@@ -127,11 +127,30 @@ ride. The realisation is deployed in an open-source energy-field router
   lengths; per-edge grade from cell elevations. Elevation-noise model per
   edge (paper 1 §2.4's per-sample jitter — here it hits *every edge
   independently*, no cancellation over a profile). [E6, E19]
-- **2.3 Validation corpora and protocol.** Reuse paper-1 corpora D1–D5 under
-  the frozen protocol; map each measured ride onto the grid (TODO: map-matching
-  procedure — snap GPS to grid path; define acceptance criteria) and score
-  edge-sum vs measured ∫P·dt with the same median/CI/gate conventions
-  (mulberry32, seeds 42/43, B = 10⁴).
+- **2.3 Validation corpora and protocol.** Two populations under paper 1's
+  A-chain per-ride physics [E52/E57]: the *IGC population* (D3–D5 rides whose
+  track lies inside the IGC-SP 2010 survey) carries every arm; the *FABDEM
+  population* (D3–D6 — FABDEM is global, so the European corpus joins) carries
+  the FABDEM arms. Score edge-sum vs measured ∫P·dt AND vs the route-level
+  estimate (paper 1's published F4 on the same chain's polyline profile) with
+  the same median/CI/gate conventions (mulberry32, seeds 42/43, B = 10⁴).
+  **Map-matching** (the E73 quantizer, `src/harness/e73_gridpath.py`): each
+  ride's GPS line, resampled to a 5 m arc grid, is followed by a deterministic
+  greedy walker over the terrain raster's own lattice using the deployed
+  move sets (`buildMoves` mirrored: classic 8 first, Farey/mediant ladder at
+  levels {16:1, 32:2, 64:3, 128:4}; long moves sub-sampled at
+  2·max(|Δr|,|Δc|) points). Each step picks the move whose endpoint best
+  chases the polyline one move-length ahead, verified by exact projection;
+  acceptance requires chainage advance ≥ 5% of the move length and endpoint
+  lateral ≤ one cell diagonal; infeasible steps (switchbacks tighter than the
+  lattice) jump one pitch and are counted — a ride is dropped from an arm
+  when jumps exceed 0.5% of its nodes. n = 1 is the un-quantized polyline at
+  lattice pitch (the [E72] profile — the parity anchor). Registered sanity
+  gates: the synthetic azimuth fan must reproduce each move set's analytic
+  metrication factor (√2 at n = 4, 1.082 at n = 8, → 1 by n = 128); per-ride
+  length-inflation medians monotone non-increasing in n; lateral p95 bounded
+  by construction; h₊(path)/h₊(n = 1) within [0.90, 1.15]; per-ride parity of
+  the n = 1 arms against [E41]'s DEM columns and [E72]'s own-profile columns.
 - **2.4 Scale experiments.** The existing chain: IGC 5 m ground truth
   [E19 `igc_resolution_test.py`], σ-smoothing calibration
   [E20 `goal_calibration.py`, `goal_smooth_rasters.py`], the
@@ -212,12 +231,115 @@ ride. The realisation is deployed in an open-source energy-field router
   individually principled, never calibrated jointly; the (α, ε) bundle rule
   extends to (ε, c), and "measured" does not exempt a constant from
   travelling with its pair.
-- **3.2 Scale dependence.** What [E19–E21] already show, promoted to results:
-  constants drift with sampling interval; a 5 m DEM over-charges vs the 30 m
-  calibration unless pre-smoothed (the Entry-20 σ anchors) or re-fitted;
-  the deadband is *not* expressible as an edge weight (proof sketch: it is a
-  running max/min over the path — non-local by construction) — hence the
-  scalar c correction is the only form-3-family option available per edge.
+- **3.2 The discrete-routing ladder — MEASURED** [E73 `e73_gridpath.py`;
+  gate section 3l; protocol §2.3]. Four axes varied one at a time on the
+  matched ridden path, per ride against measured ∫P·dt and the route-level
+  estimate. The model axis is the deployable **eF family** (flat ε per
+  paper 1's recommendation; per-edge max(0,·) clamp), traced to paper 1:
+  F1 → eF1 (aero ungated) · F2 → eF2 · F3 → eF2 on a σ-treated map ·
+  F4 → eF4 (eF2 + per-edge deduction of c metres/km on both gravity arms, at
+  the chain's MEASURED c(τ=2) pin) · F5 → out of scope. With identical
+  constants, eF# − F# is exactly the clamped-edge mass. The deployed
+  grade-local-ε v2Edge is the status-quo reference. Two populations,
+  all-arms-complete: IGC (D3–D5 in-survey, n = 1,034) and FABDEM (D3–D6,
+  n = 1,844).
+
+  **(a) Directions (n = 1 polyline → 4…128).** eF2 med|Δ%| [95% CI] · signed:
+
+  | n | IGC 5 m σ10 | signed | α·Δx pp | FABDEM 30 m | signed | α·Δx pp |
+  |--:|---|---|--:|---|---|--:|
+  | 1 | 7.71 [7.21, 8.37] | +7.68 | 0.0 | 15.82 [15.35, 16.21] | +15.80 | 0.0 |
+  | 4 | 34.12 [33.68, 34.68] | +34.12 | 23.7 | 114.84 [113.25, 117.65] | +114.84 | 20.6 |
+  | 8 | 12.71<!--@c-a3.dirs.ladder--> [12.10, 13.07] | +12.70 | 4.7 | 48.23 [47.09, 49.30] | +48.21 | 3.8 |
+  | 16 | 8.76 [8.20, 9.48] | +8.75 | 0.9 | 34.32 [33.66, 35.23] | +34.29 | 0.0 |
+  | 128 | 7.52 [6.89, 8.24] | +7.45 | −0.3 | 27.16 [26.32, 27.87] | +27.10 | −1.4 |
+
+  The ladder is **chain-shaped**. On the smoothed chain the n = 4/8 penalty
+  is essentially all path-length inflation (median len_ratio
+  1.0543<!--@c-a3.quantisation.length--> at n = 8, 1.2737 at n = 4 — the α·Δx
+  column absorbs nearly the whole penalty; H2's oscillation mechanism is
+  refuted *there*). On raw FABDEM the same rungs carry almost no length
+  share: the lattice path reads ×1.417 the polyline's h₊ at n = 8 (×2.38 at
+  n = 4) — per-pixel noise read by a zigzag path. Which discretisation error
+  dominates is a property of the terrain source. n = 8 → 16 recovers 76% of
+  the n = 8 → 128 gap.
+
+  The full family × n cross (med|Δ%| (signed); CIs for the quoted cells in
+  gate 3l; eF2\* = eF2 on the σ-treated map; eF4L = the LORO pin):
+
+  | n | eF1 | eF2 | eF2\*σ10 | eF2\*σ30 | eF4L |
+  |--:|---|---|---|---|---|
+  | *IGC-SP 5 m:* | | | | | |
+  | 1 | 17.40 (+17.37) | 11.36 (+11.31) | 7.71 (+7.68) | 4.06 (+3.76) | 7.11 (+7.05) |
+  | 8 | 48.32 (+48.32) | 35.66 (+35.66) | 12.71 (+12.70) | 9.21 (+9.16) | 30.55 (+30.54) |
+  | 16 | 22.94 (+22.90) | 15.93 (+15.88) | 8.76 (+8.75) | 5.11 (+4.94) | 11.59 (+11.56) |
+  | 128 | 17.87 (+17.80) | 11.59 (+11.57) | 7.52 (+7.45) | 4.06 (+3.75) | 7.35 (+7.29) |
+  | *FABDEM 30 m:* | | | | | |
+  | 1 | 25.97 (+25.96) | 15.82 (+15.80) | — | 5.39 (+5.12) | 9.58 (+9.47) |
+  | 8 | 59.08 (+59.08) | 48.23 (+48.21) | — | 11.49 (+11.40) | 41.08 (+41.06) |
+  | 16 | 46.22 (+46.22) | 34.32 (+34.29) | — | 6.46 (+6.29) | 26.90 (+26.89) |
+  | 128 | 39.25 (+39.23) | 27.16 (+27.10) | — | 4.79 (+4.16) | 19.94 (+19.87) |
+
+  Read column-wise: map treatment (eF2\*) is worth more than any cost-function
+  change at every n; the pin (eF4L) is the best *untreated* cost at every n
+  except the 4–8 metrication corner; and the treated chains make the pin
+  itself transferable — the per-rider c spread collapses from 6.3–11.5 m/km
+  (raw FABDEM) to 3.50–3.68 after σ30, which is why the LORO pin costs
+  nothing there.
+
+  **(b) Models and map treatment.** At the base configs, med|Δ%| [95% CI]
+  (signed):
+
+  | model | igc5s10 · n = 8 | fab30 · n = 8 |
+  |---|---|---|
+  | v2Edge (deployed) | 9.60 [9.1, 10.8] (+9.59) | 53.01 [51.8, 54.4] (+53.01) |
+  | eF1 | 17.36 (+17.35) | 59.08 (+59.08) |
+  | eF2 | 12.71 [12.1, 13.1] (+12.70) | 48.23 [47.0, 49.4] (+48.21) |
+  | **eF4L (LORO pin)** | 9.75 [9.3, 10.3] (+9.73) | 41.08<!--@c-a3.edge.pin--> [39.7, 42.3] (+41.06) |
+  | eF4 (pooled pin, sensitivity) | 9.71 [9.3, 10.2] (+9.70) | 41.62 [40.3, 42.7] (+41.61) |
+  | F3 (route algebra) | 5.24 [5.0, 5.6] (+4.78) | 7.01 [6.7, 7.3] (+6.51) |
+
+  The quoted eF4 arm is **out-of-sample by construction**: each ride's pin is
+  the median c of the OTHER riders of its region (leave-one-rider-out — the
+  pooled-pin row, which shares geometry with the scored rides, is kept only
+  as sensitivity; the two differ by ≤ 0.5 pp everywhere). eF4L beats eF2 on
+  **all six** DEM chains — the per-edge deduction at the measured pin earns
+  its term and is the best deployable cost on FABDEM by 6–11 pp. An ε-side
+  robustness slice (the calibration split's test half only) preserves every
+  ordering (IGC: eF4L 10.25 < v2 11.10 < eF2 12.91; FAB: eF4L 39.69 < eF2
+  47.39 < v2 51.97). The flat-vs-geometric ε contest is chain-dependent at edge grain:
+  grade-local wins on the smoothed chain, flat wins on raw FABDEM. In the
+  joint per-ride pairing the route forms win almost every ride (eF closer on
+  14–375 of 1,034; clamp mass ~3.4 pp at σ10, ~21 pp on raw FABDEM). And the
+  deadband keeps a unique share at edge grain: F3 on the RAW chain,
+  5.67<!--@c-a3.deadband.residual--> med|Δ%|, beats eF2 on the σ30-treated
+  map (9.21) — 7.01 vs 11.49 on FABDEM — so map pre-treatment is
+  load-bearing (35.7 → 9.2 on raw igc5) but does not substitute for the
+  filter; the ~3.5–4.5 pp residual is [E63–E67]'s unique share at edge
+  grain. Measured c pins (m/km, τ = 2): own 3.04 BR / 1.26 EU · igc5 4.89 ·
+  σ10 3.66 · σ30 2.56 · igc30 3.75 · fab30 7.58 BR / 5.73 EU · fab30+σ30
+  3.57 BR / 2.96 EU (worst disagreement with [E71]'s rates 0.14 m/km).
+
+  **(c) Portals (axis 4).** The straight deck on the base path helps
+  860<!--@c-a3.portals.edge-->/883 span-touched rides (sign p < 10⁻⁴), eF2
+  11.81 → 11.05, F3 5.22 → 5.15 at σ10 — and, refuting the registered H4
+  carry-over, it STILL helps on the σ30-treated chain (802/880 closer, eF2
+  8.95 → 8.51): the route-grain "correct or smooth, but not both" does not
+  hold at edge grain, where scoring is against measured energy rather than
+  in-span barometric ascent. Figures: `figs/fig-p3-dirs.svg`,
+  `figs/fig-p3-chain.svg`.
+
+  **(d) The deployable default.** The measured cross fixes the
+  recommendation: **eF2 on a σ30-treated map at n = 16** — med|Δ%|
+  5.11<!--@c-a3.default--> (+4.94) on the local 5 m survey and 6.46 (+6.29)
+  on FABDEM — with **n = 8 as the fast choice** (9.21 / 11.49; the deployed
+  engine's own cost table puts n = 16 at 1.5–2.4× the n = 8 runtime) and a
+  marginality note: beyond n = 32 the accuracy gain is at most ~0.6 pp
+  (0.30 IGC, 0.60 FABDEM over the whole 32 → 128 span) while runtime grows
+  ≥ 2× per rung. This default needs no site
+  measurement at all — the treatment is a fixed filter and eF2's constants
+  are paper 1's.
+
   **Registered carry-over from [E41] — the repairs do not stack.** At route
   grain, σ-smoothing and the bridge/tunnel (portal) deck correction address
   the SAME artifact: after σ = 30 m the profile's in-span ascent already

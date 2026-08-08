@@ -573,6 +573,186 @@ print(f"E72 scale minimum at 30 m: " + " ".join(f"{d}:{_u[d]:.2f}" for d in _u)
 if not _ok:
     failed = True
 
+# -------- 3l. The discrete-routing ladder (Entry 73, paper 3 §3.2–3.3)
+sec("3l")
+print("\n== Discrete-routing ladder (Entry 73, paper 3 §3.2–3.3) ==")
+e73 = parse_csv("e73_gridpath.csv")
+_igc = [r for r in e73 if num(r, "pop_igc") == 1]
+_fab = [r for r in e73 if num(r, "pop_fab") == 1]
+_ok = len(e73) == 1901 and len(_igc) == 1034 and len(_fab) == 1844
+print(f"E73 populations: rows={len(e73)}, IGC={len(_igc)}, FAB={len(_fab)}"
+      + (" GATE-OK" if _ok else " GATE-FAIL(exp 1901/1034/1844)"))
+if not _ok:
+    failed = True
+
+# the measured c pins eF4 runs at (m/km, tau = 2; medians re-derived per region)
+for _col, _reg, _exp in (("cn_own5", "BR", 3.04), ("cn_igc5", "BR", 4.89),
+                         ("cn_fab30", "BR", 7.58), ("cn_fab30", "EU", 5.73),
+                         ("cn_fab30s30", "BR", 3.57)):
+    _v = [num(r, _col) for r in e73
+          if is_finite(num(r, _col))
+          and (r["group"].startswith("D6") == (_reg == "EU"))]
+    _m = median(_v)
+    _ok = abs(_m - _exp) <= 0.011
+    print(f"E73 c pin {_col}/{_reg}: {_m:.2f} (n={len(_v)})"
+          + (" GATE-OK" if _ok else f" GATE-FAIL(exp {_exp})"))
+    if not _ok:
+        failed = True
+
+# the dirs ladders (eF2, the flat-eps deployable): anchors + monotonicity
+for _lbl, _pop, _chain, _rungs in (
+        ("IGC", _igc, "igc5s10",
+         ((1, 7.71, 7.68), (8, 12.71, 12.70), (128, 7.52, 7.45))),
+        ("FAB", _fab, "fab30",
+         ((1, 15.82, 15.80), (8, 48.23, 48.21), (128, 27.16, 27.10)))):
+    for _n, _ea, _es in _rungs:
+        report(f"E73 {_lbl} eF2 n={_n}",
+               [x for x in col(_pop, f"{_chain}_n{_n}_ef2")])
+        # medians gated tightly here (report()'s 0.11 window is for its own
+        # expectations; the ladder's published medians carry 2 dp)
+        _m = median([abs(x) for x in col(_pop, f"{_chain}_n{_n}_ef2")])
+        _ms = median(col(_pop, f"{_chain}_n{_n}_ef2"))
+        _ok = abs(_m - _ea) <= 0.011 and abs(_ms - _es) <= 0.011
+        if not _ok:
+            print(f"  E73 {_lbl} n={_n} medians GATE-FAIL(exp {_ea}/{_es})")
+            failed = True
+    _meds = {n: median([abs(x) for x in col(_pop, f"{_chain}_n{n}_ef2")])
+             for n in (4, 8, 16, 32, 64, 128)}
+    _ok = all(_meds[a] >= _meds[b]
+              for a, b in zip((4, 8, 16, 32, 64), (8, 16, 32, 64, 128)))
+    print(f"E73 {_lbl} ladder monotone (n ≥ 4): "
+          + " ".join(f"{n}:{_meds[n]:.2f}" for n in _meds)
+          + (" GATE-OK" if _ok else " GATE-FAIL"))
+    if not _ok:
+        failed = True
+
+# metrication: the length-inflation medians the paper quotes
+for _n, _exp in ((4, 1.2737), (8, 1.0543)):
+    _m = median(col(_igc, f"igc5s10_n{_n}_len"))
+    _ok = abs(_m - _exp) <= 0.002
+    print(f"E73 IGC len_ratio n={_n}: {_m:.4f}"
+          + (" GATE-OK" if _ok else f" GATE-FAIL(exp {_exp})"))
+    if not _ok:
+        failed = True
+
+# the FABDEM noise finding: the quantized path reads x1.42 the polyline's h+
+_hr = median([num(r, "fab30_n8_hplus") / num(r, "fab30_n1_hplus")
+              for r in _fab if is_finite(num(r, "fab30_n8_hplus"))
+              and num(r, "fab30_n1_hplus") > 0])
+_ok = abs(_hr - 1.417) <= 0.02
+print(f"E73 FAB h+(n=8)/h+(n=1): {_hr:.3f}"
+      + (" GATE-OK" if _ok else " GATE-FAIL(exp 1.417)"))
+if not _ok:
+    failed = True
+
+# base-config model hierarchy (the paper's section 3.2 table — CIs printed
+# by report() so the accuracy+bias+CI convention holds for every table row).
+# eF4L is the arm the paper quotes (registration v4: the LORO pin); the
+# pooled-pin eF4 stays as its sensitivity row.
+for _lbl, _pop, _base, _rows73 in (
+        ("IGC", _igc, "igc5s10_n8",
+         (("v2", 9.60, 9.59), ("ef2", 12.71, 12.70), ("ef4", 9.71, 9.70),
+          ("ef4L", 9.75, 9.73), ("f3", 5.24, 4.78))),
+        ("FAB", _fab, "fab30_n8",
+         (("v2", 53.01, 53.01), ("ef2", 48.23, 48.21), ("ef4", 41.62, 41.61),
+          ("ef4L", 41.08, 41.06), ("f3", 7.01, 6.51)))):
+    for _mname, _ea, _es in _rows73:
+        _v = col(_pop, f"{_base}_{_mname}")
+        report(f"E73 {_lbl} {_base} {_mname}", _v)
+        _m, _ms = median([abs(x) for x in _v]), median(_v)
+        _ok = abs(_m - _ea) <= 0.011 and abs(_ms - _es) <= 0.011
+        if not _ok:
+            print(f"  E73 {_lbl} {_base} {_mname} GATE-FAIL(exp {_ea}/{_es})")
+            failed = True
+
+# eF4 (measured pin) beats eF2 on EVERY DEM chain at the base n (P7) —
+# asserted for BOTH pins: pooled and, decisively, the LORO pin (P7 must
+# survive out-of-sample or the eF4 claim is retracted; registration v4)
+_chains = ("igc5", "igc5s10", "igc5s30", "igc30", "fab30", "fab30s30")
+for _pin in ("ef4", "ef4L"):
+    _wins = 0
+    for _c73 in _chains:
+        _pop = _igc if _c73.startswith("igc") else _fab
+        _a = median([abs(x) for x in col(_pop, f"{_c73}_n8_{_pin}")])
+        _b = median([abs(x) for x in col(_pop, f"{_c73}_n8_ef2")])
+        if _a < _b:
+            _wins += 1
+    _ok = _wins == 6
+    print(f"E73 {_pin} < eF2 on DEM chains at n=8: {_wins}/6"
+          + (" GATE-OK" if _ok else " GATE-FAIL"))
+    if not _ok:
+        failed = True
+
+# the recommended default (Danilo, 2026-08-08): eF2 on the σ30-treated map at
+# n = 16; n = 8 as the fast choice; gains beyond n = 32 marginal (< 0.6 pp
+# for ≥ 2× deployed compute).  The four quoted cells and the marginality.
+for _lbl, _pop, _ch, _exp in (
+        ("IGC", _igc, "igc5s30", {8: (9.21, 9.16), 16: (5.11, 4.94)}),
+        ("FAB", _fab, "fab30s30", {8: (11.49, 11.40), 16: (6.46, 6.29)})):
+    for _n, (_ea, _es) in _exp.items():
+        _v = col(_pop, f"{_ch}_n{_n}_ef2")
+        _m, _ms = median([abs(x) for x in _v]), median(_v)
+        _ok = abs(_m - _ea) <= 0.011 and abs(_ms - _es) <= 0.011
+        print(f"E73 default {_ch} n={_n}: {_m:.2f} ({_ms:+.2f})"
+              + (" GATE-OK" if _ok else f" GATE-FAIL(exp {_ea}/{_es})"))
+        if not _ok:
+            failed = True
+    _g32 = median([abs(x) for x in col(_pop, f"{_ch}_n32_ef2")])
+    _g128 = median([abs(x) for x in col(_pop, f"{_ch}_n128_ef2")])
+    _ok = 0 <= _g32 - _g128 <= 0.65
+    print(f"E73 default {_ch} marginality: n=32 {_g32:.2f} → n=128 {_g128:.2f}"
+          + (" GATE-OK" if _ok else " GATE-FAIL(gain must be ≤ 0.65 pp)"))
+    if not _ok:
+        failed = True
+
+# H4 at edge grain (P9, REFUTED as registered): the deck still helps on the
+# σ30-treated chain — the route-grain "repairs do not stack" does not carry
+_pw9 = _pl9 = 0
+for r in _igc:
+    _a, _b = num(r, "igc5s30_n8p_ef2"), num(r, "igc5s30_n8_ef2")
+    if not (is_finite(_a) and is_finite(_b)) or num(r, "n_spans") <= 0:
+        continue
+    if abs(_a) < abs(_b):
+        _pw9 += 1
+    elif abs(_a) > abs(_b):
+        _pl9 += 1
+_ok = _pw9 == 802 and _pw9 + _pl9 == 880
+print(f"E73 portal deck on σ30 (P9): closer on {_pw9}/{_pw9 + _pl9}"
+      + (" GATE-OK" if _ok else " GATE-FAIL(exp 802/880)"))
+if not _ok:
+    failed = True
+
+# the deadband's unique share at edge grain (P8 refutation): F3 on the raw
+# chain stays below eF2 on the sigma-treated map, on both populations
+_g1 = (median([abs(x) for x in col(_igc, "igc5_n8_f3")]),
+       median([abs(x) for x in col(_igc, "igc5s30_n8_ef2")]))
+_g2 = (median([abs(x) for x in col(_fab, "fab30_n8_f3")]),
+       median([abs(x) for x in col(_fab, "fab30s30_n8_ef2")]))
+_ok = (abs(_g1[0] - 5.67) <= 0.011 and abs(_g1[1] - 9.21) <= 0.011
+       and abs(_g2[0] - 7.01) <= 0.011 and abs(_g2[1] - 11.49) <= 0.011
+       and _g1[0] < _g1[1] and _g2[0] < _g2[1])
+print(f"E73 F3(raw) vs eF2(σ30 map): IGC {_g1[0]:.2f} < {_g1[1]:.2f} · "
+      f"FAB {_g2[0]:.2f} < {_g2[1]:.2f}"
+      + (" GATE-OK" if _ok else " GATE-FAIL(exp 5.67<9.21, 7.01<11.49)"))
+if not _ok:
+    failed = True
+
+# portals on the base path (eF2, span-touched rides)
+_pw73 = _pl73 = 0
+for r in _igc:
+    _a, _b = num(r, "igc5s10_n8p_ef2"), num(r, "igc5s10_n8_ef2")
+    if not (is_finite(_a) and is_finite(_b)) or num(r, "n_spans") <= 0:
+        continue
+    if abs(_a) < abs(_b):
+        _pw73 += 1
+    elif abs(_a) > abs(_b):
+        _pl73 += 1
+_ok = _pw73 == 860 and _pw73 + _pl73 == 883
+print(f"E73 portal deck closer (touched rides): {_pw73}/{_pw73 + _pl73}"
+      + (" GATE-OK" if _ok else " GATE-FAIL(exp 860/883)"))
+if not _ok:
+    failed = True
+
 # ---------------------------------------------------------------- 3p. Entry 50
 # Sensitivity decomposition. Gates the shares section 3.2 prints, and the ORDERING
 # the section's argument rests on: eps below every physical parameter, and the

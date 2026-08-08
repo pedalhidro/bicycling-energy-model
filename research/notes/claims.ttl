@@ -843,3 +843,13 @@
 :assert49_ev1 a schema:Claim ;
   cito:supports :assert49 ;
   schema:text "The one identified number worth keeping: on real descents under honest per-ride physics the best FLAT ε is 0.344 [0.292, 0.394] — an interval excluding the published ε_f = 0.20. No contradiction, since ε_f was selected on D2's urban stop-go riding, a different regime; but it says the flat constant is regime-specific and 0.20 should not be carried onto real descents as universal." .
+
+:q73 a schema:Question ;
+  schema:text "What does discretisation onto a routing lattice cost the published models — per direction count, terrain chain and portal treatment — and can a Dijkstra-deployable edge cost close the gap?" .
+:assert73 a schema:Claim ;
+  schema:about :q73 ; dcterms:type "pre-registered" ;
+  schema:text "The direction-count penalty is chain-shaped: on the smoothed 5 m survey it is essentially all path-length inflation (len_ratio 1.2737 at n = 4, 1.0543 at n = 8), on raw FABDEM essentially all noise (the lattice path reads 1.417x the polyline's h+ at n = 8). eF4 — the per-edge noise deduction at each chain's MEASURED c(tau=2) pin — beats eF2 on all six DEM chains and is the best deployable cost on FABDEM (41.62 vs 48.23 med|d%|). The deadband keeps a unique share at edge grain: F3 on the raw chain beats eF2 on the sigma-30-treated map on both populations (5.67 vs 9.21; 7.01 vs 11.49) — the filter can move into the map, but not all of it. The flat-vs-geometric epsilon contest is chain-dependent: grade-local wins on smoothed chains, flat on raw FABDEM. The portal deck helps 860/883 span-touched rides at sigma 10. Two populations all-arms-complete (IGC 1,034; FABDEM 1,844); every fitted constant read from its producing CSV; c pins measured from geometry only, worst disagreement with Entry 71's rates 0.14 m/km." ;
+  cito:citesAsEvidence :e73_gridpath.csv ; dcterms:source :journal .
+:assert73_ev1 a schema:Claim ;
+  cito:qualifies :assert73 ;
+  schema:text "The quantizer's parity gates forced two fixes in the new harness (n = 1 positions from the raw geo track; full-precision sample coordinates) and exposed one in the published instrument: Entry 41's 30 m arms are evaluated after a 5 m re-gridding that clips extrema between nodes — median 3.7 m/ride (0.85% of h+) on the local survey, 15.5 m (1.48%) on FABDEM — one-signed, internally consistent within that letter, disclosed as its erratum." .

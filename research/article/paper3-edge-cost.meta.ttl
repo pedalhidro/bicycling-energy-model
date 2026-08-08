@@ -38,6 +38,60 @@
   prov:wasDerivedFrom claims:assert33 ;
   rdfs:comment "A3's core claim, first measured in Entry 72 on each ride's own profile (no DEM error); the scope decision of roadmap A3.1 resolved as: its own experiment, e72_edgegrain.py" .
 
+<#c-a3.quantisation.length> a schema:Claim ;
+  schema:text "The 8-direction lattice inflates the ridden line by 5.4 percent (median len_ratio 1.0543; 1.2737 at n = 4), and on a smoothed chain that inflation is essentially the whole direction-count penalty" ;
+  dcterms:type "derived" ;
+  pc:value 1.0543 ;
+  pc:gateSection "3l" ;
+  cito:citesAsEvidence dg:o_e73 ;
+  prov:wasDerivedFrom claims:assert73 ;
+  rdfs:comment "Entry 73's quantizer (the map-matching procedure of section 2.3) measured on the IGC population; the alpha*dx column accounts for 23.7 of the 26.4 pp at n = 4" .
+
+<#c-a3.dirs.ladder> a schema:Claim ;
+  schema:text "eF2 at the deployed base config (IGC 5 m sigma-10, n = 8) reads +12.7 percent vs measured energy, recovering monotonically to 7.5 at n = 128 against 7.7 at n = 1; on raw FABDEM the same ladder runs 114.8 (n = 4) to 27.2 (n = 128) with the penalty carried by noise, not distance — the direction-count error is chain-shaped" ;
+  dcterms:type "derived" ;
+  pc:value 12.71 ;
+  pc:gateSection "3l" ;
+  cito:citesAsEvidence dg:o_e73 ;
+  prov:wasDerivedFrom claims:assert73 ;
+  rdfs:comment "Entry 73 R1. The FABDEM lattice path reads 1.417x the polyline's h+ at n = 8 — per-pixel noise read by a zigzag path, reported as a finding" .
+
+<#c-a3.edge.pin> a schema:Claim ;
+  schema:text "eF4L — the per-edge noise deduction at the LEAVE-ONE-RIDER-OUT measured c pin — beats eF2 on all six DEM chains and is the best Dijkstra-deployable cost on FABDEM (41.08 vs 48.23 med|delta%|); the pooled-pin arm (41.62) is kept as sensitivity" ;
+  dcterms:type "derived" ;
+  pc:value 41.08 ;
+  pc:gateSection "3l" ;
+  cito:citesAsEvidence dg:o_e73 ;
+  prov:wasDerivedFrom claims:assert73 ;
+  rdfs:comment "Entry 73 predictions P7 and P10 (registration v4): the pin is measured geometry only AND out-of-sample per rider — each ride scored with the other riders' median c. P7 survives LORO 6/6; the pooled and LORO arms differ by <= 0.5 pp everywhere because sigma-treatment collapses the per-rider c spread (raw fab30 6.3-11.5 m/km, after sigma-30 3.50-3.68)" .
+
+<#c-a3.deadband.residual> a schema:Claim ;
+  schema:text "F3 on the raw chain beats eF2 on the sigma-30-treated map on both populations (5.67 vs 9.21 on IGC; 7.01 vs 11.49 on FABDEM) — map pre-treatment is load-bearing but does not substitute for the deadband; its unique share survives at edge grain" ;
+  dcterms:type "derived" ;
+  pc:value 5.67 ;
+  pc:gateSection "3l" ;
+  cito:citesAsEvidence dg:o_e73 ;
+  prov:wasDerivedFrom claims:assert73 ;
+  rdfs:comment "Entry 73 prediction P8, refuted as registered — the edge-grain sibling of the Entries 63-67 unique-share result" .
+
+<#c-a3.portals.edge> a schema:Claim ;
+  schema:text "The straight portal deck on the base path helps 860 of 883 span-touched rides (sign p < 1e-4), eF2 11.81 to 11.05 — at sigma 10 the deck and the smoothing do not collide" ;
+  dcterms:type "derived" ;
+  pc:value 860 ;
+  pc:gateSection "3l" ;
+  cito:citesAsEvidence dg:o_e73 ;
+  prov:wasDerivedFrom claims:assert73 ;
+  rdfs:comment "Entry 73 prediction P4 confirmed. H4's registered sigma-30 stacking arm (registration v3, P9) REFUTED the route-grain carry-over: the deck still helps on the sigma-30-treated chain, 802/880 closer, eF2 8.95 to 8.51 — gated in 3l" .
+
+<#c-a3.default> a schema:Claim ;
+  schema:text "The deployable default: eF2 on a sigma-30-treated map at n = 16 directions — med|delta%| 5.11 on the local 5 m survey, 6.46 on FABDEM — with n = 8 as the fast choice (9.21 / 11.49) and gains beyond n = 32 marginal (<= 0.6 pp for >= 2x runtime per rung)" ;
+  dcterms:type "derived" ;
+  pc:value 5.11 ;
+  pc:gateSection "3l" ;
+  cito:citesAsEvidence dg:o_e73 ;
+  prov:wasDerivedFrom claims:assert73 ;
+  rdfs:comment "The recommendation is the maintainer's synthesis of Entry 73's measured cross (2026-08-08); needs no site measurement — the treatment is a fixed filter and eF2's constants are paper 1's" .
+
 <#c-a3.divergence> a schema:Claim ;
   schema:text "How often, on a real network, the energy-optimal path departs from the distance-optimal one, and by how much" ;
   dcterms:type "planned" ;

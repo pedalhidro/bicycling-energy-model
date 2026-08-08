@@ -139,7 +139,6 @@ changed. See Entry 11.)*
 - **Entry 32** (review-v3 consolidation: Table 4 descent-RMS full regeneration, the D3+D4
   transfer-only pool, per-corpus allegiance sign tests, and the gate battery extended to the
   numbers the review caught un-gated — [`bootstrap_ci.py`](../../src/harness/bootstrap_ci.py)) — this commit
-
 - **Entries 43–45** (D6, the S-curve reopened, the ride-level ε₀ contest —
   [`skc_compare.py`](../../src/harness/skc_compare.py), [`e44_scurve.py`](../../src/harness/e44_scurve.py),
   [`e45_ridelevel.py`](../../src/harness/e45_ridelevel.py)) — `376cbb1` → `5d63d87`
@@ -184,6 +183,10 @@ changed. See Entry 11.)*
 - **Entry 72** (paper 3's first tranche: edge-grain fidelity, the scale U, the valley
   patch, the F4 comparators — [`e72_edgegrain.py`](../../src/harness/e72_edgegrain.py);
   gate section 3k) — this commit
+- **Entry 73** (the discrete-routing ladder on the matched ridden path: the quantizer,
+  directions 1–128, terrain lattices, portals, the eF family at measured c pins —
+  [`e73_gridpath.py`](../../src/harness/e73_gridpath.py); gate section 3l) — this commit
+
 ---
 
 ## Data traceability
@@ -206,6 +209,7 @@ counted from its CSV rather than asserted, is [`research/data-graph.ttl`](../dat
 
 | entry | $I = (D, P)$ | $T$ | $O$ (rows) | $S$ |
 |--:|---|---|---|---|
+| 73 | $(D_3..D_6, P_{f,r})$ + GPS lines + (IGC wide, FABDEM, E26 spans) | the E73 quantizer × {v2, eF1/eF2/eF4, F1–F4, F5f, patch} per config | `e73_gridpath.csv` (1,901; IGC pop 1,034, FAB pop 1,844) + `fig-p3-dirs.svg`, `fig-p3-chain.svg` | the dirs ladder is chain-shaped (distance vs noise error); eF4 at measured pins best deployable 6/6 chains; deadband's unique share survives at edge grain (gate 3l) |
 | 72 | $(D_3..D_6, P_{f,r})$, own profiles | v2Edge at 5 pitches, twin, valley patch, F4 comparators | `e72_edgegrain.csv` (2,039) + `fig-p3-scale.svg` | fidelity +1.83 pp; U-minimum at 30 m; patch 3.29·−0.08; F4-pub 2.72 tops the table (gate 3k) |
 | 71 | D3–D5 (travel kept) + D6, the e41 MODE walk | seven arms × two protocols + τ-grid, toll, F5 per arm | `e41_dem_route.E41_POPp1_E41_D61.csv` (1,957; 1,834 primary), `e71_dem_pop.csv` | paper 2 re-based (gate 3j); c is sensor×terrain; F5 beats F3 on every DEM chain |
 | 70 | the e52 cache (train half) + `e66_drift.csv` | bare F3, τ pinned per grid point, ε refit, per rider | `e70_taucurves.csv` (9 pools × 17 τ) | basins rider-shaped; optima anti-track noise; u3 and pooled-EU at the RAIL |
@@ -284,6 +288,344 @@ what the other rows *mean* without producing a per-ride table of their own.
 
 ---
 
+## 2026-08-08 — Entry 73: the discrete-routing ladder — direction count, terrain lattice and portals on the matched ridden path
+
+**Lineage** — $I$: $(D_3..D_6, P_{f,r})$ via the A-chain cache + the ride GPS lines
++ (IGC-SP 2010 wide, FABDEM V1-2, the E26 OSM span cache) · $T$: the E73 quantizer
+(the deployed move sets mirrored from `buildMoves`) × the model family {v2Edge,
+F1–F4, F5f, valley patch} on each quantized path profile · $O$:
+`e73_gridpath.csv` (per ride × configs) + `fig-p3-dirs.svg` + `fig-p3-chain.svg` ·
+$S$: paper 3 §2.3 (the map-matching spec) and §3.2–3.3's ladders; gate section 3l.
+
+*Prompt (Danilo): "On article 3: A discrete routing simulation involves selecting
+1 - The base model (eg. F1-5) from piece 1 / 2 - The terrain model from piece 2
+(which also sets the grid on which the simulation is ran) / 3 - The number of
+directions (eg. 1 to 128) / 4 - Whatever to include semantic data to correct
+elevation (eg. bridges and tunnels). For each of one of the options, we should
+know how much the discrete model performs against the measured and the estimated
+energy of an ride."  Registration decisions, made before any number was seen:
+score the MATCHED RIDDEN PATH (no Dijkstra — `a3.divergence` stays planned);
+engine in Python in this repo; PURE one-factor ladders; two DTM populations —
+IGC (D3–D5 with `igc_ok`) and FABDEM (D3–D6).*
+
+### Protocol (pre-registered)
+
+**The question.** Paper 3's edge cost is deployed on a lattice: the path a router
+charges is not the ridden line but its quantization into n directions on a grid
+whose pitch the terrain source sets, with or without the OSM portal correction.
+Entry 72 measured the n = 1, own-barometer corner of that space. This entry
+measures the other three axes — one factor at a time, each config scored per
+ride against (a) measured energy and (b) the route-level estimate (paper 1's
+published F4 on the same chain's un-quantized profile), so the discretisation
+cost is separated from the terrain cost.
+
+**The quantizer** (resolves §2.3's map-matching TODO; spec now in the paper):
+a deterministic greedy chainage follower on the raster's own lattice, move sets
+mirrored from the deployed `buildMoves` (classic-8 prefix, Farey levels
+{16:1, 32:2, 64:3, 128:4}, long moves sub-integrated at 2·max(|Δr|,|Δc|)
+sub-points — endpoint-Δh costing of long moves is the sign-flipping error the
+Simujaules research note §5.3 measured, so the sub-points are load-bearing).
+Implementation note, disclosed: the per-step choice runs a cheap
+target-chasing score (squared distance of each move's endpoint to the polyline
+point one move-length ahead) and verifies the winner by exact projection; the
+exhaustive max-chainage-advance rule is the fallback when verification fails.
+Feasibility: chainage advance ≥ 0.05·L, endpoint lateral ≤ one cell diagonal;
+otherwise JUMP one pitch (counted; arm dropped for the ride above 0.5% of
+nodes). n = 1 bypasses the follower — the polyline itself at lattice pitch.
+
+**Arms.** Models are columns (every config scored under v2Edge, F1–F4 at their
+published constants from `e52_split.csv`, F5f at ε from
+`e63_split.E63_TAUN2p0.csv` with the τ_n = 2 floor and v_b = ∞ toll, and the
+Entry-72 valley patch), so the base-model axis costs no extra sampling.
+
+- IGC pop (D3–D5, `igc_ok`, all-arms-complete): dirs ladder igc5s10 at
+  n ∈ {1, 4, **8**, 16, 32, 64, 128} on the 5 m lattice; terrain ladder at
+  n = 8 {igc5, **igc5s10**, igc5s30, igc30 (30 m lattice), fab30 (FABDEM
+  lattice)}; n = 1 anchors {own5, own30, igc5, igc5s30, igc30, fab30};
+  portal arm igc5s10_n8**p** (E26 spans matched on the TRUE track, mapped to
+  the path by projected chainage, straight deck between the profile's own
+  boundary heights; offline-only — SP rides only, 0/710 D6 rides have cached
+  OSM tiles).
+- FABDEM pop (D3–D6, all-arms-complete): dirs ladder fab30 at the same n
+  set on the FABDEM 1-arcsec lattice (anisotropic cells via the deployed
+  metre factors); own30 control.
+- fab5 (the oversampled arm) is NOT run: paper 2 rule 3 already measured
+  oversampling as a pure cost; re-running it at edge grain would re-litigate
+  a settled result at ~25 M samples.
+
+**Physics.** The A-chain per-ride m̂/Ĉrr/ĈdA (e52_aggregates.csv), ρ/k_eff
+frozen, wind 0, G = 9.7864 — Entry 72's protocol. Join integrity is a HARD
+gate: the walk's per-ride measured energy must equal the cache's `emp` to
+2×10⁻⁴ relative, killing label misalignment outright.
+
+**Registered gates** (synthetic before data; all in the harness, headline
+numbers re-derived in `bootstrap_ci.py` section 3l):
+
+1. Move-set mirror: K counts, classic-8 prefix, coprimality, the n = 16
+   knight moves, max coordinate 8 at n = 128.
+2. Azimuth fan: the follower's length ratio on synthetic straight tracks
+   equals each move set's analytic metrication factor within 0.03 and the
+   fan maximum is monotone non-increasing in n.
+3. gauss1d_x: ≡ e41's gauss1d on uniform interiors (10⁻⁹); constant exact;
+   non-uniform ramp ≤ 1 cm.
+4. Deck on path: bounded by each span's own original abutment heights;
+   overlapping spans never chain; no-op exact.
+5. Parity vs Entry 72 per ride (own5_n1/own30_n1 v2, own30_n1 patch)
+   ≤ 0.02 pp — the corpus walk, physics join and v2 mirror in one check.
+6. Parity vs Entry 41's MODE run per ride (igc5/igc30/fab30 h₊ at n = 1)
+   ≤ 0.5 m — the geo chain and DEM sampling against the published instrument.
+   *Discovery during gate bring-up, disclosed: this gate first failed at
+   139.6 m on a FABDEM ride, and the failure was e41's, not e73's — e41's
+   30 m arms are REGRIDDED onto the ride's 5 m grid, and since a real ride's
+   total is not a multiple of the grid steps the two grids never align, so
+   every local extremum between nodes is clipped.  Fresh sampling with e41's
+   own `sample_raster` reproduces e73's values exactly (igc30 1721.25 vs the
+   published 1705.7 on the worst D3 ride; the clip is ~1% of h₊ on igc30 and
+   up to ~5% on fab30, whose noise puts a turning point in nearly every
+   cell).  e41's own regrid gate missed it because its synthetic total
+   aligned the grids exactly.  Within e41 the convention is internally
+   consistent (its arms deliberately share the 5 m grid) and its published
+   comparisons stand as "sample at 30 m, interpolate to 5 m"; e73 scores the
+   honest un-regridded 30 m profile, and this gate compares under e41's
+   convention (regridding e73's column before the comparison).  Follow-up
+   for paper 2's errata ledger: quantify the clip on the published Table-1
+   rows.*
+7. Ladders: len_ratio(n) median monotone non-increasing (n ≥ 4) and within
+   [0.97, 1.5]; h₊(path)/h₊(n = 1) median within [0.90, 1.15] on the smoothed
+   IGC chain.  *Amendment, disclosed — made after the smoke run and before the
+   full run: as first registered the bounds were [1, 1.5] on len_ratio and the
+   h₊ band gated both chains.  The smoke exposed both as mis-specified, not
+   the quantizer: a coarse lattice legitimately cuts corners of the GPS line
+   (fab30 len_ratio 0.991 at n = 128), and on FABDEM the path-vs-polyline h₊
+   ratio is per-pixel noise read by a zigzag path — the very mechanism §3
+   measures — so it is a finding there, reported, and gates only igc5s10
+   where it checks geometry.*
+
+**Predictions, stated before the run.** (P1) The dirs ladder's med|Δ%| falls
+monotonically from n = 4 to n = 128 and the n = 8 → 16 step recovers roughly
+half the n = 8 penalty (Entry 26's sq16 recovery, now against measured energy).
+(P2) The α·Δx share accounts for less than half of the n = 4/8 penalty on the
+IGC lattice — the rest is forced height oscillation (the Simujaules note's
+mechanism, first measurement against ∫P·dt). (P3) The terrain ladder at n = 8
+preserves paper 2's ordering (igc5s10 ≼ igc5s30 < igc5 < igc30 < fab30 on
+signed bias). (P4) The portal deck helps the span-touched rides at σ10
+(H4's stacking caveat bites at σ30, not σ10). (P5) F5f keeps its route-grain
+advantage over F3 on DEM chains (Entry 71's result, now at edge grain).
+
+### Registration v2 — the deployable edge family (amendment, disclosed)
+
+*Prompts (Danilo), after the first full run's route-level numbers were
+visible: "Well, then we should redo our experiment. The models that we are
+considering are v2Edge-F1 and v2Edge-F2. Additionally, the model can have map
+pre-treatment (related to F3). We can then trace back each paper 1 model to
+paper 3 treatments: F1: v2Edge-F1 without map treatment / F2: v2Edge-F2
+without map treatment / F3: v2Edge-F2 with map pre-treatment / F4: v2Edge-F4
+without map treatment (…an additional term that associates x_edge and h_edge,
+TBD) / F5: Out of scope for paper 3."  Then: "Let's call the edge form for F#
+being the eF#. Then, for each route, we want to know how each F# and eF#
+performs jointly." And: "on v2Edge: Article 1 recommends using a flat epsilon
+rather than the geometric epsilon."*
+
+**Disclosure.** This reframe was decided AFTER the first full run's
+route-level columns (F1–F4/F5f/patch/v2) were seen; the eF columns, the c
+pins and the fab30s30 arm defined below had produced no numbers when this
+registration was written. The follow-up decisions (per-edge noise deduction;
+measured per-chain c; route forms kept as the non-local reference; fab30s30
+added) were made on the same terms.
+
+**The eF family** (flat ε per article 1's recommendation; the deployed
+grade-local v2Edge stays as its own reference column):
+
+- **eF1** — per-edge F1: `α·dx + β·dh` on climbs (aero UNGATED), descents
+  `max(0, α·dx − ε₁·β·|dh|)` at F1's published ε₁.
+- **eF2** — per-edge F2 (aero gated off climbs), ε₂. "v2Edge-F2"; on a
+  σ-treated map this is paper 3's realisation of **F3**.
+- **eF4** — eF2 + the per-edge noise deduction: climbs `β·max(0, dh − c·dx)`,
+  descents recover on `max(0, |dh| − c·dx)`, at F4's published ε₄ and the
+  chain's **measured c pin** — c(τ = 2) per chain × region (BR/EU), the
+  median over the chain's own n = 1 profiles (paper 2 eq. L3; the E68/E69
+  measured-pin doctrine). The published (ε₄, c) bundle is knowingly broken
+  and disclosed; the pins are cross-checked against e71's CRATE rows
+  (registered gate, ≤ 0.6 m/km on the shared arms).
+
+With identical constants the per-edge `max(0,·)` clamp is the ONLY difference
+between eF# and F#: **eF# − F# ≡ the clamped-edge mass**, the price of a
+Dijkstra-safe cost refusing negative edges. The joint per-ride pairing
+(F# vs eF# on the same path profile; F3-on-raw vs eF2-on-treated across
+configs) is therefore an exact decomposition, not a model comparison.
+F5's family drops out of paper 3's scope (journal keeps its columns).
+A fab30s30 arm (σ = 30 map treatment on the FABDEM lattice, same cached
+paths) completes the F3 trace on the FABDEM population.
+
+**Predictions for the eF columns, registered before any was computed.**
+(P6) The clamp mass is negligible on smoothed chains (eF2 − F2 within ~1 pp
+at igc5s10/igc5s30) and material on raw noisy chains (fab30, igc5 raw).
+(P7) eF4 at the measured pin beats eF2 on every DEM chain — the local
+deduction earns its term. (P8) eF2 on the σ-treated map lands within ~1 pp
+of F3-on-the-raw-chain — map pre-treatment substitutes for the deadband at
+edge grain.
+
+**Registration v4 — the out-of-sample pin (amendment, disclosed).** *Prompt
+(Danilo): "Paper 3 forms (eg. eF4) should perform out-of-sample. This seems
+to be leaking sample information."* Correct: the pooled pin never sees
+measured energy, but it is a statistic of the scored rides' own geometry —
+and the per-rider spread is material on FABDEM (cn_fab30 medians 7.59 / 11.48
+/ 6.30 for D3/D4/D5: c tracks terrain ruggedness, E71), so a pooled pin
+borrows each rider's terrain profile. Amendment, registered before any such
+number was computed: **eF4L** — the LORO pin, each ride scored with the
+median cn of the OTHER riders of its region (ride-weighted pool, E59's
+convention; E54's transfer protocol) — becomes the arm the paper quotes;
+the pooled pin stays as a sensitivity row. An ε-side robustness slice is
+added to the report: headline medians re-derived on the e52 seed-48
+TEST-half only (the published ε's were fitted on the train half; the
+population-level scores are otherwise partially in-sample for ε and say so).
+(P10) eF4L stays within ~1 pp of pooled eF4 on the IGC chains and degrades
+by a few pp on FABDEM for the terrain-outlier rider, but P7 SURVIVES: eF4L
+still beats eF2 on all six DEM chains — else the eF4 claim is retracted.
+
+**Registration v3 — H4's stacking arm (added after the eF run of record,
+before its own numbers).** One config, `igc5s30_n8p`: the portal deck applied
+ON TOP of the σ = 30 map treatment at the base direction count. (P9) The two
+repairs do not stack at edge grain either — on the span-touched rides the
+deck makes eF2 WORSE at σ30 (the E41 route-grain direction: after σ30 the
+in-span profile already matches the barometer and the chord subtracts
+twice), in contrast to its measured benefit at σ10.
+
+### Results (run of record: the third full run — v3 caches, eF columns; 19.6 min warm)
+
+**Populations.** 1,901 rides scored (D3 439 · D4 218 · D5 572 · D6 672); IGC
+pop 1,034, FABDEM pop 1,844, both all-arms-complete. Portal coverage 894/1,087
+IGC candidates, 883 span-touched rides in the paired test.
+
+**The c pins** (measured c(τ=2) per chain × region, m/km): own5 3.04 BR /
+1.26 EU · igc5 4.89 · igc5s10 3.66 · igc5s30 2.56 · igc30 3.75 · fab30 7.58
+BR / 5.73 EU · fab30s30 3.57 BR / 2.96 EU. Worst disagreement with e71's
+CRATE rows 0.14 m/km (gate ≤ 0.6) — the pins are the same measurement.
+σ30 halves FABDEM's noise rate; the treated-FABDEM chain lands near the raw
+barometer's 3.0.
+
+**R1 — the dirs ladder is chain-shaped** (eF2, med|Δ%| [95% CI]):
+
+| n | IGC (igc5s10) | α·Δx pp | FAB (fab30) | α·Δx pp |
+|--:|---|--:|---|--:|
+| 1 | 7.71 [7.21, 8.37] | 0.00 | 15.82 [15.35, 16.21] | 0.00 |
+| 4 | 34.12 [33.68, 34.68] | 23.66 | 114.84 [113.25, 117.65] | 20.60 |
+| 8 | 12.71 [12.10, 13.07] | 4.72 | 48.23 [47.09, 49.30] | 3.76 |
+| 16 | 8.76 [8.20, 9.48] | 0.86 | 34.32 [33.66, 35.23] | 0.01 |
+| 128 | 7.52 [6.89, 8.24] | −0.25 | 27.16 [26.32, 27.87] | −1.39 |
+
+On the smoothed IGC chain the n = 4/8 penalty is essentially ALL path-length
+inflation (α·Δx 23.7 of the 26.4 pp at n = 4; len_ratio 1.2737 → 1.0543 →
+0.9976, the coarse lattice cutting corners below 1 by n = 64) — **P2
+REFUTED there**. On raw FABDEM the same rungs carry almost no length share:
+the quantized path reads ×2.38 (n = 4) and ×1.417 (n = 8) the polyline's h₊ —
+per-pixel noise read by a zigzag path. **Which discretisation error dominates
+is a property of the terrain source**: smooth chain → distance error; noisy
+chain → height-noise error. P1: monotone ✓, and n = 8 → 16 recovers 76% of
+the n = 8 → 128 gap (predicted "roughly half" — direction right, size
+underestimated).
+
+**R2 — the model hierarchy at the base configs** (med|Δ%| (signed)):
+
+| model | igc5s10_n8 | fab30_n8 |
+|---|---|---|
+| v2 (deployed, grade-local ε) | 9.60 (+9.59) | 53.01 (+53.01) |
+| eF1 | 17.36 (+17.35) | 59.08 (+59.08) |
+| eF2 (flat ε) | 12.71 (+12.70) | 48.23 (+48.21) |
+| **eF4 (measured pin)** | **9.71 (+9.70)** | **41.62 (+41.61)** |
+| F3 (route algebra, τ = 6) | 5.24 (+4.78) | 7.01 (+6.51) |
+
+**P7 CONFIRMED**: eF4 beats eF2 on all six DEM chains — the per-edge noise
+deduction at the measured pin earns its term, and it is the best *deployable*
+cost on FABDEM by 6–11 pp. The flat-vs-geometric ε contest is
+chain-dependent at edge grain: the deployed grade-local ε beats flat-ε eF2 on
+the smoothed chain (9.60 vs 12.71) and loses on raw FABDEM (53.01 vs 48.23).
+
+**R3 — the joint F#/eF# pairing** (per ride; eF# − F# ≡ the clamped-edge
+mass): the route forms win almost every ride — eF closer on 14/1,034 (F1),
+23/1,034 (F2), 375/1,034 (F4) on IGC; 9–373/1,844 on FAB (all p < 10⁻⁴).
+The clamp mass at n = 8 is ~3.4 pp on σ10 and ~21.4 pp on raw FABDEM —
+**P6 half-confirmed** (direction right, the smooth-chain magnitude above the
+~1 pp guess). eF4-vs-F4 is the closest pairing, i.e. localising F4's
+correction costs least.
+
+**R4 — the deadband keeps a unique share at edge grain (P8 REFUTED)**:
+F3 on the RAW chain beats eF2 on the σ30-TREATED map on both populations —
+5.67 vs 9.21 (IGC), 7.01 vs 11.49 (FAB). Map pre-treatment is load-bearing
+(it takes eF2 from 35.7 to 9.2 on igc5) but does not substitute for the
+deadband; the ~3.5–4.5 pp residual is the edge-grain sibling of the
+E63–E67 unique share. P5 also refuted as run: F3 beats F5f at the τ_n = 2
+pin on every DEM chain (5.24 vs 5.65 base; 7.01 vs 8.15 fab30) — the
+floor-must-match-the-chain doctrine (E68/E71), not a failure of the toll.
+P3's ordering: σ30 beat σ10 (predicted the reverse); the rest held.
+
+**R5 — portals (P4 CONFIRMED)**: the deck helps 860/883 span-touched rides
+(sign p < 10⁻⁴), eF2 11.81 → 11.05, F3 5.22 → 5.15 — at σ10 the correction
+and the smoothing do not yet collide (H4's registered σ30 arm remains).
+
+**Gates**: all pass — synthetic four; c pins vs e71 (0.14 m/km worst);
+parity vs e72 exact (5,703 comparisons, 0.0000 pp — the corpus walk, physics
+join and v2 mirror are the same computation); parity vs e41 exact after two
+harness fixes the gate itself forced (n = 1 positions from the raw geo
+track; full-precision sample coordinates — %.8f cost 1.157 m of h₊ on a
+211 km ride); ladders monotone and in-band. Headline numbers re-derived in
+`bootstrap_ci.py` section **3l** (27 gates).
+
+### Results — registrations v2–v4 (the second run of record; 37.7 min warm)
+
+**The eF family × n, both DTMs** (med|Δ%|; the paper's §3.2 tables carry the
+signed twins): on IGC-SP raw, eF1/eF2/eF4L run 48.3/35.7/30.6 at n = 8 and
+17.9/11.6/7.4 at n = 128, against eF2\*σ10 12.7 and eF2\*σ30 9.2 at n = 8 —
+map treatment is worth more than any cost-function change at every n. On
+FABDEM raw, 59.1/48.2/41.1 at n = 8 falling to 39.3/27.2/19.9 at n = 128,
+against eF2\*σ30 11.5 → 4.8. The pin is the best untreated cost everywhere
+except the n = 4–8 metrication corner (its c is measured on the polyline, so
+lattice-injected roughness is unpriced — v2's grade-adaptive ε copes better
+exactly there).
+
+**P10 (the LORO pin)** — IGC half CONFIRMED (eF4L 9.75 vs pooled 9.71); the
+FABDEM half's predicted degradation REFUTED in the median (41.08 vs 41.62 —
+slightly better: D4's under-deduction and D5's over-deduction cancel, and
+the EU riders' pins barely move). **P7 SURVIVES LORO 6/6** — the eF4 claim
+stands out-of-sample, and the paper now quotes eF4L with pooled as
+sensitivity. The sleeper: σ-treatment collapses the per-rider c spread
+(raw fab30 6.3–11.5 m/km → 3.50–3.68 after σ30) — treatment makes the pin
+itself transferable.
+
+**P9 (H4 at edge grain) — REFUTED.** The deck still helps on the
+σ30-treated chain: 802/880 span-touched rides closer, eF2 8.95 → 8.51
+(F3 464/609, 5.07 → 4.97). The route-grain "correct or smooth, but not
+both" does not carry to edge grain, where scoring is against measured
+energy rather than in-span barometric ascent.
+
+**ε-side robustness (test half only, seed-48):** every ordering preserved —
+IGC eF4L 10.25 < v2 11.10 < eF2 12.91 (F3 4.78); FAB eF4L 39.69 < eF2
+47.39 < v2 51.97 (F3 7.31).
+
+**Gates:** all pass again (c pins vs e71 worst 0.14 m/km; both parities
+exact; ladders in-band); section 3l extended with the eF4L rows, the
+6/6-under-LORO ordering and the P9 count.
+
+**Decision — the deployable default** *(Danilo: "we're strongly biased
+towards suggesting eF2\*s30 on n=16 as the default choice, n=8 as the
+'fast' choice, while making note that gains after n=32 are marginal")*:
+paper 3 §3.2(d) now recommends **eF2 on the σ30-treated map at n = 16**
+(5.11 / 6.46 med|Δ%| on IGC / FABDEM), n = 8 fast (9.21 / 11.49), gains
+beyond n = 32 ≤ 0.6 pp against ≥ 2× runtime per rung (the deployed engine's
+own cost table). No site measurement needed — the treatment is a fixed
+filter and eF2's constants are paper 1's. Gated in 3l (claim `a3.default`).
+
+**Actions.** `e73_gridpath.csv` (1,901 × 33 configs' columns) +
+`fig-p3-dirs.svg`/`fig-p3-chain.svg`; gate section 3l; paper 3 §2.3 (the
+quantizer spec), §3.2–3.3 (measured), the eF correspondence;
+`research/notes/discrete-model.md` (the algorithmic note); sidecar claims;
+`data-graph.ttl` o_e73; `data/results/README.md`. The Entry-41 regrid-clip
+discovery (gate 6's disclosure) is flagged for paper 2's errata ledger.
+`a3.divergence` stays honestly planned — routing runs remain the missing
+tranche.
+
+---
+
 ## 2026-08-08 — Entry 72: paper 3's first tranche — edge-grain fidelity, the scale U, and the valley patch at the deployed pitch
 
 **Lineage** — $I$: $(D_3..D_6, P_{f,r})$ via the A-chain cache, each ride's OWN
@@ -296,48 +638,90 @@ the Entry-63 valley toll as a per-node term at 30 m · $O$: `e72_edgegrain.csv`
 *Prompt (Danilo): "Can you generate the results, tables and figures for paper3? that
 will likely involve some experiments."*
 
-**R1 — fidelity (H1).** The edge-sum sits a median **+1.83 pp (med |gap| 1.84)**
-above its own route-level integral at 5 m — the grade-local ε and the per-edge clamp
-floor are the entire discretisation gap, and it is bias-shaped, not noise. That is
-the "stated bound" A3's core claim needed; `a3.divergence` (energy-vs-distance route
-frequency on a real network) stays honestly *planned* — it needs routing runs.
+### Protocol
 
-**R2 — the scale U (H2).** med|Δ%| vs measured energy: 4.62 / 4.13 / **3.75** /
-3.96 / 4.15 at 5→90 m, bias +3.39 → +1.33 → −0.05 → −0.93. The minimum sits exactly
-at the deployed 30 m calibration scale; finer grids over-charge because the edge cost
-carries **no deadband** to eat jitter; the bias zero near 60 m is aliasing cancelling
-noise, not accuracy. E19–21's story, reproduced at ride grain in one curve
-(`fig-p3-scale.svg`).
+**Population and physics.** All 2,039 rides of D3–D6 present in the A-chain cache,
+each under its own inverted per-ride constants (m̂/Ĉrr/ĈdA, wind 0) — the paper-1
+$P_{f,r}$ class — and each evaluated on its **own recorded elevation profile**, so no
+DEM error mixes into any comparison. Rides shorter than 3 km at any pitch drop out
+(none did beyond the cache's own exclusions).
 
-**R3 — the valley patch (H5 first look, NOT the pre-registered arm).** At 30 m,
-replacing k_s's scalar stand-in with the KE toll as a per-valley graph-node term
-(floor 0, never-brake; median toll 20.3 m/ride) takes the deployed cost from
-3.75 · +1.33 to **3.29 · −0.08**, closer on 1,131/2,038 (sign p < 10⁻⁴) — the
-Entry-71 route-grain result landing at edge grain, additive over the search and
-computable at graph build. H5's registered arm (floor pre-stated per chain) remains
-the condition for graduating this into the deployed cost.
+**Arms.** (i) The deployed per-edge cost `r1d_v2_edge` — grade-local
+ε(s) = clamp₀₁(min(1, (α/β)/s) − 0.13), aero gated off climb edges, no deadband, no
+lumped ε; **NB it returns kJ** (a units bug the smoke caught) — summed over the
+profile resampled at pitches {5, 10, 30, 60, 90} m. (ii) Its **route-level twin**:
+F2 with the drop-weighted geometric estimator ε_geom on the same 5 m profile — the
+integral v2Edge discretizes, term for term (raw h±, gated aero, geometric recovery),
+so the edge-sum-minus-twin gap isolates discretisation alone. (iii) The **valley
+patch** at the deployed 30 m pitch: the Entry-63 KE toll as a per-valley graph-node
+term (floor τ_n = 0, v_b = ∞; one algebra copy — e63's `ride_tolls` with its module
+floor set per call), applied as E = roll + aero + β(h₊−T) − ε_geom·β(h₋−T). (iv) Two
+**route-level comparators** added mid-entry on Danilo's prompts ("can't we use F4 …?
+note that article 1 recommends using a flat epsilon" · "the c constant on F4 can
+come from article 2"), both defined before their numbers were seen: F4 at paper 1's
+published joint pair (flat ε = 0.4094, c = 1.104, read from `e52_split.csv`), and F4
+all-measured (ε_geom with article 2's measured barometric c = 3.01, read from
+`e71_dem_pop.csv`). Protocol note on locality: published F4's clamp
+k = max(0, 1 − c·x/h₊) needs route totals — its per-edge realisation is the
+unclamped β·c-per-metre discount, valid where h₊ > c·x — so the F4 rows are
+route-level benchmarks, not drop-in edge weights.
 
-**R4 — the comparator rows (Danilo, mid-entry: "can't we use F4 …? note that
-article 1 recommends using a flat epsilon" · "the c constant on F4 can come from
-article 2").** Paper 1's published F4 (flat ε = 0.4094 with its jointly-fitted
-c = 1.104, both read from `e52_split.csv`) posts **2.72 · −0.35** — the strongest
-route-level number in the table, beating the deployed edge cost at its own scale AND
-the valley patch: F4-pub > patch > v2Edge@30 > twin. E51's flat-beats-dynamic lands
-at edge grain. The all-measured variant (ε_geom + article 2's measured c = 3.01,
-read from `e71_dem_pop.csv`) over-corrects to **5.66 · −3.80** — the (α, ε) bundle
-rule extends to (ε, c): individually-measured constants still travel in pairs.
-Locality caveat recorded in the paper: published F4's clamp needs route totals; its
-per-edge realisation is the unclamped β·c-per-metre discount, with its stated
-domain.
+**Scoring.** med|Δ%| and signed Δ% vs measured ∫P·dt, rider-stratified bootstrap
+CIs at the house seeds (42/43); paired per-ride comparisons with sign tests. No
+parameter is fitted anywhere in this entry; every constant is read from its
+producing CSV.
+
+### Results
+
+| arm | med \|Δ%\| [95% CI] | signed [95% CI] |
+|---|--:|--:|
+| v2Edge @ 5 m | 4.62 [4.43, 4.93] | +3.39 [+3.08, +3.96] |
+| v2Edge @ 10 m | 4.13 [3.92, 4.36] | +2.99 [+2.61, +3.36] |
+| v2Edge @ 30 m (deployed) | 3.75 [3.53, 3.97] | +1.33 [+1.09, +1.61] |
+| v2Edge @ 60 m | 3.96 [3.73, 4.23] | −0.05 [−0.27, +0.16] |
+| v2Edge @ 90 m | 4.15 [3.91, 4.37] | −0.93 [−1.11, −0.70] |
+| route-level twin (F2·ε_geom @ 5 m) | 4.31 [4.13, 4.54] | +1.25 [+0.96, +1.66] |
+| valley patch @ 30 m | 3.29 [3.12, 3.50] | −0.08 [−0.34, +0.08] |
+| **F4 as published** | **2.72 [2.58, 2.86]** | −0.35 [−0.51, −0.11] |
+| F4 all-measured | 5.66 [5.42, 5.80] | −3.80 [−4.11, −3.50] |
+
+Edge-sum vs twin at 5 m: med |gap| **1.84 pp**, median **+1.83 pp**. Patch vs
+v2Edge@30, paired: closer on **1,131/2,038** (sign p < 10⁻⁴); median toll
+20.3 m/ride. Figure: `fig-p3-scale.svg`.
+
+### Readings
+
+**R1 — fidelity (H1).** The +1.83 pp gap is bias-shaped, not noise: the grade-local
+ε and the per-edge clamp floor (both bind only on descents) are the entire
+discretisation cost. That is the "stated bound" A3's core claim needed;
+`a3.divergence` (energy-vs-distance route frequency on a real network) stays
+honestly *planned* — it needs routing runs.
+
+**R2 — the scale U (H2).** The minimum sits exactly at the deployed 30 m
+calibration scale; finer grids over-charge because the edge cost carries **no
+deadband** to eat jitter; the bias zero near 60 m is aliasing cancelling noise, not
+accuracy — med|Δ%| there is already worse than at 30. E19–21's story reproduced at
+ride grain in one curve.
+
+**R3 — the valley patch (H5 first look, NOT the pre-registered arm).** The
+Entry-71 route-grain result lands at edge grain: bias +1.33 → −0.08 with a
+significant paired win, additive over the search and computable at graph build.
+H5's registered arm (floor pre-stated per chain) remains the condition for
+graduating it into the deployed cost.
+
+**R4 — the comparators reorder the hierarchy.** F4-pub (2.72) > patch (3.29) >
+v2Edge@30 (3.75) > twin (4.31): paper 1's published totals-only form, one flat
+constant and its jointly-fitted c, beats the deployed edge cost at its own scale —
+E51's flat-beats-dynamic at edge grain. And the all-measured pairing's −3.8% bias
+is the (α, ε) bundle rule extending to (ε, c): individually-measured constants
+still travel in pairs.
 
 Actions: paper 3 §3.1 rewritten from *planned* to measured (table + figure + the
 four verdicts, routing sections still planned); sidecar claim moved to
 `derived`/1.8/gate 3k; gate section 3k added (population, the 30 m and patch cells,
 the fidelity gap, the paired count, and the U-minimum ordering — all green;
 `check_paper_stats` 16 claims, 1 planned, 0 failing). Instrument:
-[`e72_edgegrain.py`](../../src/harness/e72_edgegrain.py) (`E72_SMOKE=1`; the toll is
-one algebra copy — e63's `ride_tolls` with the module floor set per call; one units
-bug caught in smoke: `r1d_v2_edge` returns kJ).
+[`e72_edgegrain.py`](../../src/harness/e72_edgegrain.py) (`E72_SMOKE=1`).
 
 ---
 
@@ -1150,9 +1534,138 @@ reproduce `e52_split.csv`.
 
 ---
 
+## 2026-07-31 — Entry 62: what the corpora *are* — a descriptive profile of D3–D6
+
+**Lineage** — $I$: $D_3..D_6$ as paper 1 selects them (2,041 rides) · $T$: per-ride aggregation,
+no fitting · $O$: `e62_corpus_profile.csv` · $S$: 10/50/90 percentiles per rider + the pairplot
+`research/journal/figs/e62-corpus-pairplot.svg`
+
+*Prompt (Danilo): "descriptive / diagnostic statistics over each corpus on D3-D6 … render a
+pairplot between the following ride aggregates — distance, moving time, moving fraction, average
+power when moving (incl. zeros), average speed when moving, heart rate when moving … have each
+corpus as a hue"*, then, in sequence: split D6 per rider (**D6a–D6d**), add **work done**, add
+**elevation gain and mean ascent grade**, three ticks per axis, and a palette whose series are
+actually separable.
+
+### Why a purely descriptive entry, after sixty inferential ones
+
+Every corpus number in the papers so far is an *error* statistic — med |Δ%|, a signed bias, an
+ε. Nothing anywhere says what the corpora **are**. That gap has been load-bearing twice: Entry 60
+read a regional ε split off two pools without either pool ever being characterised, and Entry 61
+then had to argue terrain-vs-behaviour from *simulation* because no description of the real
+riding existed to argue it from. This entry is the missing denominator.
+
+**No registered predictions, deliberately.** Nothing is fitted, so there is no parameter to
+pre-commit against and a "prediction" here would be decoration. What it does carry is a
+registration of the *definitions*, because those are the only place a descriptive entry can
+mislead.
+
+### Definitions, registered
+
+Population is exactly paper 1's: `corpus_rides()`, i.e. the D3–D6 selection with D1/D2 excluded
+as re-processings of D5. **Moving** is $v \ge 0{,}5$ km/h — Entry 44's gate, on the raw sample.
+Aggregates per ride: distance; moving time; moving fraction ($t_\mathrm{mov}/t_\mathrm{rec}$);
+**elevation gain and mean ascent grade taken on the profile the model runs on** (resampled to
+`ENGINE_DX`, deadbanded at the published $\tau = 2$ m) rather than the raw trace, since raw $h_+$
+describes the barometer; pedal work $\sum P\,\mathrm{d}t$ through the package's one copy of
+`empirical_kj`; dt-weighted mean power over moving samples **including zeros**; dt-weighted mean
+speed; dt-weighted mean heart rate. Percentiles are linear-interpolation (numpy's default),
+stated because a published percentile must name its estimator.
+
+**Heart rate needed a parser change.** FIT record field 3 was never read — added to
+`fit.py`, carried through `pts_from_fit`, and `_CACHE_SCHEMA` bumped 1 → 2, which forces one
+full re-parse. The applet was *not* mirrored: cadence set that precedent already (Python-only,
+because the applet has no use for it), but it is now two fields of drift and worth a decision.
+
+**D6 is split per rider — D6a–D6d.** D3/D4/D5 are one rider each, so D6 was the only corpus
+hiding riders behind a regional label, which is precisely the confound Entries 60 and 61 spent
+two entries separating. `E62_HUE=corpus` pools them back.
+
+### Findings
+
+Medians per rider (n = 2,041 rides):
+
+| series | n | km | t_mov (h) | mov. frac | h₊ (m) | subida média | kJ | W (c/ zeros) | km/h | bpm |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| D3 | 441 | 58.2 | 2.3 | 0.99 | 444 | 5.1 % | 1095 | 141.7 | 25.5 | 139.5 |
+| D4 | 219 | 56.7 | 2.1 | 1.00 | 178 | 3.7 % | 1469 | 183.8 | 25.6 | 134.1 |
+| D5 | 636 | 32.3 | 2.0 | 0.85 | 277 | 5.4 % | 561 | 92.7 | 18.1 | 137.5 |
+| D6a | 194 | 56.2 | 2.0 | 1.00 | 361 | 6.5 % | 1331 | 182.9 | 27.5 | 147.9 |
+| D6b | 347 | 57.5 | 1.9 | 1.00 | 413 | 5.6 % | 1321 | 192.0 | 29.6 | 144.7 |
+| D6c | 190 | 55.6 | 2.1 | 1.00 | 1122 | 7.4 % | 1376 | 176.2 | 26.5 | 127.9 |
+| D6d | 14 | 72.4 | 2.6 | 1.00 | 531 | 5.8 % | 1605 | 186.0 | 28.9 | 130.7 |
+| **D6** | 745 | 57.0 | 2.0 | 1.00 | 470 | 6.1 % | 1356 | 185.3 | 28.4 | 136.5 |
+
+**The headline: heart rate is the one variable that does not separate the corpora.** Median
+bpm runs 128–148 across all seven riders — a 1.16× spread, and the p10–p90 bands overlap almost
+completely — while median power runs 93–192 W (2.1×) and pedal work 561–1605 kJ (2.9×). Per
+heartbeat, D5 produces **0.68 W/bpm** against 1.28–1.40 for D4 and the four D6 riders, with D3 at
+1.02. **The riders are not working at different intensities; they are converting a similar
+physiological effort into very different mechanical output.** Whatever separates D5 from the
+road corpora is bike, load, terrain and stop-start structure — not how hard anyone is trying.
+That is a constraint on any future "rider effect" the model might reach for, and it is the first
+independent support for Entry 61's conclusion that came from *measurement* rather than
+simulation.
+
+**D5 is an urban commuting corpus and the others are not.** Half the distance (32 km), half the
+power, 18 km/h against 25–30, and a moving fraction of 0.85 with **67 % of its rides below 0.9**
+— against 27 % for D3, 1 % for D4 and **zero** for every D6 rider. Pooling D5 with the road
+corpora in any statistic that is not explicitly per-rider is mixing two kinds of cycling.
+
+**Moving fraction is mostly a device statistic, and the D6 column proves it.** All four D6
+riders sit at exactly 1.00 with not a single ride under 0.9 — that is auto-pause, not a deposit
+of riders who never stop at a light. The metric is therefore a *floor* on stopped time and is
+comparable across corpora only to the extent the head units agree, which they demonstrably do
+not. It should not be read as behaviour anywhere in the papers.
+
+**D6's terrain is steeper than São Paulo's, which is the Entry 60/61 mechanism showing up in
+the description.** Mean ascent grade 6.1 % on D6 against 5.1 / 3.7 / 5.4 % on D3–D5, and median
+gain 470 m against 444 / 178 / 277 m. Entry 61 concluded from simulation that the regional ε gap
+is terrain; here is the terrain difference, measured, in the corpora themselves.
+
+**Splitting D6 per rider was worth it, and it cuts both ways.** On power, speed and work the
+four are tight (176–192 W, 26.5–29.6 km/h) — D6 really is one riding class, so Entry 60's pooled
+D6 ε is not a mix of dissimilar riders. On *terrain* they are not: **D6c climbs 1122 m per ride
+at 7.4 %**, three times D6a's gain. The regional label covers a homogeneous behaviour and a
+heterogeneous landscape — exactly the split Entry 61 needs, and an obvious test bed for the
+per-route geometric predictor it left open.
+
+**Two coverage facts that constrain reuse.** D6a carries heart rate on only **22 of 194** rides
+(no strap), so its bpm median rests on a tenth of its rides and should not be compared with the
+others' at face value; D6d is 14 rides and is included for completeness, not for inference. Every
+other series has ≥ 97 % HR coverage.
+
+### The figure
+
+`research/journal/figs/e62-corpus-pairplot.svg` — 9 × 9, lower triangle scatter (one ride = one
+point), diagonal per-rider histograms, upper triangle **Spearman ρ and the OLS slope $a$ of
+$y = a x + b$** per rider, each with its own n. The two are reported together on purpose: ρ is
+rank-based and outlier-resistant, $a$ is neither and carries the units, so a large $|a|$ beside a
+near-zero ρ is one heavy ride pulling the line — visible immediately in the moving-fraction
+column, where D6's degenerate 1.00 gives slopes of order $10^3$ km per unit fraction at ρ ≈ 0.01.
+Hand-emitted SVG, no matplotlib: the repo is build-step-free and `make_figures.py` already emits
+the article figures this way. Each series carries **both** an Okabe-Ito hue **and** its own marker
+shape — the first version gave D6a–D6d a purple ramp to keep them reading as one region and the
+four became indistinguishable at 2,000 overlapping points; shape survives overplotting and
+greyscale where hue does not. Axes are cut at the pooled 1–99 percentiles with three ticks each,
+and the frame is clamped to values the variable can actually take (the unclamped version drew a
+−139 m tick on elevation gain).
+
+`E62_PLOT_ONLY=1` re-renders from the CSV, so a layout change never re-parses 2,000 tracks —
+the same rule as Entry 61's raw dump.
+
+### Scope
+
+Descriptive only: no fit, no gate, no published number. The figure is **not** committed by
+default — it carries ride-level aggregates for two riders whose exports are private (no
+geometry, no names, no dates), and whether that is publishable is the maintainer's call, not the
+harness's.
+
+---
+
 ## 2026-07-31 — Entry 61: does the regional ε gap survive when behaviour is held fixed? — a synthetic sweep
 
-**Lineage** — $I$: (200 real route geometries from $D_3..D_5$ and $D_6$, synthetic physics) · $T$: $F_\mathrm{base}$ to generate, $F_1..F_4$ to fit · $O$: `e61_sweep.csv` · $S$: ε pooled by region under known physics
+**Lineage** — $I$: (200 real route geometries from $D_3..D_5$ and $D_6$, synthetic physics) · $T$: $F_\mathrm{base}$ to generate, $F_1..F_4$ to fit · $O$: `e61_sweep.full.csv`, `e61_raw.full.csv` · $S$: ε pooled by region under known physics
 
 *Prompt (Danilo): "Assuming Crr, CdA and m sample 100 distinct routes from D3-D5 and D6 each. Use
 the canonical engine to simulate by assuming that P is either one of P_flat, P_climb = P_flat *
@@ -1229,7 +1742,7 @@ $\varepsilon$ can in principle be predicted from geometry. If **P1 fails** — n
 sign — then Entry 60's split is rider-driven, §3.1.5's two pools are fitting a confound, and the
 paper must say so.
 
-### Findings
+### Findings — registered pass ($2^6$, 30 routes per region)
 
 Two-level full factorial, $2^6 = 64$ combinations over 30 real route geometries per region, with
 **every free parameter of every form fitted jointly** — $\varepsilon$ for F1/F2, $(\varepsilon,
@@ -1272,9 +1785,59 @@ match. **P4's stated direction was also wrong but its mechanism is confirmed**: 
 implied (the ceiling $\min(1, (\alpha/\beta)/s)$ grows with $v_f$) even though the sentence said
 "falls". §4.4.2's mechanism gets its first test under known physics and passes.
 
-**Scope.** Sixty routes and one synthetic rider family are not a landscape-class table; they
-establish that such a table is *possible*, which is what §4.4.3 sets out. The full $3^6$ grid
-over 200 routes remains unrun at an estimated 10.2 hours.
+### Findings — full $3^6$ grid, 100 routes per region
+
+The full grid was then run: all **729** combinations over **100 routes per region**, 145,800
+canonical simulations in ~5.5 h (the 10.2 h estimate above was pessimistic). Outputs are
+`e61_sweep.full.csv` (5,832 fits) and `e61_raw.full.csv` — **145,800 rows of raw per-route
+simulation**, dumped so that any re-fit is arithmetic: the forms are linear in $\varepsilon$ and
+the $\tau$ grid is pre-evaluated, so a different loss, a different form or a landscape descriptor
+costs no canonical re-run. Verified re-fittable: F1 on combination 0 recomputed from the raw file
+reproduces the sweep's $\varepsilon$ to ten digits (0.604345 on BR).
+
+| form | D3–D5 | D6 | gap | per-combination median gap | combinations with gap > 0 |
+|---|--:|--:|--:|--:|--:|
+| F1 | 0.661 | 0.636 | −0.025 | — | — |
+| F2 | 0.483 | 0.487 | +0.005 | — | — |
+| **F3** | **0.260** | **0.421** | **+0.161** | +0.145 (IQR 0.114–0.178) | **726 / 729** |
+| F4 | 0.278 | 0.395 | +0.117 | +0.131 (IQR 0.071–0.161) | **729 / 729** |
+
+**P1 holds more strongly on the full grid, and P2 is refuted more decisively.** F3's synthetic
+gap is **+0.161** against Entry 60's empirical **+0.133** — terrain alone does not merely
+reproduce the regional difference, it slightly overshoots it. And the sign is not an artefact of
+medians over the physics grid: the gap is positive in 726 of 729 *individual* settings for F3 and
+in all 729 for F4. Behaviour, held fixed here, was contributing nothing that the geometry does not
+already explain.
+
+**Only the descent-resolving forms split.** F1 and F2 show no regional structure worth the name
+(−0.025, +0.005). A terrain effect appearing exactly in the forms that resolve descent geometry,
+and not in those that do not, is the pattern a real geometric signal should make — and rules out a
+fitting artefact shared by every form.
+
+**One registered-pass number does not survive: $\tau$ is regional after all.** The $2^6$ pass
+found 4 m in both regions; on the full grid the median is **6 m on D3–D5 against 2 m on D6**, with
+BR's $\tau$ spread across the whole 0–12 m grid and EU's concentrated at 2–4 m. F4's $c$ still
+splits the same way (**2.79 vs 1.46**). Both structurals now point one direction — São Paulo
+geometry wants more smoothing — which is a cleaner story than the registered pass's
+"region-invariant filter, region-varying proxy", but it has no mechanism attached to it yet. Read
+the full-grid value as the better-resolved one: 729 settings and 100 routes per region against 64
+and 30.
+
+**P3 and P4 reproduce, with wider swings.** $\varepsilon$ falls with $k_\mathrm{descent}$
+(0.368 → 0.351 → 0.302) and rises steeply with $P_\mathrm{flat}$ (0.263 → 0.353 → 0.503). The
+secondary marginals all move as the coasting ceiling $\min(1, (\alpha/\beta)/s)$ predicts:
+$\varepsilon$ rises with the resistive terms that raise $\alpha$ ($C_{rr}$ 0.304 → 0.364, $CdA$
+0.325 → 0.348) and falls with the mass that raises $\beta$ (0.369 → 0.305), and it falls with
+$k_\mathrm{climb}$ (0.374 → 0.308).
+
+**Scope.** Two hundred routes and one synthetic rider family are not a landscape-class table; they
+establish that such a table is *possible*, which is what §4.4.3 sets out. What this licenses:
+keeping §3.1.5's two $\varepsilon$ pools and describing them as **terrain** rather than a corpus
+confound. What it does not: any $\varepsilon$ for an unseen landscape, and any claim about riders
+— behaviour was held fixed, so the experiment is silent on rider variation and shows only that
+terrain suffices. The obvious next step is now cheap: regress $\varepsilon$ on per-route geometric
+descriptors (descent-length fraction, grade distribution) instead of the region label, turning the
+two-pool decision into a continuous predictor, entirely off `e61_raw.full.csv`.
 
 ## 2026-07-31 — Entry 60: ε has a regional structure — separate pools for D3–D5 and D6
 

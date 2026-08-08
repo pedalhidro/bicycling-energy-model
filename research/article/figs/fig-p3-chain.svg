@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 298" font-family="sans-serif" font-size="12">
+<rect width="620" height="298" fill="white"/>
+<line x1="152.1" y1="34" x2="152.1" y2="254" stroke="#999"/>
+<text x="142" y="52" text-anchor="end">own5 (n=1)</text>
+<line x1="152.1" y1="48" x2="180.4" y2="48" stroke="#f0c9b0"/>
+<circle cx="181.8" cy="48" r="4" fill="#0072B2"/>
+<circle cx="180.4" cy="48" r="4" fill="#D55E00"/>
+<text x="142" y="78" text-anchor="end">igc5 (n=8)</text>
+<line x1="152.1" y1="74" x2="401.4" y2="74" stroke="#f0c9b0"/>
+<circle cx="401.4" cy="74" r="4" fill="#0072B2"/>
+<circle cx="401.4" cy="74" r="4" fill="#D55E00"/>
+<text x="142" y="104" text-anchor="end">igc5s10 (n=8)</text>
+<line x1="152.1" y1="100" x2="240.9" y2="100" stroke="#f0c9b0"/>
+<circle cx="241.0" cy="100" r="4" fill="#0072B2"/>
+<circle cx="240.9" cy="100" r="4" fill="#D55E00"/>
+<text x="142" y="130" text-anchor="end">igc5s30 (n=8)</text>
+<line x1="152.1" y1="126" x2="216.1" y2="126" stroke="#f0c9b0"/>
+<circle cx="216.5" cy="126" r="4" fill="#0072B2"/>
+<circle cx="216.1" cy="126" r="4" fill="#D55E00"/>
+<text x="142" y="156" text-anchor="end">igc30 (n=8)</text>
+<line x1="152.1" y1="152" x2="387.8" y2="152" stroke="#f0c9b0"/>
+<circle cx="388.0" cy="152" r="4" fill="#0072B2"/>
+<circle cx="387.8" cy="152" r="4" fill="#D55E00"/>
+<text x="142" y="182" text-anchor="end">fab30 (n=8)</text>
+<line x1="152.1" y1="178" x2="525.3" y2="178" stroke="#f0c9b0"/>
+<circle cx="525.3" cy="178" r="4" fill="#0072B2"/>
+<circle cx="525.3" cy="178" r="4" fill="#D55E00"/>
+<text x="142" y="208" text-anchor="end">fab30s30 (n=8)</text>
+<line x1="152.1" y1="204" x2="235.4" y2="204" stroke="#f0c9b0"/>
+<circle cx="235.8" cy="204" r="4" fill="#0072B2"/>
+<circle cx="235.4" cy="204" r="4" fill="#D55E00"/>
+<text x="142" y="234" text-anchor="end">igc5s10+portal</text>
+<line x1="152.1" y1="230" x2="229.4" y2="230" stroke="#f0c9b0"/>
+<circle cx="229.4" cy="230" r="4" fill="#0072B2"/>
+<circle cx="229.4" cy="230" r="4" fill="#D55E00"/>
+<text x="96.2" y="270" text-anchor="middle">-8</text>
+<text x="152.1" y="270" text-anchor="middle">0</text>
+<text x="208.0" y="270" text-anchor="middle">8</text>
+<text x="264.0" y="270" text-anchor="middle">16</text>
+<text x="319.9" y="270" text-anchor="middle">24</text>
+<text x="375.9" y="270" text-anchor="middle">32</text>
+<text x="431.8" y="270" text-anchor="middle">40</text>
+<text x="487.7" y="270" text-anchor="middle">48</text>
+<text x="543.7" y="270" text-anchor="middle">56</text>
+<text x="599.6" y="270" text-anchor="middle">64</text>
+<text x="375" y="290" text-anchor="middle">eF2 Δ% vs measured (blue = med |Δ%|, orange = signed) · IGC pop</text>
+</svg>

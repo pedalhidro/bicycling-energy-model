@@ -1237,8 +1237,14 @@ the filter into the map, but not all of it. And the ε contest flips with the
 chain: grade-local wins on smoothed terrain, flat on noisy. Along the way
 the parity gates forced two fixes in the new harness and exposed one in an
 old one — Entry 41's published 30 m arms clip extrema between grid nodes,
-flagged for paper 2's errata. Route divergence — the mission's measurement —
-remains the one honestly planned tranche.
+now paper 2's disclosed erratum. Two amendments closed the loop: the pin
+went **leave-one-rider-out** after Danilo caught the pooled pin borrowing
+each rider's own terrain (the eF4 claim survived, 6/6 chains, and
+σ-treatment turned out to make the pin itself transferable — the per-rider
+c spread collapses under σ30); and H4's stacking arm REFUTED the route-grain
+"correct or smooth, but not both" at edge grain — the deck keeps helping on
+the treated chain. Route divergence — the mission's measurement — remains
+the one honestly planned tranche.
 
 ---
 
