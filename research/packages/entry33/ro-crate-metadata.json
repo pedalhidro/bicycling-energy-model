@@ -67,7 +67,7 @@
       "@id": "#claim",
       "@type": "Claim",
       "name": "Entry 33: per-ride physics inversion — the Table-3 analogue under m̂/Ĉrr/ĈdA inverted from each ride's own segments",
-      "text": "per-ride physics inversion — the Table-3 analogue under m̂/Ĉrr/ĈdA inverted from each ride's own segments",
+      "text": "Mass, C_rr and CdA inverted from each ride's own segments give 3.9% pooled median error against the simulation's 4.0% — parity again, on 1,409 rides. This is partially in-sample per ride by construction and is labelled so: it answers 'can telemetry replace judgment?', not the frozen-transfer question.",
       "appearance": [
         {
           "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
@@ -129,9 +129,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/perride_invert.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/0bdb395cf89fa23ec74bfc694d27a85f9cbecb9c/src/harness/perride_invert.py",
-      "sha256": "532d62d9636b0e798e9a5440f20666ab98db54856aea39b0f2a3f9dd6ac83c6f",
-      "version": "0bdb395cf89fa23ec74bfc694d27a85f9cbecb9c",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/fe945e9cc5e74d377257e6cb118080b24f94e2c1/src/harness/perride_invert.py",
+      "sha256": "367ad01c7fd0392f8745196b1ec997e7d2dae5499b7342b44cfaf875ca18458e",
+      "version": "fe945e9cc5e74d377257e6cb118080b24f94e2c1",
       "programmingLanguage": "Python"
     },
     {

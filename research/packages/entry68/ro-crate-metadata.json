@@ -1,0 +1,228 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    {
+      "sha256": "https://w3id.org/ro/terms/workflow-run#sha256"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      },
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Entry 68 evidence package — the τ_n sweep — F5f's floor is load-bearing, and only a measured pin can hold it",
+      "description": "Evidence package for journal Entry 68 (2026-08-07): aggregates, hashes and provenance only — the prose remains authoritative in the journal. Regenerate all packages: `python3 research/packages/make_crates.py`.",
+      "author": {
+        "@id": "#danilo"
+      },
+      "dateCreated": "2026-08-07",
+      "isPartOf": {
+        "@id": "https://doi.org/10.5281/zenodo.21282165"
+      },
+      "url": "https://github.com/danlessa/bicycling-energy-model/tree/main/research/packages/entry68",
+      "hasPart": [],
+      "mentions": [
+        {
+          "@id": "#claim"
+        },
+        {
+          "@id": "#run"
+        }
+      ],
+      "subjectOf": {
+        "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/wfrun/process/0.5"
+      }
+    },
+    {
+      "@id": "#danilo",
+      "@type": "Person",
+      "name": "Danilo Lessa Bernardineli",
+      "email": "danilo.lessa@gmail.com"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md",
+      "@type": "CreativeWork",
+      "name": "Model comparison journal",
+      "encodingFormat": "text/markdown"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl",
+      "@type": "Dataset",
+      "name": "Claims–questions–evidence graph (Entries 1–24)",
+      "encodingFormat": "text/turtle"
+    },
+    {
+      "@id": "#claim",
+      "@type": "Claim",
+      "name": "Entry 68: the τ_n sweep — F5f's floor is load-bearing, and only a measured pin can hold it",
+      "text": "the τ_n sweep — F5f's floor is load-bearing, and only a measured pin can hold it",
+      "appearance": [
+        {
+          "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
+        }
+      ],
+      "subjectOf": {
+        "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl"
+      }
+    },
+    {
+      "@id": "#ride-recordings",
+      "@type": "Dataset",
+      "name": "Raw ride recordings (NOT distributed)",
+      "description": "FIT tracks (GPS + power) and source spreadsheets — excluded from version control and from this crate: location and private-activity data. Coordinate-stripped aggregates available on request.",
+      "conditionsOfAccess": "Available on request from the author, coordinates stripped."
+    },
+    {
+      "@id": "#data/results/e63_tolls.E63_TAUN0p0.csv",
+      "@type": "File",
+      "name": "data/results/e63_tolls.E63_TAUN0p0.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E63_TAUN=0.0 python3 src/harness/e63_f5_kebuffer.py`.",
+      "sha256": "00d4bd02f868c464bbd5dfd810a9fcd206e9b769ca7c32353d86a6a45ff9e3e0",
+      "contentSize": "569585",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e63_tolls.E63_TAUN0p5.csv",
+      "@type": "File",
+      "name": "data/results/e63_tolls.E63_TAUN0p5.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E63_TAUN=0.5 python3 src/harness/e63_f5_kebuffer.py`.",
+      "sha256": "7a3b4e5fc5169678ae6c2ed42a27fa1a64533e39d88cc39fb1b26a15e6276df6",
+      "contentSize": "507624",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e63_tolls.E63_TAUN1p0.csv",
+      "@type": "File",
+      "name": "data/results/e63_tolls.E63_TAUN1p0.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E63_TAUN=1.0 python3 src/harness/e63_f5_kebuffer.py`.",
+      "sha256": "a691cbb5db7264d179d7743cb81fb3ca919e01162ec881bc5c15acbaba1a5d0c",
+      "contentSize": "441185",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e63_tolls.E63_TAUN1p5.csv",
+      "@type": "File",
+      "name": "data/results/e63_tolls.E63_TAUN1p5.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E63_TAUN=1.5 python3 src/harness/e63_f5_kebuffer.py`.",
+      "sha256": "350a85ecfb09df11371f4ec153be4ef1cabe81c33d8dfcaaaa584c9a82ea8f17",
+      "contentSize": "377829",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e63_tolls.E63_TAUN3p0.csv",
+      "@type": "File",
+      "name": "data/results/e63_tolls.E63_TAUN3p0.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E63_TAUN=3.0 python3 src/harness/e63_f5_kebuffer.py`.",
+      "sha256": "91a46ed47c59c2c971d517a8181123d749102dd4f18ff0fa6c94beb24cdceff1",
+      "contentSize": "272456",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e63_tolls.E63_TAUN4p5.csv",
+      "@type": "File",
+      "name": "data/results/e63_tolls.E63_TAUN4p5.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E63_TAUN=4.5 python3 src/harness/e63_f5_kebuffer.py`.",
+      "sha256": "3eb6165dc0f7f7fe6001ea4821c3a145fb931277ee7200262fe704362be68b9e",
+      "contentSize": "229976",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e63_tolls.E63_TAUN6p0.csv",
+      "@type": "File",
+      "name": "data/results/e63_tolls.E63_TAUN6p0.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E63_TAUN=6.0 python3 src/harness/e63_f5_kebuffer.py`.",
+      "sha256": "a6c009b31cb76a40212ad1dd2e8b231b75b061670b283aead88f4340518b8863",
+      "contentSize": "215342",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#run",
+      "@type": "CreateAction",
+      "name": "Entry 68 harness run",
+      "description": "Re-executable from the repository and the private inputs; see the journal entry for protocol, endpoints and verdicts.",
+      "endTime": "2026-08-07",
+      "actionStatus": {
+        "@id": "http://schema.org/CompletedActionStatus"
+      },
+      "agent": {
+        "@id": "#danilo"
+      },
+      "instrument": [
+        {
+          "@id": "#src/harness/e63_f5_kebuffer.py"
+        }
+      ],
+      "object": [
+        {
+          "@id": "#ride-recordings"
+        }
+      ],
+      "result": [
+        {
+          "@id": "#data/results/e63_tolls.E63_TAUN0p0.csv"
+        },
+        {
+          "@id": "#data/results/e63_tolls.E63_TAUN0p5.csv"
+        },
+        {
+          "@id": "#data/results/e63_tolls.E63_TAUN1p0.csv"
+        },
+        {
+          "@id": "#data/results/e63_tolls.E63_TAUN1p5.csv"
+        },
+        {
+          "@id": "#data/results/e63_tolls.E63_TAUN3p0.csv"
+        },
+        {
+          "@id": "#data/results/e63_tolls.E63_TAUN4p5.csv"
+        },
+        {
+          "@id": "#data/results/e63_tolls.E63_TAUN6p0.csv"
+        }
+      ]
+    },
+    {
+      "@id": "#src/harness/e63_f5_kebuffer.py",
+      "@type": [
+        "File",
+        "SoftwareApplication",
+        "SoftwareSourceCode"
+      ],
+      "name": "src/harness/e63_f5_kebuffer.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/fe945e9cc5e74d377257e6cb118080b24f94e2c1/src/harness/e63_f5_kebuffer.py",
+      "sha256": "039545b91a9cacaddaeb4a14e26439133cb03d33fa6c9c4b182cf3e6b2529a9b",
+      "version": "fe945e9cc5e74d377257e6cb118080b24f94e2c1",
+      "programmingLanguage": "Python"
+    },
+    {
+      "@id": "ro-crate-preview.html",
+      "@type": [
+        "File",
+        "CreativeWork"
+      ],
+      "name": "Pré-visualização humana do pacote (convenção RO-Crate)",
+      "encodingFormat": "text/html",
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "https://doi.org/10.5281/zenodo.21282165",
+      "@type": "Dataset",
+      "name": "bicycling-energy-model — research package",
+      "url": "https://github.com/danlessa/bicycling-energy-model"
+    }
+  ]
+}

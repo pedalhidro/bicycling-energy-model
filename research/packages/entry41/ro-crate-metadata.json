@@ -134,9 +134,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e41_dem_route.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/0bdb395cf89fa23ec74bfc694d27a85f9cbecb9c/src/harness/e41_dem_route.py",
-      "sha256": "2444beacb537c90674c4d711fdebd71c867830fbf8a88f337a3b2513c28bd3bc",
-      "version": "0bdb395cf89fa23ec74bfc694d27a85f9cbecb9c",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/fe945e9cc5e74d377257e6cb118080b24f94e2c1/src/harness/e41_dem_route.py",
+      "sha256": "85152015ba91d5507d2024c54762126cd6ac7c755f05a22284773ee6c1f1505e",
+      "version": "fe945e9cc5e74d377257e6cb118080b24f94e2c1",
       "programmingLanguage": "Python"
     },
     {

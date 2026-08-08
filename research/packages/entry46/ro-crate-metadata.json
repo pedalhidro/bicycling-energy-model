@@ -1,0 +1,144 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    {
+      "sha256": "https://w3id.org/ro/terms/workflow-run#sha256"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      },
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Entry 46 evidence package — implementing the regime switch — pre-registration",
+      "description": "Evidence package for journal Entry 46 (2026-07-29): aggregates, hashes and provenance only — the prose remains authoritative in the journal. Regenerate all packages: `python3 research/packages/make_crates.py`.",
+      "author": {
+        "@id": "#danilo"
+      },
+      "dateCreated": "2026-07-29",
+      "isPartOf": {
+        "@id": "https://doi.org/10.5281/zenodo.21282165"
+      },
+      "url": "https://github.com/danlessa/bicycling-energy-model/tree/main/research/packages/entry46",
+      "hasPart": [],
+      "mentions": [
+        {
+          "@id": "#claim"
+        },
+        {
+          "@id": "#run"
+        }
+      ],
+      "subjectOf": {
+        "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/wfrun/process/0.5"
+      }
+    },
+    {
+      "@id": "#danilo",
+      "@type": "Person",
+      "name": "Danilo Lessa Bernardineli",
+      "email": "danilo.lessa@gmail.com"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md",
+      "@type": "CreativeWork",
+      "name": "Model comparison journal",
+      "encodingFormat": "text/markdown"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl",
+      "@type": "Dataset",
+      "name": "Claims–questions–evidence graph (Entries 1–24)",
+      "encodingFormat": "text/turtle"
+    },
+    {
+      "@id": "#claim",
+      "@type": "Claim",
+      "name": "Entry 46: implementing the regime switch — pre-registration",
+      "text": "The two parameter classes reverse the verdict: under frozen priors switching WORSENS the pooled median (5.08 → 5.62), under per-ride inverted physics it IMPROVES it (5.51 → 4.12). The bias column adjudicates — below 3%, ε_d is near-unbiased under frozen priors (+0.28) and badly biased under honest physics (−4.64), while ε_f = 0.20 is the mirror image (+5.90, +0.11). Below the threshold the coasting limit clamps, so the applied ε_d has median 0.544 against ε_f's 0.20, and that refund cancels the over-prediction of the frozen CdA = 0.40 (well above the 0.26–0.32 these riders invert to). So the rule is correct and the frozen grid's sub-threshold ε_d cells are accurate BY CANCELLATION rather than by fit.",
+      "appearance": [
+        {
+          "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
+        }
+      ],
+      "subjectOf": {
+        "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl"
+      }
+    },
+    {
+      "@id": "#data/results/e46_switch.csv",
+      "@type": "File",
+      "name": "data/results/e46_switch.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `python3 src/harness/e46_switch.py`.",
+      "sha256": "73c240c07ebcede0fc71d7030ad1fd003e21f149b589d09a91ab0d15010bc590",
+      "contentSize": "275272",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#run",
+      "@type": "CreateAction",
+      "name": "Entry 46 harness run",
+      "description": "Re-executable from the repository and the private inputs; see the journal entry for protocol, endpoints and verdicts.",
+      "endTime": "2026-07-29",
+      "actionStatus": {
+        "@id": "http://schema.org/CompletedActionStatus"
+      },
+      "agent": {
+        "@id": "#danilo"
+      },
+      "instrument": [
+        {
+          "@id": "#src/harness/e46_switch.py"
+        }
+      ],
+      "result": [
+        {
+          "@id": "#data/results/e46_switch.csv"
+        }
+      ]
+    },
+    {
+      "@id": "#src/harness/e46_switch.py",
+      "@type": [
+        "File",
+        "SoftwareApplication",
+        "SoftwareSourceCode"
+      ],
+      "name": "src/harness/e46_switch.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/fe945e9cc5e74d377257e6cb118080b24f94e2c1/src/harness/e46_switch.py",
+      "sha256": "2d70842fb654289cc33cf4927cd00ef0d0f4b121f518166919554a4ff670bb59",
+      "version": "fe945e9cc5e74d377257e6cb118080b24f94e2c1",
+      "programmingLanguage": "Python"
+    },
+    {
+      "@id": "ro-crate-preview.html",
+      "@type": [
+        "File",
+        "CreativeWork"
+      ],
+      "name": "Pré-visualização humana do pacote (convenção RO-Crate)",
+      "encodingFormat": "text/html",
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "https://doi.org/10.5281/zenodo.21282165",
+      "@type": "Dataset",
+      "name": "bicycling-energy-model — research package",
+      "url": "https://github.com/danlessa/bicycling-energy-model"
+    }
+  ]
+}

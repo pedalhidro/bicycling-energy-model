@@ -1,0 +1,156 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    {
+      "sha256": "https://w3id.org/ro/terms/workflow-run#sha256"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      },
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Entry 47 evidence package — which deficit form? — pre-registration of the two selections, in I/T/O/S",
+      "description": "Evidence package for journal Entry 47 (2026-07-30): aggregates, hashes and provenance only — the prose remains authoritative in the journal. Regenerate all packages: `python3 research/packages/make_crates.py`.",
+      "author": {
+        "@id": "#danilo"
+      },
+      "dateCreated": "2026-07-30",
+      "isPartOf": {
+        "@id": "https://doi.org/10.5281/zenodo.21282165"
+      },
+      "url": "https://github.com/danlessa/bicycling-energy-model/tree/main/research/packages/entry47",
+      "hasPart": [],
+      "mentions": [
+        {
+          "@id": "#claim"
+        },
+        {
+          "@id": "#run"
+        }
+      ],
+      "subjectOf": {
+        "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/wfrun/process/0.5"
+      }
+    },
+    {
+      "@id": "#danilo",
+      "@type": "Person",
+      "name": "Danilo Lessa Bernardineli",
+      "email": "danilo.lessa@gmail.com"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md",
+      "@type": "CreativeWork",
+      "name": "Model comparison journal",
+      "encodingFormat": "text/markdown"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl",
+      "@type": "Dataset",
+      "name": "Claims–questions–evidence graph (Entries 1–24)",
+      "encodingFormat": "text/turtle"
+    },
+    {
+      "@id": "#claim",
+      "@type": "Claim",
+      "name": "Entry 47: which deficit form? — pre-registration of the two selections, in I/T/O/S",
+      "text": "Two selections on D1 ∪ D2 (48 rides at s̄ ≥ 3%), by BIC under a Laplace likelihood, under frozen priors and again under per-ride inverted physics: BOTH return the incumbent ε₀ = 0.13, with zero fitted parameters. The same contest on D3–D6 selects the grade-inverse form decisively (ΔBIC 128.8), so the disagreement is statistical power, not direction — 48 calibration rides cannot resolve what 990 evaluation rides can, and only the calibration arm is licensed to build the tables. Nothing published moved.",
+      "appearance": [
+        {
+          "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
+        }
+      ],
+      "subjectOf": {
+        "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl"
+      }
+    },
+    {
+      "@id": "#ride-recordings",
+      "@type": "Dataset",
+      "name": "Raw ride recordings (NOT distributed)",
+      "description": "FIT tracks (GPS + power) and source spreadsheets — excluded from version control and from this crate: location and private-activity data. Coordinate-stripped aggregates available on request.",
+      "conditionsOfAccess": "Available on request from the author, coordinates stripped."
+    },
+    {
+      "@id": "#data/results/e47_formselect.csv",
+      "@type": "File",
+      "name": "data/results/e47_formselect.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `python3 src/harness/e47_formselect.py`.",
+      "sha256": "87fac9e46d6c4eb8535119972d326aec93918f8f7f4ac578d0b076573cc765ac",
+      "contentSize": "625779",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#run",
+      "@type": "CreateAction",
+      "name": "Entry 47 harness run",
+      "description": "Re-executable from the repository and the private inputs; see the journal entry for protocol, endpoints and verdicts.",
+      "endTime": "2026-07-30",
+      "actionStatus": {
+        "@id": "http://schema.org/CompletedActionStatus"
+      },
+      "agent": {
+        "@id": "#danilo"
+      },
+      "instrument": [
+        {
+          "@id": "#src/harness/e47_formselect.py"
+        }
+      ],
+      "object": [
+        {
+          "@id": "#ride-recordings"
+        }
+      ],
+      "result": [
+        {
+          "@id": "#data/results/e47_formselect.csv"
+        }
+      ]
+    },
+    {
+      "@id": "#src/harness/e47_formselect.py",
+      "@type": [
+        "File",
+        "SoftwareApplication",
+        "SoftwareSourceCode"
+      ],
+      "name": "src/harness/e47_formselect.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/fe945e9cc5e74d377257e6cb118080b24f94e2c1/src/harness/e47_formselect.py",
+      "sha256": "6b6d3db9fdf3fb1249ab577343a8199f9cc7d9c3c75d9d82918b32ea6ba05ddc",
+      "version": "fe945e9cc5e74d377257e6cb118080b24f94e2c1",
+      "programmingLanguage": "Python"
+    },
+    {
+      "@id": "ro-crate-preview.html",
+      "@type": [
+        "File",
+        "CreativeWork"
+      ],
+      "name": "Pré-visualização humana do pacote (convenção RO-Crate)",
+      "encodingFormat": "text/html",
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "https://doi.org/10.5281/zenodo.21282165",
+      "@type": "Dataset",
+      "name": "bicycling-energy-model — research package",
+      "url": "https://github.com/danlessa/bicycling-energy-model"
+    }
+  ]
+}

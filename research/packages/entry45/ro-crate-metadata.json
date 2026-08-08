@@ -1,0 +1,195 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    {
+      "sha256": "https://w3id.org/ro/terms/workflow-run#sha256"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      },
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Entry 45 evidence package — what should ε₀ be? — a contest of ride-level summaries",
+      "description": "Evidence package for journal Entry 45 (2026-07-29): aggregates, hashes and provenance only — the prose remains authoritative in the journal. Regenerate all packages: `python3 research/packages/make_crates.py`.",
+      "author": {
+        "@id": "#danilo"
+      },
+      "dateCreated": "2026-07-29",
+      "isPartOf": {
+        "@id": "https://doi.org/10.5281/zenodo.21282165"
+      },
+      "url": "https://github.com/danlessa/bicycling-energy-model/tree/main/research/packages/entry45",
+      "hasPart": [],
+      "mentions": [
+        {
+          "@id": "#claim"
+        },
+        {
+          "@id": "#run"
+        }
+      ],
+      "subjectOf": {
+        "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/wfrun/process/0.5"
+      },
+      "citation": [
+        {
+          "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/article/paper1-closed-form.md"
+        }
+      ]
+    },
+    {
+      "@id": "#danilo",
+      "@type": "Person",
+      "name": "Danilo Lessa Bernardineli",
+      "email": "danilo.lessa@gmail.com"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md",
+      "@type": "CreativeWork",
+      "name": "Model comparison journal",
+      "encodingFormat": "text/markdown"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl",
+      "@type": "Dataset",
+      "name": "Claims–questions–evidence graph (Entries 1–24)",
+      "encodingFormat": "text/turtle"
+    },
+    {
+      "@id": "#claim",
+      "@type": "Claim",
+      "name": "Entry 45: what should ε₀ be? — a contest of ride-level summaries",
+      "text": "Out of sample on 513 held-out rides, the grade-inverse δ = k/s̄ with k = 0.0051 beats the frozen constant, winning 344/513 (p < 1e-4) and cutting held-out deficit error 0.067 → 0.055. Its domain is real descents only: k/s̄ exceeds 1 below s̄ ≈ 0.51%, so the form is defined for s̄ ≥ 3%. A companion flat-terrain probe was retracted mid-entry — it had selected segments on RAW ascent whose target rate sat below the corpus noise floor, making the search self-reinforcing; rebuilt on deadband-smoothed cells.",
+      "appearance": [
+        {
+          "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
+        }
+      ],
+      "subjectOf": {
+        "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl"
+      }
+    },
+    {
+      "@id": "#ride-recordings",
+      "@type": "Dataset",
+      "name": "Raw ride recordings (NOT distributed)",
+      "description": "FIT tracks (GPS + power) and source spreadsheets — excluded from version control and from this crate: location and private-activity data. Coordinate-stripped aggregates available on request.",
+      "conditionsOfAccess": "Available on request from the author, coordinates stripped."
+    },
+    {
+      "@id": "#data/results/e45_ridelevel.paper.csv",
+      "@type": "File",
+      "name": "data/results/e45_ridelevel.paper.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E45_TARGET=paper python3 src/harness/e45_ridelevel.py`.",
+      "sha256": "5e3dadbeda4f4ef92a5905d183bdb518cf588fa4d1ec630057f43fe90b552c20",
+      "contentSize": "206424",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e45_flatseg.csv",
+      "@type": "File",
+      "name": "data/results/e45_flatseg.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `python3 src/harness/e45_flatseg.py`.",
+      "sha256": "e0f30008a5b5948564d9d0cd146579fb542db64827e450c8741f2f5851e157ad",
+      "contentSize": "36343",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#run",
+      "@type": "CreateAction",
+      "name": "Entry 45 harness run",
+      "description": "Re-executable from the repository and the private inputs; see the journal entry for protocol, endpoints and verdicts.",
+      "endTime": "2026-07-29",
+      "actionStatus": {
+        "@id": "http://schema.org/CompletedActionStatus"
+      },
+      "agent": {
+        "@id": "#danilo"
+      },
+      "instrument": [
+        {
+          "@id": "#src/harness/e45_ridelevel.py"
+        },
+        {
+          "@id": "#src/harness/e45_flatseg.py"
+        }
+      ],
+      "object": [
+        {
+          "@id": "#ride-recordings"
+        }
+      ],
+      "result": [
+        {
+          "@id": "#data/results/e45_ridelevel.paper.csv"
+        },
+        {
+          "@id": "#data/results/e45_flatseg.csv"
+        }
+      ]
+    },
+    {
+      "@id": "#src/harness/e45_ridelevel.py",
+      "@type": [
+        "File",
+        "SoftwareApplication",
+        "SoftwareSourceCode"
+      ],
+      "name": "src/harness/e45_ridelevel.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/fe945e9cc5e74d377257e6cb118080b24f94e2c1/src/harness/e45_ridelevel.py",
+      "sha256": "2ca5233b8e4eb3adc9af6c7fdb6f0bbfe2e0ba1e5f2686d46fd39ad70505f2b5",
+      "version": "fe945e9cc5e74d377257e6cb118080b24f94e2c1",
+      "programmingLanguage": "Python"
+    },
+    {
+      "@id": "#src/harness/e45_flatseg.py",
+      "@type": [
+        "File",
+        "SoftwareApplication",
+        "SoftwareSourceCode"
+      ],
+      "name": "src/harness/e45_flatseg.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/fe945e9cc5e74d377257e6cb118080b24f94e2c1/src/harness/e45_flatseg.py",
+      "sha256": "18b067738ed3afa3f06a051baeb1549d868f9114d9923d2404dd94115ebf27c7",
+      "version": "fe945e9cc5e74d377257e6cb118080b24f94e2c1",
+      "programmingLanguage": "Python"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/article/paper1-closed-form.md",
+      "@type": "CreativeWork",
+      "name": "research/article/paper1-closed-form.md",
+      "encodingFormat": "text/markdown"
+    },
+    {
+      "@id": "ro-crate-preview.html",
+      "@type": [
+        "File",
+        "CreativeWork"
+      ],
+      "name": "Pré-visualização humana do pacote (convenção RO-Crate)",
+      "encodingFormat": "text/html",
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "https://doi.org/10.5281/zenodo.21282165",
+      "@type": "Dataset",
+      "name": "bicycling-energy-model — research package",
+      "url": "https://github.com/danlessa/bicycling-energy-model"
+    }
+  ]
+}

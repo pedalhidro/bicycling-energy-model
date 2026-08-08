@@ -1,0 +1,144 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    {
+      "sha256": "https://w3id.org/ro/terms/workflow-run#sha256"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      },
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Entry 70 evidence package — the pinned-τ curves, per rider — basins are rider-shaped, and the steep ones are the absorbers",
+      "description": "Evidence package for journal Entry 70 (2026-08-08): aggregates, hashes and provenance only — the prose remains authoritative in the journal. Regenerate all packages: `python3 research/packages/make_crates.py`.",
+      "author": {
+        "@id": "#danilo"
+      },
+      "dateCreated": "2026-08-08",
+      "isPartOf": {
+        "@id": "https://doi.org/10.5281/zenodo.21282165"
+      },
+      "url": "https://github.com/danlessa/bicycling-energy-model/tree/main/research/packages/entry70",
+      "hasPart": [],
+      "mentions": [
+        {
+          "@id": "#claim"
+        },
+        {
+          "@id": "#run"
+        }
+      ],
+      "subjectOf": {
+        "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/wfrun/process/0.5"
+      }
+    },
+    {
+      "@id": "#danilo",
+      "@type": "Person",
+      "name": "Danilo Lessa Bernardineli",
+      "email": "danilo.lessa@gmail.com"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md",
+      "@type": "CreativeWork",
+      "name": "Model comparison journal",
+      "encodingFormat": "text/markdown"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl",
+      "@type": "Dataset",
+      "name": "Claims–questions–evidence graph (Entries 1–24)",
+      "encodingFormat": "text/turtle"
+    },
+    {
+      "@id": "#claim",
+      "@type": "Claim",
+      "name": "Entry 70: the pinned-τ curves, per rider — basins are rider-shaped, and the steep ones are the absorbers",
+      "text": "the pinned-τ curves, per rider — basins are rider-shaped, and the steep ones are the absorbers",
+      "appearance": [
+        {
+          "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
+        }
+      ],
+      "subjectOf": {
+        "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl"
+      }
+    },
+    {
+      "@id": "#data/results/e70_taucurves.csv",
+      "@type": "File",
+      "name": "data/results/e70_taucurves.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `python3 src/harness/e70_taucurves.py`.",
+      "sha256": "10b1351cb3bf98749b10f6ea9f0c7fc2aa6ca920e6a146cf8010a8ad2497c535",
+      "contentSize": "14276",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#run",
+      "@type": "CreateAction",
+      "name": "Entry 70 harness run",
+      "description": "Re-executable from the repository and the private inputs; see the journal entry for protocol, endpoints and verdicts.",
+      "endTime": "2026-08-08",
+      "actionStatus": {
+        "@id": "http://schema.org/CompletedActionStatus"
+      },
+      "agent": {
+        "@id": "#danilo"
+      },
+      "instrument": [
+        {
+          "@id": "#src/harness/e70_taucurves.py"
+        }
+      ],
+      "result": [
+        {
+          "@id": "#data/results/e70_taucurves.csv"
+        }
+      ]
+    },
+    {
+      "@id": "#src/harness/e70_taucurves.py",
+      "@type": [
+        "File",
+        "SoftwareApplication",
+        "SoftwareSourceCode"
+      ],
+      "name": "src/harness/e70_taucurves.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/fe945e9cc5e74d377257e6cb118080b24f94e2c1/src/harness/e70_taucurves.py",
+      "sha256": "65ce88ba15041b1fb8971c41f377ae8f74c49c1121faa002373837e0690fb911",
+      "version": "fe945e9cc5e74d377257e6cb118080b24f94e2c1",
+      "programmingLanguage": "Python"
+    },
+    {
+      "@id": "ro-crate-preview.html",
+      "@type": [
+        "File",
+        "CreativeWork"
+      ],
+      "name": "Pré-visualização humana do pacote (convenção RO-Crate)",
+      "encodingFormat": "text/html",
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "https://doi.org/10.5281/zenodo.21282165",
+      "@type": "Dataset",
+      "name": "bicycling-energy-model — research package",
+      "url": "https://github.com/danlessa/bicycling-energy-model"
+    }
+  ]
+}

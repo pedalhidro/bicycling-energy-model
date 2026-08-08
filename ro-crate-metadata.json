@@ -24,8 +24,8 @@
       "hasPart": [
         { "@id": "applet/index.html" },
         { "@id": "notas.md" },
-        { "@id": "research/notes/MODEL_COMPARISON_JOURNAL.md" },
-        { "@id": "research/notes/CURATED_JOURNAL.md" },
+        { "@id": "research/journal/MODEL_COMPARISON_JOURNAL.md" },
+        { "@id": "research/journal/CURATED_JOURNAL.md" },
         { "@id": "research/article/article-draft.md" },
         { "@id": "research/article/article-draft.pt-BR.md" },
         { "@id": "research/notes/claims.ttl" },
@@ -72,7 +72,7 @@
       "encodingFormat": "text/markdown"
     },
     {
-      "@id": "research/notes/MODEL_COMPARISON_JOURNAL.md",
+      "@id": "research/journal/MODEL_COMPARISON_JOURNAL.md",
       "@type": ["File", "CreativeWork"],
       "name": "Model comparison journal",
       "description": "Numbered, reverse-chronological research journal (22 entries): verbatim human prompts, hypotheses, pre-registered protocols and endpoints, results, and verdicts, with per-entry code provenance (commit hashes).",
@@ -95,18 +95,18 @@
       "translationOf": { "@id": "research/article/article-draft.md" }
     },
     {
-      "@id": "research/notes/CURATED_JOURNAL.md",
+      "@id": "research/journal/CURATED_JOURNAL.md",
       "@type": ["File", "CreativeWork"],
       "name": "Curated journal (readable companion)",
-      "description": "Plain-language retelling of all 24 lab-journal entries, oldest first, organized as a narrative with per-entry links to the evidence packages. The lab journal remains authoritative; this is the reading edition.",
+      "description": "Plain-language retelling of every lab-journal entry (1–72), oldest first, organized as a narrative in acts, with links to the evidence packages where they exist. The lab journal remains authoritative; this is the reading edition.",
       "encodingFormat": "text/markdown",
-      "isBasedOn": { "@id": "research/notes/MODEL_COMPARISON_JOURNAL.md" }
+      "isBasedOn": { "@id": "research/journal/MODEL_COMPARISON_JOURNAL.md" }
     },
     {
       "@id": "research/notes/claims.ttl",
       "@type": ["File", "Dataset"],
-      "name": "Claims–questions–evidence graph (journal Entries 1–24)",
-      "description": "RDF/Turtle graph in widely-used vocabularies only: research questions and claims (schema.org), pre-registered protocols (P-Plan), harness runs (PROV-O), evidence polarity and inter-entry citation links as typed CiTO relations (supports/disputes/corrects/updates/qualifies), covering every journal entry.",
+      "name": "Claims–questions–evidence graph",
+      "description": "RDF/Turtle graph in widely-used vocabularies only: research questions and claims (schema.org), pre-registered protocols (P-Plan), harness runs (PROV-O), evidence polarity and inter-entry citation links as typed CiTO relations (supports/disputes/corrects/updates/qualifies). Published-statistic claims from the articles live in the sidecar graphs (research/article/*.meta.ttl), which load with this graph and research/data-graph.ttl as one.",
       "encodingFormat": "text/turtle",
       "about": { "@id": "./" }
     },
@@ -114,7 +114,7 @@
       "@id": "research/packages/",
       "@type": "Dataset",
       "name": "Per-entry evidence packages (nested RO-Crates)",
-      "description": "One evidence package per journal entry (entry01–entry24): nested RO-Crates (Workflow-Run Process Run profile where the entry has a harness run) holding the entry's claim, run provenance, hash-only descriptions of the gitignored per-ride artifacts, and a human-readable preview page. Entry 22 additionally carries its claim.ttl slice and the captured gated bootstrap_ci.py report. Regenerates via `python3 research/packages/make_crates.py`.",
+      "description": "One evidence package per journal entry (entry01–entry72; Entry 53 has no journal heading of its own and no crate): nested RO-Crates (Workflow-Run Process Run profile where the entry has a harness run) holding the entry's claim, run provenance, hash-only descriptions of the gitignored per-ride artifacts, and a human-readable preview page. Entry 22 additionally carries its claim.ttl slice and the captured gated bootstrap_ci.py report. Regenerates via `python3 research/packages/make_crates.py`.",
       "isPartOf": { "@id": "./" }
     },
     {

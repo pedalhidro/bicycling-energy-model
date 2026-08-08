@@ -1,0 +1,192 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    {
+      "sha256": "https://w3id.org/ro/terms/workflow-run#sha256"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      },
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Entry 64 evidence package — the toll wins selection, travels better, and its rider-grain τ prediction fails",
+      "description": "Evidence package for journal Entry 64 (2026-08-07): aggregates, hashes and provenance only — the prose remains authoritative in the journal. Regenerate all packages: `python3 research/packages/make_crates.py`.",
+      "author": {
+        "@id": "#danilo"
+      },
+      "dateCreated": "2026-08-07",
+      "isPartOf": {
+        "@id": "https://doi.org/10.5281/zenodo.21282165"
+      },
+      "url": "https://github.com/danlessa/bicycling-energy-model/tree/main/research/packages/entry64",
+      "hasPart": [],
+      "mentions": [
+        {
+          "@id": "#claim"
+        },
+        {
+          "@id": "#run"
+        }
+      ],
+      "subjectOf": {
+        "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/wfrun/process/0.5"
+      }
+    },
+    {
+      "@id": "#danilo",
+      "@type": "Person",
+      "name": "Danilo Lessa Bernardineli",
+      "email": "danilo.lessa@gmail.com"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md",
+      "@type": "CreativeWork",
+      "name": "Model comparison journal",
+      "encodingFormat": "text/markdown"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl",
+      "@type": "Dataset",
+      "name": "Claims–questions–evidence graph (Entries 1–24)",
+      "encodingFormat": "text/turtle"
+    },
+    {
+      "@id": "#claim",
+      "@type": "Claim",
+      "name": "Entry 64: the toll wins selection, travels better, and its rider-grain τ prediction fails",
+      "text": "the toll wins selection, travels better, and its rider-grain τ prediction fails",
+      "appearance": [
+        {
+          "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
+        }
+      ],
+      "subjectOf": {
+        "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl"
+      }
+    },
+    {
+      "@id": "#ride-recordings",
+      "@type": "Dataset",
+      "name": "Raw ride recordings (NOT distributed)",
+      "description": "FIT tracks (GPS + power) and source spreadsheets — excluded from version control and from this crate: location and private-activity data. Coordinate-stripped aggregates available on request.",
+      "conditionsOfAccess": "Available on request from the author, coordinates stripped."
+    },
+    {
+      "@id": "#data/results/e63_split.E63_TAUN2p0.csv",
+      "@type": "File",
+      "name": "data/results/e63_split.E63_TAUN2p0.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E63_TAUN=2.0 python3 src/harness/e63_f5_kebuffer.py`.",
+      "sha256": "fdc27695d62c5e37548b20f69dd3ab9542623834e5725a8ed080f92cbe06ad4d",
+      "contentSize": "436",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e63_loro.E63_TAUN2p0.csv",
+      "@type": "File",
+      "name": "data/results/e63_loro.E63_TAUN2p0.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E63_TAUN=2.0 E63_LORO=1 python3 src/harness/e63_f5_kebuffer.py`.",
+      "sha256": "df317e14eb263c129dbfca03cf0ebe6a1a65514fb4567ec49cd63a40093129de",
+      "contentSize": "1375",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e63_taupred.E63_TAUN2p0.csv",
+      "@type": "File",
+      "name": "data/results/e63_taupred.E63_TAUN2p0.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E63_TAUN=2.0 E63_TAUPRED=1 python3 src/harness/e63_f5_kebuffer.py`.",
+      "sha256": "6fa4ab592d824e0c7170279de0d924f45f6cef22ca676451ea4d03d3dd877482",
+      "contentSize": "745",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e63_tolls.E63_TAUN2p0.csv",
+      "@type": "File",
+      "name": "data/results/e63_tolls.E63_TAUN2p0.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E63_TAUN=2.0 python3 src/harness/e63_f5_kebuffer.py`.",
+      "sha256": "f698e18201cccb9b7eca8695a5d8b810f2ff220f2ea63d2fa0b75c12c999a457",
+      "contentSize": "334069",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#run",
+      "@type": "CreateAction",
+      "name": "Entry 64 harness run",
+      "description": "Re-executable from the repository and the private inputs; see the journal entry for protocol, endpoints and verdicts.",
+      "endTime": "2026-08-07",
+      "actionStatus": {
+        "@id": "http://schema.org/CompletedActionStatus"
+      },
+      "agent": {
+        "@id": "#danilo"
+      },
+      "instrument": [
+        {
+          "@id": "#src/harness/e63_f5_kebuffer.py"
+        }
+      ],
+      "object": [
+        {
+          "@id": "#ride-recordings"
+        }
+      ],
+      "result": [
+        {
+          "@id": "#data/results/e63_split.E63_TAUN2p0.csv"
+        },
+        {
+          "@id": "#data/results/e63_loro.E63_TAUN2p0.csv"
+        },
+        {
+          "@id": "#data/results/e63_taupred.E63_TAUN2p0.csv"
+        },
+        {
+          "@id": "#data/results/e63_tolls.E63_TAUN2p0.csv"
+        }
+      ]
+    },
+    {
+      "@id": "#src/harness/e63_f5_kebuffer.py",
+      "@type": [
+        "File",
+        "SoftwareApplication",
+        "SoftwareSourceCode"
+      ],
+      "name": "src/harness/e63_f5_kebuffer.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/fe945e9cc5e74d377257e6cb118080b24f94e2c1/src/harness/e63_f5_kebuffer.py",
+      "sha256": "039545b91a9cacaddaeb4a14e26439133cb03d33fa6c9c4b182cf3e6b2529a9b",
+      "version": "fe945e9cc5e74d377257e6cb118080b24f94e2c1",
+      "programmingLanguage": "Python"
+    },
+    {
+      "@id": "ro-crate-preview.html",
+      "@type": [
+        "File",
+        "CreativeWork"
+      ],
+      "name": "Pré-visualização humana do pacote (convenção RO-Crate)",
+      "encodingFormat": "text/html",
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "https://doi.org/10.5281/zenodo.21282165",
+      "@type": "Dataset",
+      "name": "bicycling-energy-model — research package",
+      "url": "https://github.com/danlessa/bicycling-energy-model"
+    }
+  ]
+}

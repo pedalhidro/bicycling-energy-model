@@ -57,7 +57,7 @@
     a prov:Bundle, schema:Dataset ;
     dcterms:title "Evaluation lineage (I/T/O/S) for the bicycling energy model" ;
     dcterms:creator "Danilo Lessa Bernardineli" ;
-    dcterms:modified "2026-07-30"^^xsd:date ;
+    dcterms:modified "2026-08-08"^^xsd:date ;
     dcterms:description "Corpora, parameter classes, transformers, per-ride outputs and the published statistics derived from them." ;
     rdfs:seeAlso <https://danlessa.github.io/bicycling-energy-model/claims> .
 
@@ -114,6 +114,7 @@
 
 :D1 a :Dataset ; rdfs:label "D1 longões" ; :cardinality 44 ;
     dcterms:description "Long brevet-style rides, open terrain, the author. Calibration + primary comparison." ;
+    rdfs:comment "Contained in D5 (Entry 52: 43% match on measured kJ; the rest are the same rider's rides under an older pipeline) — so D1, like D2, is NOT an independent check and is excluded from the Entry-52-onward evaluation population." ;
     schema:spatialCoverage "São Paulo metropolitan region and beyond" .
 
 :D2 a :Dataset ; rdfs:label "D2 censo" ; :cardinality 62 ;
@@ -144,7 +145,7 @@
 
 :D_pool_36 a :Dataset ; rdfs:label "D3–D6 pool" ;
     prov:wasDerivedFrom :D3, :D4, :D5, :D6 ;
-    rdfs:comment "Reported BESIDE the headline pool, never replacing it: adding D6 lowers the pooled error only because D6 is the best-performing corpus, so the gain measures the corpus mix, not the law." .
+    rdfs:comment "In the frozen era this was reported BESIDE the D3–D5 headline pool, never replacing it (adding D6 lowers the pooled error only because D6 is the best-performing corpus). Since Entry 52 it IS paper 1's evaluation population — D1/D2 excluded as re-processings of D5 — walked at 2,039 rides by e52_build and split 1,734 train / 305 test, once, at seed 48." .
 
 # Auxiliary (non-ride) inputs — the DEM/routing thread
 :DEM_IGC   a :Dataset ; rdfs:label "IGC-SP 5 m raster" ; dcterms:description "The elevation source Simujaules deploys." .
@@ -528,3 +529,348 @@
 :entry48 a :Statistic ; rdfs:label "Entry 48 — formal equivalence (TOST) for the parity claims" ;
     prov:wasDerivedFrom :o_e48 ; :gatedBy :gate ;
     rdfs:comment "Four equivalent, six inconclusive, none outside the margin. Both pooled rows are formally equivalent within ±1.0 pp (D3+D4 [-0.90,-0.33], D3-D5 [-0.55,-0.07]), upgrading the headline transfer claim from a failure-to-reject. D1 is inconclusive at n = 44 on both protocols, as registered. Five of six inconclusive verdicts are inconclusive on the side where the LAW BEATS the simulation — D3's CI [-1.56,-0.63] is wholly negative — so reading 'inconclusive' as a weakness of the law is backwards. The exception is D2 · F3, whose interval [-0.04,+2.18] allows the law being 2.2 pp WORSE on urban stop-go riding; that parity sentence was softened rather than defended." .
+
+# ===========================================================================
+# Entries 49–72 (2026-07-30 → 2026-08-08): the deficit demoted, the A-chain,
+# the F5 program, and the doctrine reaching papers 2–3.
+# Every :cardinality below counted from data/results/ on 2026-08-08.
+# ===========================================================================
+
+# --- New parameter classes and ε entities ----------------------------------
+
+:P_fr_rider a :ParameterClass ; rdfs:label "P_{f,r}^{rider} — per-ride inversion with rider-median fallbacks" ;
+    dcterms:description "Entry 57: each rider's own train-half median replaces every global prior (Crr 0.008, CdA 0.400), so no ride carries an assumed constant and no ride is dropped. Partial pooling: ride-level where the ride supports it, rider-level where it cannot — the direction Entry 53 pointed to." ;
+    rdfs:comment "The canonical class from Entry 57 on: e52_build's unsuffixed cache carries it (E52_FALLBACK=rider default)." .
+
+:eps5 a prov:Entity ; rdfs:label "δ₅ — affine deficit ε_coast·k₁ + k₂ (Entry 49)" ;
+    rdfs:comment "UNIDENTIFIED: slope CI [−1.727, +0.536] — k₁ and k₂ trade off. Dominated on BIC by the flat constant it nests. Label kept as given (the family runs ε₀–ε₃; renaming would disagree with the request that created it)." .
+
+:eps_flat a prov:Entity ; rdfs:label "ε — the published A-chain flat constant (0.2939)" ;
+    rdfs:comment "Replaces ε_d in paper 1 since Entries 50–51 (the dynamic estimator lost to a constant on held-out rides). Fitted under mean |log(Ê/E)| — Entry 51's 0.2278 was median-|Δ%|-optimal on the same rides; the LOSS moved it, not the data. Regional pools since Entry 60: 0.2385 (D3–D5) / 0.3712 (D6), a split Entry 61 showed is terrain, not people." .
+
+# --- New transformers ------------------------------------------------------
+
+:F_sobol a :Estimator ; rdfs:label "Saltelli/Sobol variance decomposition over (m, C_dA, C_rr, ε)" ;
+    rdfs:comment "Affordable because F1–F4 reduce per ride to precomputed geometry aggregates; ε enters exactly linearly. Ranks depend on the assumed boxes — the registered verdict had to hold under two parameterisations, and did." .
+
+:F_describe a :Estimator ; rdfs:label "descriptive per-ride aggregation (Entry 62 — fits nothing, gates nothing)" ;
+    rdfs:comment "Its HR column forced the parser change that bumped ride.py's _CACHE_SCHEMA 1 → 2 (FIT record field 3); cadence and HR are Python-only, the one intentional gap in the applet-mirror rule." .
+
+:F_drift a :Estimator ; rdfs:label "closure-pair drift probe (Entry 66)" ;
+    rdfs:comment "Drift is a function of time at a fixed place; terrain of place — so same-cell (10 m) point pairs ≥ 10 min apart measure a ride's own elevation drift with no DTM. Place-shaped errors (FABDEM bias, georeferencing, GPS-slope leakage) cancel from a same-place difference by construction." .
+
+:F5 a :Model ; rdfs:label "F5 — F3(τ_n) minus the KE-buffer valley toll" ;
+    rdfs:comment "T = Σ_valleys min(D, H, max(0, h_KE − 2τ_n)) subtracted from both h̃₊ and h̃₋: the momentum carried out of each descent foot, computed not fitted. Exact surgery on F3's components (linear in ε, so the E52 two-point cache pins the family); gate: F5(v_b = 0) ≡ F3(τ_n) at 0 kJ on all 2,039 rides. Fitted v_b rails at never-brake — a finding (the cap doesn't bind at these grades), not a fit." .
+
+:F5f a :Model ; rdfs:label "F5f — F5 with v_b frozen at never-brake (1 fitted parameter: ε)" ;
+    rdfs:comment "Wins Entry 64's 1-SE selection at τ_n = 2 over the fitted-τ F3; AIC still prefers F3 (Entry 49's precedent: held-out/CV primary, IC reported). Entry 68: its CV declines MONOTONICALLY in τ_n — the floor is load-bearing, so the one-parameter claim is as strong as the floor's external justification." .
+
+:F5m a :Model ; rdfs:label "F5m — F5 with v_b measured per ride (95th-pct descent speed)" ;
+    rdfs:comment "Telemetry, not a parameter: corpus median v̂_b = 46.5 km/h. The best LORO transferrer of Entry 64 (169/302, sign p = 0.044)." .
+
+:F5p a :Model ; rdfs:label "F5p — F5 with the floor pinned per corpus by measured drift, v_b frozen; ε the ONLY fitted parameter" ;
+    rdfs:comment "Each rider group's floor = its median closure-pair drift (e66_drift.csv) snapped to the τ grid — parameter-class telemetry, like m̂. Entry 69: matches F3's CV, ages ~4× better, best rider transfer of the program (−0.27 pp, p = 0.0001). Pins are READ from the producing CSV, never hardcoded." .
+
+# --- New inputs ------------------------------------------------------------
+
+:i_d36_fr a :Input ; rdfs:label "(D₃..D₆, P_{f,r})" ;
+    :dataset :D3, :D4, :D5, :D6 ; :parameters :P_fr ; :override :ov_m, :ov_crr, :ov_cda_reg ;
+    rdfs:comment "The A-chain input as registered (Entry 52), regime-consistent aero the default since Entry 55. What the label actually contains is COUNTED and published: Crr at the 0.008 prior on 77% of rides, CdA at the 0.400 rail on 27% — until Entry 57 replaced both fallbacks." .
+
+:i_d36_fr_rider a :Input ; rdfs:label "(D₃..D₆, P_{f,r}^{rider})" ;
+    :dataset :D3, :D4, :D5, :D6 ; :parameters :P_fr_rider ; :override :ov_m, :ov_crr, :ov_cda_reg ;
+    rdfs:comment "The canonical input from Entry 57 on: every constant originates in the rider's own telemetry." .
+
+:i_e61_synth a :Input ; rdfs:label "(200 real route geometries from D₃–D₅ and D₆, synthetic physics grid)" ;
+    :dataset :D_pool_35, :D6 ;
+    rdfs:comment "100 routes per region, deterministic by seed; ground truth is the canonical engine under a swept 3⁶ physics/behaviour grid. Behaviour is FIXED by the sweep — the same synthetic rider over both regions — so a surviving regional ε gap can only be terrain." .
+
+:i_e71_dem a :Input ; rdfs:label "(D₃..D₆ routes, IGC/FABDEM profiles · A-chain physics)" ;
+    :dataset :D3, :D4, :D5, :D6, :DEM_IGC, :DEM_FABDEM ; :parameters :P_fr_rider ;
+    rdfs:comment "Entry 71's MODE walk: paper 1's population with D5's travel rides KEPT (bbox skip demoted to a per-ride igc_ok flag) and D6 vs FABDEM+baro; physics joined from the A-chain cache (100% join verified), wind 0 by that iterator's registration." .
+
+# --- Entry 49: the affine deficit ------------------------------------------
+
+:h_e49 a prov:Activity ; p-plan:correspondsToStep "src/harness/e49_affine.py" ; prov:used :i_d36_fr .
+:o_e49 a :Output ; dcterms:identifier "e49_affine.csv" ;
+    prov:wasGeneratedBy :h_e49 ; prov:wasDerivedFrom :o_e47 ;
+    :input :i_d36_fr ; :transformer :F3, :F_select ; :epsilonForm :eps5, :eps0, :eps2 ;
+    :cardinality 24 ;
+    :selection "grain is the (scope × form) row, NOT the ride: primary population 990 (P_{f,r}, s̄ ≥ 3%), secondary 2,028 (all rides), disclosed P_{a,g} arm run first on a misread and kept as a labelled secondary" .
+
+:entry49 a :Statistic ; rdfs:label "Entry 49 — the affine deficit δ₅, global vs per rider" ;
+    prov:wasDerivedFrom :o_e49 ;
+    rdfs:comment "k₁ > 0 holds (the coasting limit needs shrinking) but the form is unidentified and dominated by the flat constant it nests; the 14-parameter per-rider arm leads every criterion and fails every check. Frozen ε₀ = 0.13 posts the best held-out error of every cheap form — the third entry running (47, 46, 49) where the incumbent survives. Kept number: best flat ε on real descents under P_{f,r} is 0.344 [0.292, 0.394], excluding the published 0.20." .
+
+# --- Entry 50: ε's variance share ------------------------------------------
+
+:h_e50 a prov:Activity ; p-plan:correspondsToStep "src/harness/e50_sensitivity.py" ; prov:used :i_d36_fr .
+:o_e50 a :Output ; dcterms:identifier "e50_sensitivity.csv" ;
+    prov:wasGeneratedBy :h_e50 ; :input :i_d36_fr ; :transformer :F_sobol, :F1, :F2, :F3, :F4 ;
+    :cardinality 32 ;
+    :selection "grain is the (box × form × parameter) cell; 2,028 rides and a 4,096-point Saltelli design underneath every cell" .
+
+:entry50 a :Statistic ; rdfs:label "Entry 50 — is ε worth its density? S_T(ε) = 0.070" ;
+    prov:wasDerivedFrom :o_e50 ; :gatedBy :gate ;
+    rdfs:comment "Registered bar 0.50; ε explains 7% of prediction-error variance (C_dA 55%, m 46%) under BOTH registered boxes — the deficit research leaves paper 1 for future work and the paper ships a flat ε. A rejected ε box is the cautionary tale: derived per ride it gives S_T = 0.713 by construction, because 29% of rides admit NO physical ε (the residual is not ε-shaped). Bonus finding: the split inside α is unidentified — α's within-rider CV 0.154 vs C_dA's 0.451 — route energy identifies the flat resistance, not its rolling/aero division. Gate section 3p." .
+
+# --- Entry 51: the replacement flat constant -------------------------------
+
+:h_e51 a prov:Activity ; p-plan:correspondsToStep "src/harness/e51_flatconst.py" ; prov:used :i_d36_fr .
+:o_e51 a :Output ; dcterms:identifier "e51_flatconst.csv" ;
+    prov:wasGeneratedBy :h_e51 ; :input :i_d36_fr ; :transformer :F3 ; :epsilonForm :eps_flat, :eps_f, :eps_d ;
+    :cardinality 5 ;
+    :selection "grain is the ESTIMATOR (fitted flat / incumbent 0.20 / Entry-49's 0.344 / dynamic ε_d / ε = 0); 2,028 rides, chronological odd/even train 1,016 / test 1,012" .
+
+:entry51 a :Statistic ; rdfs:label "Entry 51 — the flat constant beats the dynamic estimator held-out" ;
+    prov:wasDerivedFrom :o_e51 ;
+    rdfs:comment "Registered as what the fallback COSTS; it wins instead: flat 0.228 scores 4.17 vs ε_d's 5.49 (p = 0.0004) with smaller bias. The old 'flat costs 1.6 pp' was the frozen-protocol cancellation (Entry 46) carried into a per-ride argument. ε = 0 costs 4.8 pp — the descent term is real; only its functional form was not earning its keep." .
+
+# --- Entry 52: the A-chain -------------------------------------------------
+
+:h_e52build a prov:Activity ; p-plan:correspondsToStep "src/harness/e52_build.py" ; prov:used :i_d36_fr_rider ;
+    rdfs:comment "The only expensive step (~12 min): walks D3–D6 once and caches per-form energy components at every τ grid point, so every downstream fit in Entries 52–72 is exact arithmetic (the forms are linear in ε). Arms: E52_AERO=seg|reg, E52_FALLBACK=prior|rider — non-default arms suffix the cache (.seg/.prior), the unsuffixed cache is reg+rider." .
+:o_e52_aggregates a :Output ; dcterms:identifier "e52_aggregates.csv" ;
+    prov:wasGeneratedBy :h_e52build ; :input :i_d36_fr_rider ;
+    :transformer :F1, :F2, :F3, :F4, :F_base, :F_invert ; :cardinality 2039 ;
+    :selection "every scored D3–D6 ride; the cache every second-order output of Entries 52–72 joins on" ;
+    rdfs:comment "Suffixed arms e52_aggregates.seg.csv / .prior.csv (2,039 each) carry the Entry 55/57 comparisons. verify() checks the cache against FRESH approximate() calls at ε values neither endpoint used (2.2e-16) after the original check was found to only ever return zero." .
+
+:h_e52split a prov:Activity ; p-plan:correspondsToStep "src/harness/e52_split.py" ; prov:used :o_e52_aggregates ;
+    rdfs:comment "A.1–A.8: 15% of each corpus held out once (seed 48), repeated stratified 5-fold × 4 with EVERY free parameter (ε, τ, c, x_flat) refitted in-fold, CV binding (mean |log(Ê/E)|) with AIC reported, test scored once — the scoring routine refuses to run until the validation winner is serialised." .
+:o_e52_split a :Output ; dcterms:identifier "e52_split.csv" ;
+    prov:wasGeneratedBy :h_e52split ; :input :i_d36_fr_rider ; :transformer :F1, :F2, :F3, :F4 ;
+    :cardinality 4 ;
+    :selection "grain is the FORM (train CV + one test scoring each); 1,734 train / 305 test rides underneath" ;
+    rdfs:comment "The canonical rows are the reg-aero + rider-fallback chain (Entries 55/57 re-based the defaults): F3 wins at CV 0.05406, ε = 0.2939, τ = 6 m, test 3.24 [2.75, 3.50]. The seg sensitivity arm lives in e52_split.seg.csv (4 rows). Downstream harnesses READ fitted constants from this CSV — never a literal (the e54/e61 held-parameter lesson)." .
+:o_e52_summary a :Output ; dcterms:identifier "e52_summary.csv" ;
+    prov:wasGeneratedBy :h_e52split ; :cardinality 18 ;
+    :selection "the gate-facing summary (what bootstrap_ci.py section 3q reads); seg arm suffixed .seg (10 rows)" .
+
+:entry52 a :Statistic ; rdfs:label "Entry 52 — one protocol, one split: P_{a,g} retired, F3 selected held-out" ;
+    prov:wasDerivedFrom :o_e52_split, :o_e52_summary ; :gatedBy :gate ;
+    rdfs:comment "F3 the only form inside the 1-SE band; CV and AIC agree. D1/D2 revealed as re-processings of D5 (87% of D2 matches on measured kJ) — they survive as history, not evidence. F_base scored WORST with a −3.85 São Paulo bias, diagnosed as the inversion protocol (quasi-steady constants spent on transients), confirmed by intervention in Entry 55. Claim wording licensed by the split: given a ride's own constants, the form and a universal ε reproduce its energy on rides that chose neither. Disclosure printed with the headline: 82% of test rides have a same-rider train ride within 5% distance / 10% ascent — a repeat-route error. Gate section 3q." .
+
+:entry53 a :Statistic ; rdfs:label "Entry 53 — joint linear inversion of the constants: REFUTED" ;
+    rdfs:comment "No journal heading and no canonical CSV of its own — the negative result lives in the commit (src/harness/e53_linear_invert.py) and is cited by Entries 55/67. Its direction (pool at rider level where a ride cannot support a fit) became Entry 57." .
+
+# --- Entries 54–59: the physics made honest --------------------------------
+
+:h_e54 a prov:Activity ; p-plan:correspondsToStep "src/harness/e54_transfer.py" ; prov:used :o_e52_aggregates .
+:o_e54 a :Output ; dcterms:identifier "e54_transfer.csv" ;
+    prov:wasGeneratedBy :h_e54 ; :input :i_d36_fr_rider ; :transformer :F3 ;
+    :cardinality 31 ;
+    :selection "grain is the (donor × recipient) pair — 7 riders, donors fitted on train halves only, scored on OTHER riders' test halves" ;
+    rdfs:comment "The corrected output. The first run fitted donors at TAU_PUB_I = 2 m while the selected form uses 6 m — a held parameter that manufactured a negative transfer penalty and a spurious case for rider-weighted pooling (caught in Entry 59). Its pooled comparator was also once a hardcoded 0.2879 that went stale when the aero estimator changed; both now read from the producing CSVs." .
+
+:entry54 a :Statistic ; rdfs:label "Entry 54 — leave-one-rider-out ε transfer: +0.047 pp" ;
+    prov:wasDerivedFrom :o_e54 ; :gatedBy :gate ;
+    rdfs:comment "The paper's one real hypothesis: a published ε serves a rider who contributed nothing to it. Corrected penalty +0.047 pp [0.033, 0.084] — under Entry 48's 1.0 pp margin, so the transfer claim stands (scoped by Entry 60 to WITHIN a region; across regions costs 0.85 pp). Gate section 3r." .
+
+:entry55 a :Statistic ; rdfs:label "Entry 55 — regime-consistent aero adopted as the default" ;
+    prov:wasDerivedFrom :o_e52_split, :o_e52_aggregates ; :gatedBy :gate ;
+    rdfs:comment "Swapping ONLY the CdA estimator (seg → reg, i.e. drag inferred at the MEASURED flat speed): F3 test 3.98 → 3.39, bias −1.06 → +0.06, and F_base's São Paulo bias −3.85 → −0.03 — Entry 52's diagnosis confirmed by intervention; the 190/305 'win' over the simulation becomes 149/305, p = 0.73: parity. Carried honestly: τ refits 2 → 6 m (the deadband was part-compensating aero error) and F4 wins the test half while F3 wins binding CV. The seg arm is retained as the sensitivity pair (e52_split.seg.csv)." .
+
+:h_e56 a prov:Activity ; p-plan:correspondsToStep "src/harness/e56_struct.py" ; prov:used :o_e52_aggregates .
+:o_e56 a :Output ; dcterms:identifier "e56_struct.csv" ;
+    prov:wasGeneratedBy :h_e56 ; :transformer :F3, :F4 ; :cardinality 4 ;
+    :selection "grain is the STRUCTURAL PARAMETER (τ, c) with its ±10% loss inflation; profiles over the full range reported beside" .
+
+:entry56 a :Statistic ; rdfs:label "Entry 56 — the method's own constants: τ 0.2%, c 0.1% at ±10%" ;
+    prov:wasDerivedFrom :o_e56 ; :gatedBy :gate ;
+    rdfs:comment "Both at the BOTTOM of the error budget (~200× below C_dA) — but local flatness is not global indifference: τ = 0 costs 77.3%, c = 3 costs 21.7%. The two halves must travel together: roughly right, then precision stops mattering. Also resolves Entry 55's τ-shift alarm: 2 → 6 m moved through a basin where the loss barely varies. Gate section 3s." .
+
+:h_e57 a prov:Activity ; p-plan:correspondsToStep "src/harness/e57_rider_fallback.py" ; prov:used :o_e52_aggregates .
+:o_e52_rider_fallback a :Output ; dcterms:identifier "e52_rider_fallback.csv" ;
+    prov:wasGeneratedBy :h_e57 ; :transformer :F_invert ; :cardinality 7 ;
+    :selection "grain is the RIDER: train-half-only medians of the genuinely inverted m̂/Ĉrr/ĈdA, fed back into e52_build (which must be re-run after — the chain's one loop)" .
+
+:entry57 a :Statistic ; rdfs:label "Entry 57 — rider-median fallbacks: no ride wears a global prior" ;
+    prov:wasDerivedFrom :o_e52_rider_fallback, :o_e52_split ; :gatedBy :gate ;
+    rdfs:comment "Dropping non-inverted rides was measured and rejected first: it keeps 455/2,039 and selects on climb-richness — the covariate ε governs. With rider medians: held-out 3.39 → 3.24, ε moves 0.0002, and the paired test vs F_base reads 152/305, p = 1.00 — the closed form and the simulation indistinguishable to the precision of the test. Gate section 3q." .
+
+:h_e58 a prov:Activity ; p-plan:correspondsToStep "src/harness/e58_intervals.py" ; prov:used :o_e52_aggregates .
+:o_e58 a :Output ; dcterms:identifier "e58_intervals.csv" ;
+    prov:wasGeneratedBy :h_e58 ; :transformer :F1, :F2, :F3, :F4 ; :cardinality 10 ;
+    :selection "grain is the (form × parameter) interval: stratified bootstrap within rider, B = 400, seed 50, refitting each replicate" .
+
+:entry58 a :Statistic ; rdfs:label "Entry 58 — parameter CIs and the 50%-loss breaking points" ;
+    prov:wasDerivedFrom :o_e58 ;
+    rdfs:comment "ε = 0.294 [0.285, 0.304]; τ grid-valued [4.5, 6.6]. Tolerances: C_dA 0.89–1.10×, ε 0.22–1.79×. Two bugs found under published numbers: logratio silently changed its population with ε (fixed: the population is set once across the search range — ε 0.2918 → 0.2939), and an id()-keyed cache answered for recycled throwaway dicts, making every breaking point read exactly 1.00×. Never memoise on id()." .
+
+:h_e59 a prov:Activity ; p-plan:correspondsToStep "src/harness/e59_pooling.py" ; prov:used :o_e52_aggregates .
+:o_e59 a :Output ; dcterms:identifier "e59_pooling.csv" ;
+    prov:wasGeneratedBy :h_e59 ; :transformer :F1, :F2, :F3, :F4 ; :cardinality 12 ;
+    :selection "grain is the (form × pooling objective) cell: ride-weighted / rider-weighted / rider-median, fitted on train, scored once on test" .
+
+:entry59 a :Statistic ; rdfs:label "Entry 59 — rider-weighted pooling REFUTED; the incumbent objective stays" ;
+    prov:wasDerivedFrom :o_e59 ;
+    rdfs:comment "The registered 0.3–0.6 pp gain does not exist (~0.1 pp, sign flips across forms, nothing significant): the diagnostic that promised it ran through the TAU_PUB_I held-parameter bug, which inflated every per-rider optimum. Entry 54 corrected in the same stroke (−0.55 → +0.047 pp; worst donor D6-user_2, not user_1). The estimand argument stands ON PRINCIPLE; the data say it is worth 0.1 pp here." .
+
+# --- Entries 60–62: two landscapes, one law --------------------------------
+
+:h_e60 a prov:Activity ; p-plan:correspondsToStep "src/harness/e60_regional.py" ; prov:used :o_e52_aggregates .
+:o_e60 a :Output ; dcterms:identifier "e60_regional.csv" ;
+    prov:wasGeneratedBy :h_e60 ; :transformer :F3, :F4 ; :epsilonForm :eps_flat ; :cardinality 8 ;
+    :selection "grain is the (region × arm × form) cell; test halves n = 194 (D3–D5) and 111 (D6) underneath" .
+
+:entry60 a :Statistic ; rdfs:label "Entry 60 — regional ε pools: 0.2385 (São Paulo) / 0.3712 (Europe)" ;
+    prov:wasDerivedFrom :o_e60 ; :gatedBy :gate ;
+    rdfs:comment "One shared constant cost 0.82–0.92 pp per side and biased the regions in OPPOSITE directions (−1.31 / +1.95) — a compromise constant's signature. Selection re-run per region chooses F3 both times: two constants, one form. §1.3 restated: ε is a property of a RIDING CONTEXT, stable across riders who share one. F4 does NOT split the same way (it reverses the ordering, absorbing the landscape into c) — the regional claim is F3's. Gate section 3t." .
+
+:h_e61 a prov:Activity ; p-plan:correspondsToStep "src/harness/e61_sweep.py" ; prov:used :i_e61_synth ;
+    rdfs:comment "E61_FULL=1: all 729 combinations × 200 routes ≈ 5.5 h of canonical simulation, dumped raw so any re-fit is arithmetic (verified: a re-fit from the raw file reproduces the sweep's ε to ten digits)." .
+:o_e61_sweep a :Output ; dcterms:identifier "e61_sweep.full.csv" ;
+    prov:wasGeneratedBy :h_e61 ; :input :i_e61_synth ; :transformer :F1, :F2, :F3, :F4, :F_base ;
+    :cardinality 5832 ;
+    :selection "grain is the (combination × form × region) fit: 729 × 4 × 2" .
+:o_e61_raw a :Output ; dcterms:identifier "e61_raw.full.csv" ;
+    prov:wasGeneratedBy :h_e61 ; :input :i_e61_synth ; :transformer :F_base ;
+    :cardinality 145800 ;
+    :selection "grain is the (route × combination) simulation: 200 × 729 — raw ground truth, kept so a different loss, form or landscape descriptor costs no re-run" .
+
+:entry61 a :Statistic ; rdfs:label "Entry 61 — the regional ε gap survives with behaviour held fixed: terrain, not people" ;
+    prov:wasDerivedFrom :o_e61_sweep, :o_e61_raw ;
+    rdfs:comment "Synthetic gap +0.161 vs empirical +0.133, positive in 726/729 individual settings (F4: 729/729), and appearing ONLY in the descent-resolving forms. The first pass understated it by pinning F4's c at the published 3.0 — a held parameter flipping F4's gap negative and supporting a wrong 'F3-specific, suspect the deadband' reading. P3's registered reasoning was wrong (ε FALLS with descent pedalling: the rider spends more, so the form needs a smaller refund); P4's mechanism confirmed (ε rises with P_flat, as the coasting ceiling predicts)." .
+
+:h_e62 a prov:Activity ; p-plan:correspondsToStep "src/harness/e62_corpus_profile.py" ; prov:used :i_d36_fr_rider .
+:o_e62 a :Output ; dcterms:identifier "e62_corpus_profile.csv" ;
+    prov:wasGeneratedBy :h_e62 ; :transformer :F_describe ; :cardinality 2041 ;
+    :selection "paper 1's own population (corpus_rides), one row per ride, nine aggregates; D6 split per rider (D6a–D6d) — the only corpus that hid riders behind a regional label" ;
+    rdfs:comment "The figure (research/journal/figs/e62-corpus-pairplot.svg) is hand-emitted SVG and NOT committed by default: it carries ride-level aggregates of two private exports — the maintainer's call, not the harness's. E62_PLOT_ONLY=1 re-renders from this CSV without re-parsing 2,000 tracks." .
+
+:entry62 a :Statistic ; rdfs:label "Entry 62 — what the corpora ARE: the descriptive profile" ;
+    prov:wasDerivedFrom :o_e62 ;
+    rdfs:comment "Fits nothing, gates nothing — the missing denominator after sixty inferential entries. Headline: heart rate does NOT separate the corpora (medians 128–148 bpm) while mechanical output spans 2.9× — D5 produces 0.68 W/beat vs 1.28–1.40 for the road riders; the first MEASURED support for Entry 61's conclusion. Also: D5 is an urban commuting corpus (moving fraction 0.85, 67% of rides < 0.9); moving fraction elsewhere is auto-pause, a device statistic, unusable as behaviour; D6a's bpm rests on 22/194 rides (no strap) and D6d is 14 rides — included for completeness, not inference." .
+
+# --- Entries 63–70: the F5 program -----------------------------------------
+
+:h_e63 a prov:Activity ; p-plan:correspondsToStep "src/harness/e63_f5_kebuffer.py" ; prov:used :o_e52_aggregates ;
+    rdfs:comment "One walk enumerates valleys and caches per-ride toll sums on a 12-arm v_b grid, so every downstream refit is arithmetic. ALL F5 modes live in this one file (E63_TAUN, E63_LORO, E63_TAUPRED, E63_DECOMP, E63_RAINFLOW, E63_SMOOTH, E63_F5FCV) so the algebra has exactly one copy; e71/e72 call its ride_tolls rather than duplicating it. F3/F4 rows re-run through e52_split's own fit() must reproduce e52_split.csv to the printed digit — the standing drift check." .
+
+:o_e63_tolls a :Output ; dcterms:identifier "e63_tolls.csv" ;
+    prov:wasGeneratedBy :h_e63 ; :transformer :F5 ; :cardinality 2039 ;
+    :selection "per ride × 12 v_b arms, at the canonical τ_n = 0.5 floor; the τ_n family (e63_tolls.E63_TAUN{0..6}.csv, 2,039 each) carries Entries 64–69's floors and Entry 65's rainflow/smooth arms" .
+:o_e63_split a :Output ; dcterms:identifier "e63_split.csv" ;
+    prov:wasGeneratedBy :h_e63 ; :transformer :F3, :F4, :F5 ; :cardinality 3 ;
+    :selection "grain is the FORM, τ_n = 0.5 arm (Entry 63's registered floor)" .
+:o_e63_split_t2 a :Output ; dcterms:identifier "e63_split.E63_TAUN2p0.csv" ;
+    prov:wasGeneratedBy :h_e63 ; :transformer :F3, :F4, :F5, :F5f, :F5m ; :cardinality 6 ;
+    :selection "grain is the FORM, τ_n = 2 arm — Entry 64's selection table (F5f the 1-SE winner)" .
+:o_e63_loro_t2 a :Output ; dcterms:identifier "e63_loro.E63_TAUN2p0.csv" ;
+    prov:wasGeneratedBy :h_e63 ; :transformer :F3, :F5f, :F5m ; :cardinality 7 ;
+    :selection "grain is the RECIPIENT rider (Entry 54's strictness: donors' train halves → recipient's test half); the τ_n = {0, 3, 4.5} and rainflow/smooth LORO arms are suffixed siblings" .
+:o_e63_taupred_t2 a :Output ; dcterms:identifier "e63_taupred.E63_TAUN2p0.csv" ;
+    prov:wasGeneratedBy :h_e63 ; :cardinality 7 ;
+    :selection "grain is the rider GROUP: fitted τ* vs the τ_n + h_KE/2(1−ε) prediction" .
+
+:entry63 a :Statistic ; rdfs:label "Entry 63 — F5 benchmarked: the deadband is mostly the KE buffer" ;
+    prov:wasDerivedFrom :o_e63_tolls, :o_e63_split ;
+    rdfs:comment "F5 beats its pinned-τ control at both floors and is the first form ever to enter F3's 1-SE band (at τ_n = 2); the fitted deadband's job is ~four-fifths reproducible as jitter filter + parameter-free toll. v_b rails at never-brake — the cap doesn't bind at these corpora's grades. Winner under the registered rule stays F3 in THIS entry; the τ_n = 2 test scoring follows Entry 55's sensitivity-arm precedent." .
+
+:entry64 a :Statistic ; rdfs:label "Entry 64 — F5f wins selection; F5m transfers better; the τ* ordering prediction fails" ;
+    prov:wasDerivedFrom :o_e63_split_t2, :o_e63_loro_t2, :o_e63_taupred_t2 ;
+    rdfs:comment "F5f (1 parameter) inside F3's 1-SE band → selection flips to the computed toll; AIC still prefers F3, stated per Entry 49's precedent. F5m closer on 169/302 LORO rides (p = 0.044), biggest gain on D5, the rider most unlike the donors. τ* ordering vs h_KE: ρ = +0.055 — magnitude right, ordering bias-contaminated (Entry 39's lesson under a sharper lens). Multiplicity stated: the seed-48 test half has now been scored by seven registered estimators. The filterless amendment (τ_n = 0) prices the decomposition: toll alone 53% of the F2→F3 gap, filter alone 76%, both 82% — ~46 pp shared; the deadband is NOT redundant (without it F5f leaves the band and the LORO significance dissolves)." .
+
+:entry65 a :Statistic ; rdfs:label "Entry 65 — rainflow and smoothing both fail; the unique share named (then refuted in 66)" ;
+    prov:wasDerivedFrom :o_e63_tolls ;
+    rdfs:comment "Outputs: the e63_{tolls,split,loro}.E63_TAUN0p0_E63_RAINFLOW1 / _E63_SMOOTH15 families (2,039 / 6 / 7 rows). Rainflow OVER-tolls (39% of the gap; the only arm where v_b left the rail, fitting 32 km/h — the optimiser shrinking buffers to undo it: hierarchy without per-context entry speed is worse than none). σ = 15 smoothing is inert alone (0%) and buys the toll 2 pp. The surviving attribution — amplitude-bounded long-wavelength error, i.e. barometric drift — was Entry 66's target. Filterless program closed; F5f(τ_n = 2) stays the best variant." .
+
+:h_e66 a prov:Activity ; p-plan:correspondsToStep "src/harness/e66_driftprobe.py" ;
+    rdfs:comment "Re-parses raw records for lat/lon (the pts cache keeps no geo). Its record loader is a deliberate LOCAL COPY: param_fit.py is a module-level script whose import runs Entry 15 and rewrites param_fit.csv — which it did once in this entry's smoke before the copy." .
+:o_e66 a :Output ; dcterms:identifier "e66_drift.csv" ;
+    prov:wasGeneratedBy :h_e66 ; :transformer :F_drift ; :cardinality 2039 ;
+    :selection "one row per ride; 1,663 with ≥ 10 closure pairs carry statistics (median 393 pairs/ride)" ;
+    rdfs:comment "Scalar statistics ONLY — the repo is public and no ride geometry leaves the walk. This CSV is also the PIN SOURCE for F5p and paper 2's F5 floors: consumers read the medians from it, never hardcode them." .
+
+:entry66 a :Statistic ; rdfs:label "Entry 66 — drift measured (2.8 m, 3.4 m/h), Entry 65's attribution refuted at ride grain" ;
+    prov:wasDerivedFrom :o_e66 ;
+    rdfs:comment "The drift is real and baro-sized, but the deadband's τ6-over-τ2 benefit is BLIND to it (ρ = −0.009, n = 1,413) and rider-level τ* anti-correlates with drift. Re-reading adopted: the fitted deadband's unique share is the model's cheapest flexible misfit absorber, not measurement-error removal. S2 (drift correction) deferred with a registered predicted-null." .
+
+:h_e67 a prov:Activity ; p-plan:correspondsToStep "src/harness/e67_residual.py" ;
+    rdfs:comment "Pins the e63 module to the τ_n = 2 arm BEFORE import; pure cache arithmetic; train half only — the test half untouched." .
+:o_e67_signature a :Output ; dcterms:identifier "e67_signature.csv" ;
+    prov:wasGeneratedBy :h_e67 ; :cardinality 1732 ;
+    :selection "train-half rides: per-ride removal effect δ at common ε vs signed misfit r — the coupling that is the ONLY channel through which τ = 6 can beat τ = 2 once ε is refit per arm" .
+:o_e67_stability a :Output ; dcterms:identifier "e67_stability.csv" ;
+    prov:wasGeneratedBy :h_e67 ; :cardinality 6 ;
+    :selection "grain is the rider-HALF pair: (ε, τ*) refit early/late, plus the aging test (late half under early constants, F3 vs F5f)" .
+
+:entry67 a :Statistic ; rdfs:label "Entry 67 — no transferable physics in the deadband's unique share" ;
+    prov:wasDerivedFrom :o_e67_signature, :o_e67_stability ;
+    rdfs:comment "Coupling weak everywhere (pooled ρ +0.082, within +0.081, between −0.029 — neither the physics nor the absorber fingerprint); τ* moved in 5/6 riders early→late; aging medians F3 0.00298 vs F5f 0.00064 — the deadbanded form's early constants serve the same rider's later rides ~4.7× worse. What transfers is exactly F5f's content: ε + the computed toll are stationary within riders. D4 flagged as the counterexample (a material mid-history change; device or route-mix shift suspected)." .
+
+:entry68 a :Statistic ; rdfs:label "Entry 68 — the τ_n sweep: the floor is load-bearing; only a measurement can pin it" ;
+    prov:wasDerivedFrom :o_e63_tolls, :o_e66 ;
+    rdfs:comment "Eight floors (the e63_tolls.E63_TAUN* family); summary is console-borne, reproducible per arm via E63_TAUN=<x> E63_F5FCV=1. F5f's CV declines MONOTONICALLY to the F3 anchor (F5f(6) ≡ F3(6), ε recovering 0.2939 to the third decimal — the predicted degeneracy landing exactly) while the toll margin decays 0.0047 → 0. No data-internal floor exists; the registered pin is Entry 66's measured drift amplitude (median 2.8 m), making τ_n telemetry per corpus." .
+
+:h_e69 a prov:Activity ; p-plan:correspondsToStep "src/harness/e69_frontier.py" ;
+    rdfs:comment "Pins read from e66_drift.csv, F3's CV read from the chain CSV — never hardcoded; errors out listing any missing toll walk rather than tolling zero. Cross-checked digit-for-digit against the standalone e63_loro/e67_stability τ_n = {3, 4.5} runs." .
+:o_e69_pins a :Output ; dcterms:identifier "e69_pins.csv" ;
+    prov:wasGeneratedBy :h_e69 ; prov:wasDerivedFrom :o_e66 ; :cardinality 7 ;
+    :selection "grain is the rider GROUP: median measured drift snapped to the cached τ grid — F5p's floors" .
+:o_e69_frontier a :Output ; dcterms:identifier "e69_frontier.csv" ;
+    prov:wasGeneratedBy :h_e69 ; :transformer :F3, :F5f, :F5p ; :cardinality 5 ;
+    :selection "grain is the FORM (train CV; no test-half scoring happened in this entry)" .
+:o_e69_loro a :Output ; dcterms:identifier "e69_loro.csv" ;
+    prov:wasGeneratedBy :h_e69 ; :transformer :F3, :F5p ; :cardinality 7 ;
+    :selection "grain is the RECIPIENT rider" .
+:o_e69_aging a :Output ; dcterms:identifier "e69_aging.csv" ;
+    prov:wasGeneratedBy :h_e69 ; :cardinality 6 ;
+    :selection "grain is the RIDER: late half scored under early-half constants, per form" .
+
+:entry69 a :Statistic ; rdfs:label "Entry 69 — the frontier collapses; F5p; the flat-basin law named" ;
+    prov:wasDerivedFrom :o_e69_pins, :o_e69_frontier, :o_e69_loro, :o_e69_aging ;
+    rdfs:comment "Keepability is FLAT in the floor (aging ~0.0006 at every rung vs F3's 0.0030): what ages badly in F3 is the τ REFIT, not the removal size. F5p — zero chosen constants, ε the only fitted parameter — matches F3's CV (0.05413 vs 0.05406), ages ~4× better, posts the program's best rider transfer (−0.27 pp [−0.50, −0.13], 184/301, p = 0.0001). The flat-basin law: where the loss is locally flat, fitting harvests noise, and fitted noise is precisely what does not generalise (E39/E50/E51/E67–69 are the same principle). Closing reframe adopted: F5 is the DERIVATION'S WITNESS — F3 stays the published form. Untested axis stated: LORO holds out riders, not landscapes." .
+
+:h_e70 a prov:Activity ; p-plan:correspondsToStep "src/harness/e70_taucurves.py" ; prov:used :o_e52_aggregates .
+:o_e70 a :Output ; dcterms:identifier "e70_taucurves.csv" ;
+    prov:wasGeneratedBy :h_e70 ; :transformer :F3 ; :cardinality 153 ;
+    :selection "grain is the (pool × τ) cell: 9 pools × 17 grid points, train half, ε refit per point — deliberately IN-SAMPLE per group: the object is basin SHAPE, not a generalisation estimate" .
+
+:entry70 a :Statistic ; rdfs:label "Entry 70 — pinned-τ curves per rider: basins are rider-shaped" ;
+    prov:wasDerivedFrom :o_e70 ;
+    rdfs:comment "The pooled-EU curve's steepness is ONE rider: D6-user_3 runs monotonically to the 12 m grid RAIL (the absorber signature in its purest form) while two other Europeans own the flattest basins in the family — a pooled curve inherits its steepest member (E59's lesson again). In-pool optima ANTI-track measured drift row by row. Open diagnosis flagged: what does user_3's ledger systematically overpredict?" .
+
+# --- Entries 71–72: papers 2 and 3 -----------------------------------------
+
+:h_e71 a prov:Activity ; p-plan:correspondsToStep "src/harness/e41_dem_route.py (E41_POP=p1 E41_D6=1) + src/harness/e71_dem_pop.py" ;
+    prov:used :i_e71_dem ;
+    rdfs:comment "MODE runs suffix the CSV AND the sampling cache and skip the published gates — the canonical e41 walk (:o_e41, gate 3i) is untouched. The valley toll is e63's ride_tolls called with the module floor set per call: one algebra copy." .
+:o_e41_mode a :Output ; dcterms:identifier "e41_dem_route.E41_POPp1_E41_D61.csv" ;
+    prov:wasGeneratedBy :h_e71 ; :input :i_e71_dem ; :transformer :F3, :F4, :F5, :F_v2edge ;
+    :cardinality 1957 ;
+    :selection "1,957 rides walked; the PRIMARY population is 1,834 (D3+D4+D5 1,164 with D5's 84 travel rides kept via the per-ride igc_ok flag, D6 670) — survey arms absent on travel rides, not rides dropped" .
+:o_e71 a :Output ; dcterms:identifier "e71_dem_pop.csv" ;
+    prov:wasGeneratedBy :h_e71 ; :cardinality 97 ;
+    :selection "grain is the (table × pool × arm) summary cell over the MODE walk: re-based Table 1, the c(τ) grids, the paired terrain split, F5 per floor" .
+
+:entry71 a :Statistic ; rdfs:label "Entry 71 — paper 2 re-based: travel rides, D6 vs FABDEM, c(τ), F5 on planner inputs" ;
+    prov:wasDerivedFrom :o_e41_mode, :o_e71, :o_e66 ; :gatedBy :gate ;
+    rdfs:comment "D6 vs FABDEM prices like São Paulo (the prescription transfers; D6 baro 3.4 · +0.3 is the program's cleanest column). The within-rider terrain split: same rider, fab5, covered 5.7 vs travel 7.7 (paired +5.1 → +7.2) while their barometer holds 4.7 — the terrain caveat at fixed person and instrument. c(τ) per chain: European chains 2.4× cleaner (D6 baro 1.26 vs SP 3.01 m/km) with ρ(c, ruggedness) positive within every corpus — c is sensor noise convolved with terrain reversal structure; never inherit a c. F5 beats F3 on EVERY DEM chain, best floor at the chain's measured noise scale (fab5 SP 5.06 → 3.67). Honesty note: this F3 carries the letter's frozen τ = 2 bundle. Gate section 3j (canonical 3i untouched)." .
+
+:h_e72 a prov:Activity ; p-plan:correspondsToStep "src/harness/e72_edgegrain.py" ; prov:used :o_e52_aggregates ;
+    rdfs:comment "Each ride's OWN recorded profile — no DEM error mixes in. One units bug caught in smoke: r1d_v2_edge returns kJ. The toll is e63's ride_tolls with the module floor set per call." .
+:o_e72 a :Output ; dcterms:identifier "e72_edgegrain.csv" ;
+    prov:wasGeneratedBy :h_e72 ; :input :i_d36_fr_rider ; :transformer :F_v2edge, :F2, :F4, :F5 ;
+    :cardinality 2039 ;
+    :selection "per ride: v2Edge at pitches {5, 10, 30, 60, 90} m, its route-level twin (F2·ε_geom) at 5 m, the valley patch at 30 m, and the two F4 comparator rows" ;
+    rdfs:comment "The F4-pub row reads (ε = 0.4094, c = 1.104) from e52_split.csv; the all-measured row reads c = 3.01 from e71_dem_pop.csv — both from producing CSVs, never literals. Also emits research/article/figs/fig-p3-scale.svg (hand-drawn)." .
+
+:entry72 a :Statistic ; rdfs:label "Entry 72 — paper 3's first tranche: edge-grain fidelity, the scale U, the valley patch" ;
+    prov:wasDerivedFrom :o_e72, :o_e52_split ; :gatedBy :gate ;
+    rdfs:comment "Fidelity gap: the edge sum sits +1.83 pp above its own route-level integral at 5 m — bias-shaped, the stated bound A3's core claim needed (a3.divergence stays honestly PLANNED: needs real network routing). The scale U: 4.62/4.13/3.75/3.96/4.15 at 5→90 m — minimum exactly at the deployed 30 m; the bias zero near 60 m is aliasing cancelling noise, not accuracy. The valley patch takes 30 m from 3.75 · +1.33 to 3.29 · −0.08 (closer on 1,131/2,038, p < 1e-4). Paper 1's published F4 tops the whole table at 2.72 · −0.35 while the all-measured (ε_geom, article-2 c) pairing over-corrects to −3.80: the bundle rule extends to (ε, c) — individually-measured constants still travel in pairs. Gate section 3k." .
+
+:h_e73 a prov:Activity ; p-plan:correspondsToStep "src/harness/e73_gridpath.py" ;
+    prov:used :o_e52_aggregates, :o_e52_split, :OSM ;
+    rdfs:comment "The E73 quantizer: each ride's GPS line followed onto the terrain raster's own lattice with the deployed move sets (classic-8 prefix, Farey levels {16:1, 32:2, 64:3, 128:4}, long moves sub-integrated). Two parity bugs its own gates forced out before the run of record: n = 1 positions must come from the raw geo track (double interpolation costs metres of phantom h+ on a noisy raster), and sample coordinates must go out at full js_str precision (%.8f cost 1.157 m of h+ on a 211 km ride). The same gates exposed that e41's published 30 m arms clip extrema (its 5 m regrid never aligns on real totals) — flagged for paper 2's errata ledger." .
+:o_e73 a :Output ; dcterms:identifier "e73_gridpath.csv" ;
+    prov:wasGeneratedBy :h_e73 ; :input :i_d36_fr_rider ;
+    :transformer :F_v2edge, :F1, :F2, :F3, :F4 ;
+    :cardinality 1901 ;
+    :selection "per ride x config (chain x directions n in {1,4,8,16,32,64,128} x portals): the deployed v2Edge, the flat-eps edge family eF1/eF2/eF4 (eF4 at the chain's measured c(tau=2) pin per region), the route forms F1-F4 (+F5f/patch, journal-only), quantizer QA (len_ratio, lateral p95, njump) and the per-chain noise pins cn_*. Populations all-arms-complete: IGC 1,034 - FABDEM 1,844" ;
+    rdfs:comment "Every fitted constant read from its producing CSV (e52_split.csv, e63_split.E63_TAUN2p0.csv); c pins measured from geometry only and cross-checked against e71's CRATE rows (worst 0.14 m/km). Also emits research/article/figs/fig-p3-dirs.svg and fig-p3-chain.svg (hand-drawn)." .
+
+:entry73 a :Statistic ; rdfs:label "Entry 73 — the discrete-routing ladder: directions, terrain lattice, portals, the eF family" ;
+    prov:wasDerivedFrom :o_e73, :o_e52_split, :o_e71 ; :gatedBy :gate ;
+    rdfs:comment "The dirs ladder is chain-shaped: on the smoothed IGC chain the n = 4/8 penalty is essentially all path-length inflation (len_ratio 1.2737/1.0543; P2 refuted there), on raw FABDEM it is almost all height noise (the lattice path reads 1.417x the polyline's h+ at n = 8). eF4 at the measured pin beats eF2 on all six DEM chains (P7 confirmed) and is the best deployable cost on FABDEM (41.62 vs 48.23). The deadband keeps a unique share at edge grain: F3 on the raw chain beats eF2 on the sigma-30-treated map on both populations (5.67 vs 9.21; 7.01 vs 11.49 — P8 refuted). Portals help 860/883 span-touched rides at sigma 10 (P4 confirmed). The flat-vs-geometric eps contest is chain-dependent: grade-local wins on smoothed chains, flat on raw FABDEM. Gate section 3l (27 gates)." .
