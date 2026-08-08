@@ -117,9 +117,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e56_struct.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/fe945e9cc5e74d377257e6cb118080b24f94e2c1/src/harness/e56_struct.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b345cbbc055f985ae3fcab06a408c951f86fa012/src/harness/e56_struct.py",
       "sha256": "9ca524eb15df522844d7cea555382d36c9edcebad2bfee6c6dd3b1f8e1a1b829",
-      "version": "fe945e9cc5e74d377257e6cb118080b24f94e2c1",
+      "version": "b345cbbc055f985ae3fcab06a408c951f86fa012",
       "programmingLanguage": "Python"
     },
     {

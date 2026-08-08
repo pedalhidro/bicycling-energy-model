@@ -129,9 +129,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e57_rider_fallback.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/fe945e9cc5e74d377257e6cb118080b24f94e2c1/src/harness/e57_rider_fallback.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b345cbbc055f985ae3fcab06a408c951f86fa012/src/harness/e57_rider_fallback.py",
       "sha256": "7e2c9b1a37b4ec50378223e5b4e650a8b090a48bd72709d49392d4e5ae4dd6f1",
-      "version": "fe945e9cc5e74d377257e6cb118080b24f94e2c1",
+      "version": "b345cbbc055f985ae3fcab06a408c951f86fa012",
       "programmingLanguage": "Python"
     },
     {

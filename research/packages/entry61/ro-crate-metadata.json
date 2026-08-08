@@ -141,9 +141,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e61_sweep.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/fe945e9cc5e74d377257e6cb118080b24f94e2c1/src/harness/e61_sweep.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b345cbbc055f985ae3fcab06a408c951f86fa012/src/harness/e61_sweep.py",
       "sha256": "88372ba30c74abff07f17b7d494d67a0283ad7356f7a327aba8a5c4ca8447633",
-      "version": "fe945e9cc5e74d377257e6cb118080b24f94e2c1",
+      "version": "b345cbbc055f985ae3fcab06a408c951f86fa012",
       "programmingLanguage": "Python"
     },
     {

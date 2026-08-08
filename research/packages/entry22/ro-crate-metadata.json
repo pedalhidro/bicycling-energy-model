@@ -194,9 +194,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/bootstrap_ci.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/fe945e9cc5e74d377257e6cb118080b24f94e2c1/src/harness/bootstrap_ci.py",
-      "sha256": "8dc9b8ebb49382cd2c837e3b75005e67e0cd57a955f4e61508bcc66aa8c8904a",
-      "version": "fe945e9cc5e74d377257e6cb118080b24f94e2c1",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b345cbbc055f985ae3fcab06a408c951f86fa012/src/harness/bootstrap_ci.py",
+      "sha256": "83f23c7518e0e19bb02b38c5ea0ce51db668a4b48ae48f04d5b8e921921139e2",
+      "version": "b345cbbc055f985ae3fcab06a408c951f86fa012",
       "programmingLanguage": "Python"
     },
     {
@@ -205,7 +205,7 @@
       "name": "bootstrap_ci.py report (aggregates only)",
       "description": "Captured stdout: medians, bootstrap CIs, sign tests and gate status per corpus. Aggregate statistics only — no ride-level data.",
       "encodingFormat": "text/plain",
-      "sha256": "f61e61d9c8c2816babe8e560c1c7cb13ca6e7cb627d71a7ac021b2a8b3ed5033"
+      "sha256": "4675161ea2b8d417a55b88cf6b54c623b0874108b766bcd970eb1c46cf51ab57"
     },
     {
       "@id": "ro-crate-preview.html",

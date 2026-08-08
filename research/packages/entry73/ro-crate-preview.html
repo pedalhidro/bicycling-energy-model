@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Entrada 64 — pacote de evidência</title>
+<title>Entrada 73 — pacote de evidência</title>
 <style>
 :root {
   --paper:#f6f9f8; --ink:#1d2b30; --muted:#5b7076; --accent:#16717f;
@@ -59,9 +59,9 @@ ul { margin:.4rem 0; padding-left:1.2rem; }
 <main>
 <header>
   <div class="eyebrow">Pacote de evidência · RO-Crate (Process Run)</div>
-  <h1>Entrada 64 — the toll wins selection, travels better, and its rider-grain τ prediction fails</h1>
+  <h1>Entrada 73 — the discrete-routing ladder — direction count, terrain lattice and portals on the matched ridden path</h1>
   <div class="badges">
-    <span>2026-08-07</span>
+    <span>2026-08-08</span>
     <span>commit b345cbbc055f</span>
     <span>com execução de harness</span>
   </div>
@@ -70,7 +70,7 @@ ul { margin:.4rem 0; padding-left:1.2rem; }
 <section>
   <h2>A afirmação</h2>
   <blockquote>
-    the toll wins selection, travels better, and its rider-grain τ prediction fails
+    The direction-count penalty is chain-shaped: on the smoothed 5 m survey it is essentially all path-length inflation (len_ratio 1.2737 at n = 4, 1.0543 at n = 8), on raw FABDEM essentially all noise (the lattice path reads 1.417x the polyline&#x27;s h+ at n = 8). eF4 — the per-edge noise deduction at each chain&#x27;s MEASURED c(tau=2) pin — beats eF2 on all six DEM chains and is the best deployable cost on FABDEM (41.62 vs 48.23 med|d%|). The deadband keeps a unique share at edge grain: F3 on the raw chain beats eF2 on the sigma-30-treated map on both populations (5.67 vs 9.21; 7.01 vs 11.49) — the filter can move into the map, but not all of it. The flat-vs-geometric epsilon contest is chain-dependent: grade-local wins on smoothed chains, flat on raw FABDEM. The portal deck helps 860/883 span-touched rides at sigma 10. Two populations all-arms-complete (IGC 1,034; FABDEM 1,844); every fitted constant read from its producing CSV; c pins measured from geometry only, worst disagreement with Entry 71&#x27;s rates 0.14 m/km.
     <footer>Conforme registrado no
     <a href="https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md">diário de comparação de modelos</a> e no grafo de
     afirmações (<a href="https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl">claims.ttl</a>) — a prosa da entrada
@@ -80,7 +80,7 @@ ul { margin:.4rem 0; padding-left:1.2rem; }
 
 <section>
   <h2>Como foi produzida</h2>
-  <p>Instrumento(s): <code>src/harness/e63_f5_kebuffer.py</code> (sha256 <code class='hash'>039545b91a9cacad…</code>, <a href="https://github.com/danlessa/bicycling-energy-model/blob/b345cbbc055f985ae3fcab06a408c951f86fa012/src/harness/e63_f5_kebuffer.py">fonte no commit</a>).</p>
+  <p>Instrumento(s): <code>src/harness/e73_gridpath.py</code> (sha256 <code class='hash'>9d422a380bad99a6…</code>, <a href="https://github.com/danlessa/bicycling-energy-model/blob/b345cbbc055f985ae3fcab06a408c951f86fa012/src/harness/e73_gridpath.py">fonte no commit</a>).</p>
   <p class='muted'>Insumos primários: gravações de pedaladas privadas (FIT com GPS e potência) — fora do repositório e deste pacote; agregados sem coordenadas disponíveis sob pedido.</p>
   <p class="muted">Reconstruir os pacotes:
   <code>python3 research/packages/make_crates.py</code>.</p>
@@ -93,19 +93,16 @@ ul { margin:.4rem 0; padding-left:1.2rem; }
   consentido confirmar que recebeu os mesmos arquivos.</p>
   <div class="tablewrap"><table>
     <tr><th>arquivo</th><th>tamanho</th><th>sha256</th><th>regenera via</th></tr>
-    <tr><td><code>data/results/e63_split.E63_TAUN2p0.csv</code></td><td class='num'>436 B</td><td><code class='hash'>fdc27695d62c5e37…</code></td><td>E63_TAUN=2.0 python3 src/harness/e63_f5_kebuffer.py</td></tr>
-<tr><td><code>data/results/e63_loro.E63_TAUN2p0.csv</code></td><td class='num'>1,375 B</td><td><code class='hash'>df317e14eb263c12…</code></td><td>E63_TAUN=2.0 E63_LORO=1 python3 src/harness/e63_f5_kebuffer.py</td></tr>
-<tr><td><code>data/results/e63_taupred.E63_TAUN2p0.csv</code></td><td class='num'>745 B</td><td><code class='hash'>6fa4ab592d824e0c…</code></td><td>E63_TAUN=2.0 E63_TAUPRED=1 python3 src/harness/e63_f5_kebuffer.py</td></tr>
-<tr><td><code>data/results/e63_tolls.E63_TAUN2p0.csv</code></td><td class='num'>334,069 B</td><td><code class='hash'>f698e18201cccb9b…</code></td><td>E63_TAUN=2.0 python3 src/harness/e63_f5_kebuffer.py</td></tr>
+    <tr><td><code>data/results/e73_gridpath.csv</code></td><td class='num'>10,898,195 B</td><td><code class='hash'>556fbdf258e3cae4…</code></td><td>/Users/danlessa/conda/bin/python src/harness/e73_gridpath.py</td></tr>
   </table></div>
 </section>
 
 <section>
   <h2>Contexto</h2>
   <ul>
-    <li>Diário (entrada 64): <a href="https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md">MODEL_COMPARISON_JOURNAL.md</a></li>
+    <li>Diário (entrada 73): <a href="https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md">MODEL_COMPARISON_JOURNAL.md</a></li>
     <li>Grafo de afirmações: <a href="https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl">claims.ttl</a></li>
-    
+    <li>Documento relacionado: <a href="https://github.com/danlessa/bicycling-energy-model/blob/main/research/article/paper3-edge-cost.md">research/article/paper3-edge-cost.md</a></li><li>Documento relacionado: <a href="https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/discrete-model.md">research/notes/discrete-model.md</a></li>
     <li>Pacote de pesquisa: <a href="https://doi.org/10.5281/zenodo.21282165">https://doi.org/10.5281/zenodo.21282165</a></li>
     <li>Metadados legíveis por máquina: <code>ro-crate-metadata.json</code></li>
   </ul>

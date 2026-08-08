@@ -19,8 +19,8 @@
     {
       "@id": "./",
       "@type": "Dataset",
-      "name": "Entry 72 evidence package — paper 3's first tranche — edge-grain fidelity, the scale U, and the valley patch at the deployed pitch",
-      "description": "Evidence package for journal Entry 72 (2026-08-08): aggregates, hashes and provenance only — the prose remains authoritative in the journal. Regenerate all packages: `python3 research/packages/make_crates.py`.",
+      "name": "Entry 73 evidence package — the discrete-routing ladder — direction count, terrain lattice and portals on the matched ridden path",
+      "description": "Evidence package for journal Entry 73 (2026-08-08): aggregates, hashes and provenance only — the prose remains authoritative in the journal. Regenerate all packages: `python3 research/packages/make_crates.py`.",
       "author": {
         "@id": "#danilo"
       },
@@ -28,7 +28,7 @@
       "isPartOf": {
         "@id": "https://doi.org/10.5281/zenodo.21282165"
       },
-      "url": "https://github.com/danlessa/bicycling-energy-model/tree/main/research/packages/entry72",
+      "url": "https://github.com/danlessa/bicycling-energy-model/tree/main/research/packages/entry73",
       "hasPart": [],
       "mentions": [
         {
@@ -47,6 +47,9 @@
       "citation": [
         {
           "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/article/paper3-edge-cost.md"
+        },
+        {
+          "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/discrete-model.md"
         }
       ]
     },
@@ -71,8 +74,8 @@
     {
       "@id": "#claim",
       "@type": "Claim",
-      "name": "Entry 72: paper 3's first tranche — edge-grain fidelity, the scale U, and the valley patch at the deployed pitch",
-      "text": "paper 3's first tranche — edge-grain fidelity, the scale U, and the valley patch at the deployed pitch",
+      "name": "Entry 73: the discrete-routing ladder — direction count, terrain lattice and portals on the matched ridden path",
+      "text": "The direction-count penalty is chain-shaped: on the smoothed 5 m survey it is essentially all path-length inflation (len_ratio 1.2737 at n = 4, 1.0543 at n = 8), on raw FABDEM essentially all noise (the lattice path reads 1.417x the polyline's h+ at n = 8). eF4 — the per-edge noise deduction at each chain's MEASURED c(tau=2) pin — beats eF2 on all six DEM chains and is the best deployable cost on FABDEM (41.62 vs 48.23 med|d%|). The deadband keeps a unique share at edge grain: F3 on the raw chain beats eF2 on the sigma-30-treated map on both populations (5.67 vs 9.21; 7.01 vs 11.49) — the filter can move into the map, but not all of it. The flat-vs-geometric epsilon contest is chain-dependent: grade-local wins on smoothed chains, flat on raw FABDEM. The portal deck helps 860/883 span-touched rides at sigma 10. Two populations all-arms-complete (IGC 1,034; FABDEM 1,844); every fitted constant read from its producing CSV; c pins measured from geometry only, worst disagreement with Entry 71's rates 0.14 m/km.",
       "appearance": [
         {
           "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
@@ -90,18 +93,18 @@
       "conditionsOfAccess": "Available on request from the author, coordinates stripped."
     },
     {
-      "@id": "#data/results/e72_edgegrain.csv",
+      "@id": "#data/results/e73_gridpath.csv",
       "@type": "File",
-      "name": "data/results/e72_edgegrain.csv",
-      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `python3 src/harness/e72_edgegrain.py`.",
-      "sha256": "d1aeec2fb0f5c97fd62ba46018a7ed40d596d51701b5680732bdcb708079be48",
-      "contentSize": "473102",
+      "name": "data/results/e73_gridpath.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `/Users/danlessa/conda/bin/python src/harness/e73_gridpath.py`.",
+      "sha256": "556fbdf258e3cae49ae64216aa25ac57e0e6683ee7d21c0483d0a7acd833c1ec",
+      "contentSize": "10898195",
       "encodingFormat": "text/csv"
     },
     {
       "@id": "#run",
       "@type": "CreateAction",
-      "name": "Entry 72 harness run",
+      "name": "Entry 73 harness run",
       "description": "Re-executable from the repository and the private inputs; see the journal entry for protocol, endpoints and verdicts.",
       "endTime": "2026-08-08",
       "actionStatus": {
@@ -112,7 +115,7 @@
       },
       "instrument": [
         {
-          "@id": "#src/harness/e72_edgegrain.py"
+          "@id": "#src/harness/e73_gridpath.py"
         }
       ],
       "object": [
@@ -122,20 +125,20 @@
       ],
       "result": [
         {
-          "@id": "#data/results/e72_edgegrain.csv"
+          "@id": "#data/results/e73_gridpath.csv"
         }
       ]
     },
     {
-      "@id": "#src/harness/e72_edgegrain.py",
+      "@id": "#src/harness/e73_gridpath.py",
       "@type": [
         "File",
         "SoftwareApplication",
         "SoftwareSourceCode"
       ],
-      "name": "src/harness/e72_edgegrain.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b345cbbc055f985ae3fcab06a408c951f86fa012/src/harness/e72_edgegrain.py",
-      "sha256": "a2219211badbd795727b00c996561575be2beb93ac255a5a799a53e0330cf86e",
+      "name": "src/harness/e73_gridpath.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b345cbbc055f985ae3fcab06a408c951f86fa012/src/harness/e73_gridpath.py",
+      "sha256": "9d422a380bad99a6b6619a2ea92f1e969f81c503154fad7f514d42b5a03e832a",
       "version": "b345cbbc055f985ae3fcab06a408c951f86fa012",
       "programmingLanguage": "Python"
     },
@@ -143,6 +146,12 @@
       "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/article/paper3-edge-cost.md",
       "@type": "CreativeWork",
       "name": "research/article/paper3-edge-cost.md",
+      "encodingFormat": "text/markdown"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/discrete-model.md",
+      "@type": "CreativeWork",
+      "name": "research/notes/discrete-model.md",
       "encodingFormat": "text/markdown"
     },
     {
