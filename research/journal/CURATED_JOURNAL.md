@@ -1177,7 +1177,7 @@ systematically overpredict?
 
 ---
 
-## Act XVII — The doctrine reaches papers 2 and 3 (Entries 71–74)
+## Act XVII — The doctrine reaches papers 2 and 3 (Entries 71–75)
 
 *One day (2026-08-08). The Entry 52–69 machinery is turned on the other two
 articles' questions.*
@@ -1265,6 +1265,27 @@ steep micro-descents that a grade-local policy refuses to credit. The
 paper's default became: treat the map (σ30), keep the deployed ε, sixteen
 directions, portals on. The router the collective already ships was two
 configuration defaults away from its own measured optimum.
+
+### Entry 75 — The deadband will not move into the map
+**Data:** 290 stratified rides × raster crops at the 30 m lattices; 2-D
+prominence-τ filtering vs the σ30 Gaussian, registered before any number.
+
+The last brainstormed repair, tried and cleanly refuted. The idea: the
+deadband is an amplitude filter, the Gaussian a wavelength filter, so move
+the amplitude selectivity into the raster — fill every pit and shave every
+peak of prominence < τ, deployable exactly like σ. The terrain said no,
+twice: prominence-6 lost to σ30 on both lattices (7.43 vs 4.23 on the
+survey; 22.80 vs 4.96 on FABDEM, paired tests decisively against), and the
+noise pins explained why — DEM noise is predominantly *connected* 2-D
+micro-structure, ridges and saddles with through-paths everywhere, not the
+closed extrema a prominence filter can see, while a 1-D transect crosses it
+at full amplitude. The deadband's job has no faithful raster analog. Two
+things salvaged: the filter destroys no signal (F3 on the filtered chain
+matches F3 on raw), and a side-finding for the grid-design chapter — a
+30 m lattice point-sampled from a 5 m raster is itself a noisier chain
+than along-track sampling of the same survey. σ30 keeps the crown, and the
+first smoke's unconverged filter (caught by its own convergence gate) is
+the session's third reminder that the gates earn their keep.
 
 ---
 

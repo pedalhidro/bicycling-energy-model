@@ -64,6 +64,8 @@ resolve their inputs and this directory relative to their own location).
 | `e72_edgegrain.csv` (+ `research/article/figs/fig-p3-scale.svg`) | `python3 src/harness/e72_edgegrain.py` (`E72_SMOKE=1`; needs `e52_split.csv` + `e71_dem_pop.csv` for the F4 comparators) | 72 (paper 3 §3.1: v2Edge at 5 grid pitches vs measured energy, the route-level twin, the valley patch, F4 comparators; gated in §3k) |
 | `e73_gridpath.csv` (+ `research/article/figs/fig-p3-dirs.svg`, `fig-p3-chain.svg`; caches `cache/dem/e73_*_n*.{bin,meta.json}`, `cache/dem/e73_portal_spans.json`) | `/Users/danlessa/conda/bin/python src/harness/e73_gridpath.py` (`E73_SMOKE=1`, `E73_GATES=1` synthetic-only, `E73_ONLY=<cfgs>`; needs `e52_aggregates.csv`, `e52_split.csv`, `e63_split.E63_TAUN2p0.csv`, the IGC/FABDEM rasters and, for parity gates, `e72_edgegrain.csv` + `e41_dem_route.E41_POPp1_E41_D61.csv`) | 73–74 (paper 3 §3.2–3.3: the matched-ridden-path ladders — directions 1–128, terrain lattice, portals — plus Entry 74's descent-ε contest columns (exSP/exGI/exVD/ex0); v2Edge/eF family/F1–F4/F5f/patch per config vs measured and vs the route-level estimate; two populations; gated in §3l) |
 
+| `e75_prominence.csv` | `/Users/danlessa/conda/bin/python src/harness/e75_prominence.py` (`E75_SMOKE=1`; needs `e73_gridpath.csv`, the rasters, numpy + scipy) | 75 (prominence-τ map treatment REFUTED vs σ30 on both 30 m lattices — DEM noise is connected 2-D micro-structure, not closed extrema; 290-ride registered subset) |
+
 `python3 src/harness/bootstrap_ci.py` (Entry 22) reads these CSVs and gates the
 article's published medians against them.
 

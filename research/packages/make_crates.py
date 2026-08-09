@@ -135,6 +135,7 @@ PRODUCER = {
     "e71_dem_pop.csv": "python3 src/harness/e71_dem_pop.py",
     "e72_edgegrain.csv": "python3 src/harness/e72_edgegrain.py",
     "e73_gridpath.csv": "/Users/danlessa/conda/bin/python src/harness/e73_gridpath.py",
+    "e75_prominence.csv": "/Users/danlessa/conda/bin/python src/harness/e75_prominence.py",
 }
 
 # entry → (instrument harness scripts, result CSVs, uses private tracks,
@@ -260,6 +261,8 @@ ENTRIES = {
     74: (["src/harness/e73_gridpath.py"], ["e73_gridpath.csv"], True,
          ["research/article/paper3-edge-cost.md",
           "research/notes/discrete-model.md"]),
+    75: (["src/harness/e75_prominence.py"], ["e75_prominence.csv"], True,
+         ["research/notes/discrete-model.md"]),
 }
 
 # entry 22 reads the per-ride CSVs the other harnesses wrote

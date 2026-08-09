@@ -189,6 +189,9 @@ changed. See Entry 11.)*
 - **Entry 74** (the descent-ε contest: five policies, one skeleton, constants frozen —
   the deployed grade-local ε wins every treated-map cell and becomes §3.2(d)'s default;
   columns in [`e73_gridpath.py`](../../src/harness/e73_gridpath.py); gate section 3l) — this commit
+- **Entry 75** (prominence-τ map treatment REFUTED: DEM noise is connected 2-D
+  micro-structure, not closed extrema — σ30 keeps the crown;
+  [`e75_prominence.py`](../../src/harness/e75_prominence.py)) — this commit
 
 ---
 
@@ -212,6 +215,7 @@ counted from its CSV rather than asserted, is [`research/data-graph.ttl`](../dat
 
 | entry | $I = (D, P)$ | $T$ | $O$ (rows) | $S$ |
 |--:|---|---|---|---|
+| 75 | 290-ride stratified subset × raster crops at the 30 m lattices | 2-D prominence-τ (capped geodesic reconstruction) vs σ30, × {v2, eF2, F3} | `e75_prominence.csv` (290) | REFUTED: prom6 7.43/22.80 vs σ30 4.23/4.96 at (v2, n=16) — DEM noise is connected 2-D micro-structure; σ30 keeps the crown |
 | 74 | Entry 73's cached paths, five ε policies | the eF2 skeleton × {ε₂, ε_SP, ε_geo, ε_GI, ε_VD, 0} | contest columns in `e73_gridpath.csv` (same 1,901) | ε_geo wins every treated cell (3.31 default); regional flat refuted; raw chains invert to flat; §3.2(d)'s default = deployed ε on σ30 at n = 16 (gate 3l) |
 | 73 | $(D_3..D_6, P_{f,r})$ + GPS lines + (IGC wide, FABDEM, E26 spans) | the E73 quantizer × {v2, eF1/eF2/eF4, F1–F4, F5f, patch} per config | `e73_gridpath.csv` (1,901; IGC pop 1,034, FAB pop 1,844) + `fig-p3-dirs.svg`, `fig-p3-chain.svg` | the dirs ladder is chain-shaped (distance vs noise error); eF4 at measured pins best deployable 6/6 chains; deadband's unique share survives at edge grain (gate 3l) |
 | 72 | $(D_3..D_6, P_{f,r})$, own profiles | v2Edge at 5 pitches, twin, valley patch, F4 comparators | `e72_edgegrain.csv` (2,039) + `fig-p3-scale.svg` | fidelity +1.83 pp; U-minimum at 30 m; patch 3.29·−0.08; F4-pub 2.72 tops the table (gate 3k) |
@@ -289,6 +293,103 @@ Entries with no $O$ are reviews, registrations, imported notes or refactors — 
 what the other rows *mean* without producing a per-ride table of their own.
 
 ---
+
+---
+
+## 2026-08-08 — Entry 75: prominence-τ map treatment — the deadband's amplitude selectivity as raster preprocessing
+
+**Lineage** — $I$: a stratified 300-ride subset of Entry 73's populations ×
+per-ride raster crops at the 30 m lattices (IGC 30, FABDEM) · $T$: 2-D
+h-extrema (prominence-τ) filtering by capped geodesic reconstruction, then
+the Entry-73 quantizer and policies on the filtered chain · $O$:
+`e75_prominence.csv` · $S$: does amplitude-selective map treatment close the
+gap σ30 leaves to the F3 bound?
+
+*Prompt (Danilo), on the brainstormed deadband-approximation arms with
+prominence-τ flagged most promising: "let's test it".*
+
+### Protocol (pre-registered)
+
+**The idea.** The deadband is an amplitude filter; the σ-Gaussian is a
+wavelength filter — P8 measured the substitution gap at 3.5–4.5 pp. The 2-D
+amplitude analog is h-extrema filtering by morphological reconstruction:
+fill every pit and shave every peak of prominence < τ (and, like the 1-D
+backlash, shave τ off the extremes that survive). It is raster
+preprocessing — deployable exactly like σ, edges stay O(1).
+
+**Implementation.** Per ride, a raster crop at the chain's own 30 m lattice
+(rasterio windowed bilinear read aligned to the Entry-73 lattice; parity
+gate below), then fill-pits (reconstruction by erosion of h + τ over h)
+followed by shave-peaks (reconstruction by dilation of h − τ under h), each
+by iterative geodesic steps CAPPED at 64 (1 cell/step reaches every
+noise-scale feature; the cap's convergence residual is measured at the path
+samples and gated ≤ 1 cm). Filtered heights sampled at the Entry-73 path
+points by bilinear interpolation in the crop.
+
+**Design.** 300 rides, stratified by rider × ride-h₊ tercile, seed 42 draw
+(150 from the IGC pop scored on the igc30 grid; 150 from the FABDEM pop on
+fab30 — 30 m lattices only: the 5 m deployment costs real engineering and
+is warranted only if the mechanism wins here; disclosed). Arms per grid:
+**prom2**, **prom6** (τ = 2 / 6 m — the noise floor and F3's published
+deadband), against the same rides' raw and σ30 chains from
+`e73_gridpath.csv` (join by ride). n ∈ {1, 16}; policies v2 (ε_geo — the
+default), eF2, and F3 (the path-deadband bound, computed on each chain).
+
+**Predictions.** (P1₇₅) prom6 beats σ30 under ε_geo at n = 16 on both
+grids (paired, ≥ 0.5 pp on FABDEM) — amplitude selectivity is the missing
+piece. (P2₇₅) prom is surgical: it removes LESS total h₊ than σ30 on the
+smooth IGC chain while removing comparable phantom ascent on FABDEM —
+c(τ=2) measured per treated chain shows it. (P3₇₅) F3-on-prom6 ≈
+F3-on-raw within ~0.5 pp — the two filters share their target, so the
+path deadband finds little left to remove.
+
+**Gates.** (G1) Crop parity: the RAW crop bilinear-sampled at the Entry-73
+path points reproduces the cached chain heights (worst |Δ| ≤ 0.1 m). (G2)
+No-op: τ = 0 returns the crop bit-identically. (G3) Convergence: the
+64-cap's residual at path samples ≤ 1 cm after 10 extra iterations. (G4)
+Monotonicity: prom-filtered h₊ ≤ raw h₊ per ride, and prom6 ≤ prom2.
+(G5) The subset's raw/σ30 scores reproduce the Entry-73 CSV per ride
+(join integrity, exact).
+
+### Results (run of record: 290 rides — 150 IGC, 140 FABDEM; 47.5 min; all gates green after one registered fix)
+
+**REFUTED — the prominence filter loses to the Gaussian on both grids.**
+At the primary cell (v2, n = 16): IGC raw 14.78 → prom6 7.43 vs **σ30
+4.23** (prom6 closer on only 41/150, p < 10⁻⁴ *against*); FABDEM raw 25.97
+→ prom6 22.80 vs **σ30 4.96** (16/140 against). The smoke run's 10-ride
+IGC hint in prom6's favour was small-n luck — the direction the subset
+design exists to catch.
+
+**The mechanism, read from the c pins.** prom6 removes phantom ascent at
+5.91 → 3.63 m/km on the IGC lattice and barely 5.73 → 5.20 on FABDEM,
+against σ30's 2.53 / 2.99: **DEM noise is predominantly CONNECTED
+micro-structure in 2-D** — micro-ridges and saddles with through-paths
+everywhere — not the closed pits and summits a prominence filter can see,
+while a 1-D transect crosses it as full-amplitude oscillation. The
+amplitude-selectivity idea was right about the deadband and wrong about
+the terrain: the deadband's 1-D amplitude filtering has no faithful
+2-D raster analog via h-extrema. P2₇₅ observed as registered (prom removes
+less h₊) but as a defect, not surgery; P3₇₅'s F3-preservation held (F3 on
+prom6 within 0.1–0.2 pp of F3 on raw — the filter at least destroys no
+signal). ε = 0-style pricing not applicable here.
+
+**Side-finding, disclosed (G1-igc):** a 30 m lattice built by
+point-sampling the 5 m survey is a genuinely NOISIER chain than
+along-track sampling of the same raster (c 5.91 vs 3.75 m/km; worst
+per-ride h₊ gap 1,326 m on a long ride) — regular-lattice aliasing of fine
+rasters is itself a grid-design cost, and belongs beside paper 2's
+"do not oversample" rule in any grid-construction discussion.
+
+**One registered fix mid-bring-up:** the first smoke's 64-iteration
+reconstruction cap was materially unconverged on FABDEM (G3 residual
+5.5 m) and its numbers were artifacts; the cap became a 4,096-step
+backstop with measured convergence (G3 = 0.0000 m in the run of record).
+
+**Verdict for the program:** σ30 keeps the crown; the §3.2(d) default
+stands unchanged. The remaining ~1 pp to the F3 bound at the default cell
+is NOT reachable by map-side amplitude filtering; the candidates left are
+path/search-side (the line-graph reversal refund; the band-state
+automaton) — parked, not registered.
 
 ---
 
@@ -718,6 +819,22 @@ itself transferable.
 (F3 464/609, 5.07 → 4.97). The route-grain "correct or smooth, but not
 both" does not carry to edge grain, where scoring is against measured
 energy rather than in-span barometric ascent.
+
+**The σ contrast, explicit (P3's verdict quantified — σ30 beats σ10
+uniformly, every n, every policy; IGC pop, med|Δ%|):**
+
+| n | v2 · σ10 | v2 · σ30 | eF2 · σ10 | eF2 · σ30 |
+|--:|--:|--:|--:|--:|
+| 1 | 5.94 | **3.25** | 7.71 | **4.06** |
+| 8 | 9.60 | **6.57** | 12.71 | **9.21** |
+| 16 | 6.73 | **3.31** | 8.76 [8.20, 9.48] | **5.11** [4.75, 5.49] |
+| 32 | 6.16 | **3.40** | 8.05 | **4.36** |
+| 128 | 5.80 | **3.42** | 7.52 | **4.06** |
+
+Non-overlapping CIs at the default cell; the ordering matches paper 2's
+route-grain Table 2 (IGC + σ30 its top row) reproduced at edge grain — and
+it is why the §3.2(d) default says σ30 where the deployed app's "auto"
+default says σ10.
 
 **ε-side robustness (test half only, seed-48):** every ordering preserved —
 IGC eF4L 10.25 < v2 11.10 < eF2 12.91 (F3 4.78); FAB eF4L 39.69 < eF2
