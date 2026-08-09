@@ -1177,7 +1177,7 @@ systematically overpredict?
 
 ---
 
-## Act XVII — The doctrine reaches papers 2 and 3 (Entries 71–73)
+## Act XVII — The doctrine reaches papers 2 and 3 (Entries 71–74)
 
 *One day (2026-08-08). The Entry 52–69 machinery is turned on the other two
 articles' questions.*
@@ -1245,6 +1245,26 @@ c spread collapses under σ30); and H4's stacking arm REFUTED the route-grain
 "correct or smooth, but not both" at edge grain — the deck keeps helping on
 the treated chain. Route divergence — the mission's measurement — remains
 the one honestly planned tranche.
+
+### Entry 74 — Which ε belongs in the edge? The incumbent wins its trial
+**Data:** Entry 73's cached paths; five descent policies in one identical
+edge skeleton; nothing fitted on this experiment's energies.
+
+A registered contest for the router's descent credit: the published flat
+ε₂, Entry 60's regional ε_SP (Danilo's conjecture — São Paulo should want a
+*lower* constant), the deployed grade-local ε_geo, Entry 45's grade-inverse
+deficit, and its occupancy mechanism curve, with ε = 0 pricing the term.
+The registration's analytic curve table predicted the battleground — the
+shallow 1–3% band that σ-treated profiles live in — and the run confirmed
+it: **ε_geo wins every treated-map cell** (3.31 at the São Paulo default
+cell, against 5.11 flat and 10.24 regional), the regional conjecture is
+refuted by the bias arithmetic it collided with, the mechanism curve does
+not survive the trip from route cells to edges — and on *raw* chains the
+whole ordering inverts, flat beating adaptive, because noise manufactures
+steep micro-descents that a grade-local policy refuses to credit. The
+paper's default became: treat the map (σ30), keep the deployed ε, sixteen
+directions, portals on. The router the collective already ships was two
+configuration defaults away from its own measured optimum.
 
 ---
 

@@ -853,3 +853,10 @@
 :assert73_ev1 a schema:Claim ;
   cito:qualifies :assert73 ;
   schema:text "The quantizer's parity gates forced two fixes in the new harness (n = 1 positions from the raw geo track; full-precision sample coordinates) and exposed one in the published instrument: Entry 41's 30 m arms are evaluated after a 5 m re-gridding that clips extrema between nodes — median 3.7 m/ride (0.85% of h+) on the local survey, 15.5 m (1.48%) on FABDEM — one-signed, internally consistent within that letter, disclosed as its erratum." .
+
+:q74 a schema:Question ;
+  schema:text "Which descent-epsilon policy belongs in the deployed edge cost for Sao Paulo routing — flat (published or regional), grade-local geometric, grade-inverse deficit, or the occupancy mechanism curve?" .
+:assert74 a schema:Claim ;
+  schema:about :q74 ; dcterms:type "pre-registered" ;
+  schema:text "The incumbent holds, decisively: the deployed grade-local eps_geo wins every treated-map cell on both DTMs and both regions (3.31 med|d%| at the Sao Paulo sigma-30 n = 16 cell vs 5.11 for the published flat eps-2 and 10.24 for the regionally honest eps_SP = 0.2385 — the lower regional constant loses ~5 pp because the treated-chain bias is already positive). Entry 45's grade-inverse deficit trails by ~3 pp (its k/s term under-credits the shallow band treated chains live in) and the occupancy mechanism curve does not transfer from route cells to edges. On RAW chains the ordering inverts and flat eps-2 wins: noise manufactures steep micro-descents that grade-local policies refuse to credit — adaptive recovery and untreated noise do not mix. eps = 0 prices the descent term as worst everywhere. Five policies, identical edge skeleton, all constants frozen from producing CSVs; no candidate fitted on this experiment's energies." ;
+  cito:citesAsEvidence :e73_gridpath.csv ; dcterms:source :journal .

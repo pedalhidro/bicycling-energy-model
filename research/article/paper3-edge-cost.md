@@ -329,16 +329,31 @@ ride. The realisation is deployed in an open-source energy-field router
   in-span barometric ascent. Figures: `figs/fig-p3-dirs.svg`,
   `figs/fig-p3-chain.svg`.
 
-  **(d) The deployable default.** The measured cross fixes the
-  recommendation: **eF2 on a σ30-treated map at n = 16** — med|Δ%|
-  5.11<!--@c-a3.default--> (+4.94) on the local 5 m survey and 6.46 (+6.29)
-  on FABDEM — with **n = 8 as the fast choice** (9.21 / 11.49; the deployed
-  engine's own cost table puts n = 16 at 1.5–2.4× the n = 8 runtime) and a
-  marginality note: beyond n = 32 the accuracy gain is at most ~0.6 pp
-  (0.30 IGC, 0.60 FABDEM over the whole 32 → 128 span) while runtime grows
-  ≥ 2× per rung. This default needs no site
-  measurement at all — the treatment is a fixed filter and eF2's constants
-  are paper 1's.
+  **(d) The deployable default.** The measured cross plus the descent-ε
+  contest [E74] fix the recommendation: **the deployed grade-local cost —
+  v2Edge's ε_geo(s) — on a σ30-treated map at n = 16**, med|Δ%|
+  3.31<!--@c-a3.default--> (+2.41) on the local 5 m survey and 5.05 (+3.34)
+  on FABDEM, with **n = 8 as the fast choice** (6.57 / 8.52; the deployed
+  engine's own cost table puts n = 16 at 1.5–2.4× the n = 8 runtime) and
+  **portals on** (the bridge/tunnel deck is policy-independent and still
+  worth ~0.4 pp on span-touched rides after σ30). Marginality: past n = 16
+  the med|Δ%| stops improving — n = 16 is the measured optimum on the local
+  survey and sits 0.20 pp from FABDEM's n = 32 optimum — while runtime grows
+  ≥ 2× per rung; only the signed bias keeps falling (+2.41 → +1.36 by
+  n = 128). This default needs no site measurement and **no engine change**:
+  it is the deployed cost itself, with two configuration defaults moved
+  (smoothing σ10 → σ30, now applied to coarse sources too; directions
+  8 → 16). The ε contest behind the policy choice [E74], five policies in
+  the identical edge skeleton, constants frozen from their producing CSVs:
+  the grade-local ε wins **every** treated-map cell — against the published
+  flat ε₂ = 0.4621 (5.11 at this cell), the regionally honest flat
+  ε_SP = 0.2385 (10.24 — ~5 pp worse: the treated-chain bias is already
+  positive and a stingier constant raises it), Entry 45's grade-inverse
+  deficit (6.17) and its occupancy mechanism curve (9.01) — while on RAW
+  chains the ordering inverts and flat ε₂ wins (35.66 vs 38.20 on raw
+  igc5): adaptive recovery and untreated noise do not mix, because noise
+  manufactures steep micro-descents that a grade-local policy refuses to
+  credit.
 
   **Registered carry-over from [E41] — the repairs do not stack.** At route
   grain, σ-smoothing and the bridge/tunnel (portal) deck correction address

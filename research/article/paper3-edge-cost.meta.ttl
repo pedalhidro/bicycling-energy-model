@@ -84,13 +84,13 @@
   rdfs:comment "Entry 73 prediction P4 confirmed. H4's registered sigma-30 stacking arm (registration v3, P9) REFUTED the route-grain carry-over: the deck still helps on the sigma-30-treated chain, 802/880 closer, eF2 8.95 to 8.51 — gated in 3l" .
 
 <#c-a3.default> a schema:Claim ;
-  schema:text "The deployable default: eF2 on a sigma-30-treated map at n = 16 directions — med|delta%| 5.11 on the local 5 m survey, 6.46 on FABDEM — with n = 8 as the fast choice (9.21 / 11.49) and gains beyond n = 32 marginal (<= 0.6 pp for >= 2x runtime per rung)" ;
+  schema:text "The deployable default: the deployed grade-local cost (v2Edge's eps_geo) on a sigma-30-treated map at n = 16 directions — med|delta%| 3.31 on the local 5 m survey, 5.05 on FABDEM — with n = 8 as the fast choice (6.57 / 8.52), portals on, and n = 16 the measured med|delta%| optimum on the local survey (0.20 pp from FABDEM's n = 32 optimum); only the signed bias improves past 16" ;
   dcterms:type "derived" ;
-  pc:value 5.11 ;
+  pc:value 3.31 ;
   pc:gateSection "3l" ;
   cito:citesAsEvidence dg:o_e73 ;
-  prov:wasDerivedFrom claims:assert73 ;
-  rdfs:comment "The recommendation is the maintainer's synthesis of Entry 73's measured cross (2026-08-08); needs no site measurement — the treatment is a fixed filter and eF2's constants are paper 1's" .
+  prov:wasDerivedFrom claims:assert74 ;
+  rdfs:comment "The maintainer's synthesis of Entry 73's measured cross and Entry 74's eps contest (2026-08-08, 'our recommendation should be eps_geo'): the grade-local eps wins every treated-map cell while flat eps-2 wins raw chains — adaptive recovery and untreated noise do not mix. No site measurement, no engine change: two config defaults move (sigma 10 to 30 incl. coarse sources; n 8 to 16)" .
 
 <#c-a3.divergence> a schema:Claim ;
   schema:text "How often, on a real network, the energy-optimal path departs from the distance-optimal one, and by how much" ;

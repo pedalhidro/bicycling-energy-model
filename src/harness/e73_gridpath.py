@@ -87,6 +87,7 @@ from bicycling_energy_model import (approx_components, build_profile,  # noqa: E
 from bicycling_energy_model.engines import G  # noqa: E402
 from bicycling_energy_model.jsfmt import js_str, to_fixed  # noqa: E402
 
+from e44_scurve import sigmoid  # noqa: E402
 from igc_resolution_test import (geo_track_from_fit, grid_positions,  # noqa: E402
                                  lon_lat_at)
 from perride_invert import CLIMB_THR, DESC_THR, KEFF, RESULTS, RHO  # noqa: E402
@@ -554,6 +555,110 @@ def edge_form(prof: dict, p: dict, vf: float, climb_thr: float,
     return E / 1000, clamped / 1000
 
 
+# ---- Entry 74: the ε contest (registration in the journal) ----------------
+# Five descent policies in the identical eF2 skeleton; constants frozen from
+# their producing CSVs.  k = 0.0051 is Entry 45's eq. (8) grade-inverse
+# deficit (form G, deficit-space fit; Entry 47 reproduced it at 0.0052) — a
+# published derivation constant, the ε₀ = 0.13 treatment.
+K8_GRADE_INV = 0.0051
+E60EPS: dict = {}                 # set in main() from e60_regional.csv
+PINS45: dict = {}                 # set in main() from e44/e45 CSVs
+
+
+def load_e60_eps() -> dict:
+    """Entry 60's regional flat ε pools, from e60_regional.csv arm B."""
+    path = os.path.join(RESULTS, "e60_regional.csv")
+    out = {}
+    with open(path, encoding="utf-8") as fh:
+        for r in csv.DictReader(fh):
+            if r["arm"].strip('"') == "B regional eps":
+                reg = "BR" if "Paulo" in r["region"] else "EU"
+                out[reg] = float(r["eps"])
+    if set(out) != {"BR", "EU"}:
+        raise SystemExit("e60_regional.csv lacks the regional ε pools")
+    return out
+
+
+def load_e45_pins() -> dict:
+    """Per-rider mechanism pins for ε_VD: (s50, width) fractions from
+    e44_scurve_fits.csv and the median interruption intensity Î from
+    e45_ridelevel.csv — rider-level telemetry, the m̂ protocol's standing."""
+    fits = {}
+    with open(os.path.join(RESULTS, "e44_scurve_fits.csv"), encoding="utf-8") as fh:
+        for r in csv.DictReader(fh):
+            g = r["group"].strip('"')
+            try:
+                fits[g] = [float(r["s50_pct"]) / 100,
+                           float(r["s_width_pct"]) / 100, None]
+            except ValueError:
+                continue
+    by_g: dict[str, list] = {}
+    with open(os.path.join(RESULTS, "e45_ridelevel.csv"), encoding="utf-8") as fh:
+        for r in csv.DictReader(fh):
+            g = r["group"].strip('"')
+            try:
+                by_g.setdefault(g, []).append(float(r["i_flat"]))
+            except ValueError:
+                continue
+    for g, v in by_g.items():
+        if g in fits and v:
+            fits[g][2] = med_of(v)
+    return {g: tuple(v) for g, v in fits.items() if v[2] is not None}
+
+
+def edge_eps(prof: dict, p: dict, vf: float, climb_thr: float,
+             eps_fn) -> float:
+    """The eF2 skeleton with an arbitrary descent-ε policy, kJ.
+    eps_fn(s, abRatio) → ε for a descent edge of grade s."""
+    mg = p["m"] * G
+    beta = mg / p["keff"]
+    w = p["wind"]
+    aRoll = mg * p["Crr"] / p["keff"]
+    aAero = 0.5 * p["rho"] * p["CdA"] * (vf + w) * abs(vf + w) / p["keff"]
+    ab = (aRoll + aAero) / beta
+    xs, hs = prof["x"], prof["h"]
+    E = 0.0
+    for i in range(1, len(xs)):
+        dx = xs[i] - xs[i - 1]
+        dh = hs[i] - hs[i - 1]
+        if not dx > 0:
+            continue
+        if dh >= 0:
+            aero = aAero * dx if dh < climb_thr * dx else 0
+            e = aRoll * dx + aero + beta * dh
+        else:
+            eps = eps_fn(-dh / dx, ab)
+            e = aRoll * dx + aAero * dx - eps * beta * (-dh)
+            if e < 0:
+                e = 0.0
+        E += e
+    return E / 1000
+
+
+def eps_grade_inverse(s: float, ab: float) -> float:
+    e = min(1.0, ab / s) - K8_GRADE_INV / s
+    return 0.0 if e < 0 else (1.0 if e > 1 else e)
+
+
+def make_eps_vd(p: dict, vf: float, pins: tuple):
+    """ε_VD(s): Entry 45's cell curve per edge — occupancy sigmoid × Î over
+    the work rate at v(s) = max(v_t(s), v_f) (E63's v_e convention)."""
+    s50, wd, i_flat = pins
+    mg = p["m"] * G
+    b_aero = 0.5 * p["rho"] * p["CdA"]
+
+    def fn(s: float, ab: float) -> float:
+        sec = math.sqrt(1 + s * s)
+        vt = math.sqrt(max(0.0, mg * (s - p["Crr"]) / sec) / b_aero)
+        v = max(vt, vf)
+        occ = sigmoid(s, s50, wd)          # Entry 44's curve, one copy
+        delta = occ * i_flat * p["keff"] / (mg * s * v)
+        e = min(1.0, ab / s) - delta
+        return 0.0 if e < 0 else (1.0 if e > 1 else e)
+
+    return fn
+
+
 _E63 = None
 
 
@@ -693,6 +798,15 @@ def score_profile(xs: list[float], hs: list[float], ride: dict,
                                 forms["F4"]["eps"], c_loro)
     else:
         ef4l = float("nan")
+    # ---- Entry 74's ε contest: the same skeleton, only the descent policy
+    # varies (constants from producing CSVs; see the registration) ----
+    reg74 = "EU" if ride["group"].startswith("D6") else "BR"
+    ex_sp, _ = edge_form(prof, p, vf, CLIMB_THR, True, E60EPS[reg74], 0.0)
+    ex_gi = edge_eps(prof, p, vf, CLIMB_THR, eps_grade_inverse)
+    pins74 = PINS45.get(ride["group"])
+    ex_vd = (edge_eps(prof, p, vf, CLIMB_THR, make_eps_vd(p, vf, pins74))
+             if pins74 else float("nan"))
+    ex_0, _ = edge_form(prof, p, vf, CLIMB_THR, True, 0.0, 0.0)
     # F1/F2 on the raw profile
     grav = beta * a["hplus"]
     aero_flat = 0.5 * p["rho"] * p["CdA"] * (vf + p["wind"]) * abs(vf + p["wind"]) / p["keff"]
@@ -724,6 +838,7 @@ def score_profile(xs: list[float], hs: list[float], ride: dict,
              - eg * beta * (a["hminus"] - t0)) / 1000
     return {"v2": v2, "ef1": ef1, "ef2": ef2, "ef4": ef4, "ef4L": ef4l,
             "ef2cl": cl2,
+            "exSP": ex_sp, "exGI": ex_gi, "exVD": ex_vd, "ex0": ex_0,
             "f1": f1, "f2": f2, "f3": f3, "f4": f4, "f5f": f5f,
             "patch": patch, "hplus": a["hplus"], "x_m": a["X"], "toll": t5,
             "eps_geom": eg}
@@ -1159,8 +1274,8 @@ def score_config(row: dict, ride: dict, name: str, xs, ss, hs_raw,
     row[f"{name}_toll"] = s["toll"]
     row[f"{name}_epsg"] = s["eps_geom"]
     row[f"{name}_ef2cl"] = s["ef2cl"]
-    for m in ("v2", "ef1", "ef2", "ef4", "ef4L", "f1", "f2", "f3", "f4",
-              "f5f", "patch"):
+    for m in ("v2", "ef1", "ef2", "ef4", "ef4L", "exSP", "exGI", "exVD",
+              "ex0", "f1", "f2", "f3", "f4", "f5f", "patch"):
         if is_finite(s[m]):
             row[f"{name}_{m}"] = 100 * (s[m] - emp) / emp
     chain = name.split("_n")[0]
@@ -1622,6 +1737,37 @@ def report(rows: list[dict], pop_igc: list[dict], pop_fab: list[dict],
                  ("eF2*σ30", "fab30s30"), ("eF4", "fab30"),
                  ("eF4L", "fab30")])
 
+    # ---- Entry 74: the ε contest (primary cell first — SP × σ30 × n 8/16) ----
+    print("\nE74 ε CONTEST — the eF2 skeleton, only the descent policy varies "
+          "— med|Δ%| (signed):")
+    print("cell".ljust(22) + "".join(m.rjust(17) for m in
+          ("ε₂ 0.4621", "ε_SP", "ε_geo(s)", "ε_GI(s)", "ε_VD(s)", "ε=0")))
+    cells74 = [("igc5s30_n8", pop_igc, None), ("igc5s30_n16", pop_igc, None),
+               ("fab30s30_n8", pop_fab, "BR"), ("fab30s30_n16", pop_fab, "BR"),
+               ("fab30s30_n8", pop_fab, "EU"),
+               ("igc5_n8", pop_igc, None), ("fab30_n8", pop_fab, "BR"),
+               ("igc5s30_n1", pop_igc, None), ("igc5s30_n128", pop_igc, None)]
+    e74_fail = []
+    for cfg, pop_, reg_ in cells74:
+        sub = [r for r in pop_ if reg_ is None
+               or (r["group"].startswith("D6") == (reg_ == "EU"))]
+        cells = []
+        vals_by_m = {}
+        for m in ("ef2", "exSP", "v2", "exGI", "exVD", "ex0"):
+            v = [r[f"{cfg}_{m}"] for r in sub
+                 if is_finite(r.get(f"{cfg}_{m}", float("nan")))]
+            vals_by_m[m] = med_of([abs(x) for x in v]) if v else float("nan")
+            cells.append(f"{f(med_of([abs(x) for x in v]))} "
+                         f"({f(med_of(v))})" if v else "—")
+        tag = cfg + (f" [{reg_}]" if reg_ else "")
+        print(tag.ljust(22) + "".join(c.rjust(17) for c in cells))
+        others = [vals_by_m[m] for m in ("ef2", "exSP", "v2", "exGI", "exVD")
+                  if is_finite(vals_by_m[m])]
+        if others and not vals_by_m["ex0"] >= max(others):
+            e74_fail.append(tag)
+    print("  [{}] ε = 0 is the worst column in every cell".format(
+        "PASS" if not e74_fail else "FAIL: " + ", ".join(e74_fail)))
+
     # ---- the ε-side robustness slice: the e52 seed-48 TEST half only (the
     # published ε's were fitted on the train half; registration v4) ----
     try:
@@ -1697,6 +1843,10 @@ def main() -> None:
 
     forms = load_forms()
     eps5f = load_f5f_eps()
+    E60EPS.update(load_e60_eps())
+    PINS45.update(load_e45_pins())
+    print(f"  ε contest pins: regional {E60EPS} · VD pins for "
+          f"{sorted(PINS45)}", file=sys.stderr)
     cache_rows = load_cache_rows()
 
     # ---- pass A: corpus walk, geometry, physics ----

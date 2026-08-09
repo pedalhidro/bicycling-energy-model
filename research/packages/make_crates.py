@@ -257,6 +257,9 @@ ENTRIES = {
     73: (["src/harness/e73_gridpath.py"], ["e73_gridpath.csv"], True,
          ["research/article/paper3-edge-cost.md",
           "research/notes/discrete-model.md"]),
+    74: (["src/harness/e73_gridpath.py"], ["e73_gridpath.csv"], True,
+         ["research/article/paper3-edge-cost.md",
+          "research/notes/discrete-model.md"]),
 }
 
 # entry 22 reads the per-ride CSVs the other harnesses wrote

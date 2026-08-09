@@ -133,6 +133,14 @@ The deployed v2Edge (grade-local ε, §2) stays as the status-quo reference
 column: eF2 vs v2Edge is the flat-vs-geometric ε contest at edge grain,
 extending Entry 51/72's flat-beats-dynamic line.
 
+**The ε contest's verdict (Entry 74):** on σ-treated maps the deployed
+grade-local ε wins every cell — treated profiles live in the shallow 1–3%
+descent band, which only ε_geo credits near its coasting limit — while on
+raw chains the ordering inverts and the flat ε₂ wins, because noise
+manufactures steep micro-descents a grade-local policy refuses to credit.
+Paper 3's default is therefore the deployed cost unchanged, on a
+σ30-treated map at n = 16, portals on.
+
 ## 3. F1 — the bare closed form
 
 `E₁ = roll + aAero·X + β·h₊ − ε₁·β·h₋`, with the **ungated** aero (flat-speed

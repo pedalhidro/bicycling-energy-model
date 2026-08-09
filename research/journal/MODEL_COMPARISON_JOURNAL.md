@@ -186,6 +186,9 @@ changed. See Entry 11.)*
 - **Entry 73** (the discrete-routing ladder on the matched ridden path: the quantizer,
   directions 1–128, terrain lattices, portals, the eF family at measured c pins —
   [`e73_gridpath.py`](../../src/harness/e73_gridpath.py); gate section 3l) — this commit
+- **Entry 74** (the descent-ε contest: five policies, one skeleton, constants frozen —
+  the deployed grade-local ε wins every treated-map cell and becomes §3.2(d)'s default;
+  columns in [`e73_gridpath.py`](../../src/harness/e73_gridpath.py); gate section 3l) — this commit
 
 ---
 
@@ -209,6 +212,7 @@ counted from its CSV rather than asserted, is [`research/data-graph.ttl`](../dat
 
 | entry | $I = (D, P)$ | $T$ | $O$ (rows) | $S$ |
 |--:|---|---|---|---|
+| 74 | Entry 73's cached paths, five ε policies | the eF2 skeleton × {ε₂, ε_SP, ε_geo, ε_GI, ε_VD, 0} | contest columns in `e73_gridpath.csv` (same 1,901) | ε_geo wins every treated cell (3.31 default); regional flat refuted; raw chains invert to flat; §3.2(d)'s default = deployed ε on σ30 at n = 16 (gate 3l) |
 | 73 | $(D_3..D_6, P_{f,r})$ + GPS lines + (IGC wide, FABDEM, E26 spans) | the E73 quantizer × {v2, eF1/eF2/eF4, F1–F4, F5f, patch} per config | `e73_gridpath.csv` (1,901; IGC pop 1,034, FAB pop 1,844) + `fig-p3-dirs.svg`, `fig-p3-chain.svg` | the dirs ladder is chain-shaped (distance vs noise error); eF4 at measured pins best deployable 6/6 chains; deadband's unique share survives at edge grain (gate 3l) |
 | 72 | $(D_3..D_6, P_{f,r})$, own profiles | v2Edge at 5 pitches, twin, valley patch, F4 comparators | `e72_edgegrain.csv` (2,039) + `fig-p3-scale.svg` | fidelity +1.83 pp; U-minimum at 30 m; patch 3.29·−0.08; F4-pub 2.72 tops the table (gate 3k) |
 | 71 | D3–D5 (travel kept) + D6, the e41 MODE walk | seven arms × two protocols + τ-grid, toll, F5 per arm | `e41_dem_route.E41_POPp1_E41_D61.csv` (1,957; 1,834 primary), `e71_dem_pop.csv` | paper 2 re-based (gate 3j); c is sensor×terrain; F5 beats F3 on every DEM chain |
@@ -285,6 +289,123 @@ Entries with no $O$ are reviews, registrations, imported notes or refactors — 
 what the other rows *mean* without producing a per-ride table of their own.
 
 ---
+
+---
+
+## 2026-08-08 — Entry 74: which ε belongs in the edge? — a frozen-transfer contest of five descent policies
+
+**Lineage** — $I$: Entry 73's cached path profiles (both populations, raw and
+σ30-treated chains, n ∈ {1, 4, 8, 16, 32, 64, 128}) · $T$: the eF2 edge
+skeleton (gated aero, per-edge clamp, no c deduction) with ONLY the descent-ε
+policy varying · $O$: new model columns in `e73_gridpath.csv` · $S$: the ε
+recommendation for São Paulo routing; paper 3 §3.2's ε paragraph.
+
+*Prompts (Danilo): "I think we should do an experiment in order to evaluate
+which eps to use. Can you go over the journal and propose 5 candidate for
+eps?" · "Note: we should optimize routing for São Paulo. I think that the
+eps_flat would be lower than this one" · "Let's register and run".*
+
+### Protocol (pre-registered — no candidate is fitted on this experiment's energies)
+
+**Scope.** Primary verdict cell: the **São Paulo population on the
+σ30-treated chains at n ∈ {8, 16}** (the deployment target per §3.2(d)).
+Secondary: EU, raw chains, the remaining rungs. All candidates run in the
+identical edge skeleton, so any difference is the ε policy alone.
+
+**Candidates** (constants frozen from their producing CSVs; s = |dh|/dx per
+edge, a/b = α/β from the ride's own physics):
+
+- **1a. ε₂ = 0.4621** — paper 1's F2 flat constant (`e52_split.csv`); the
+  published-bundle control. IS the existing eF2 column.
+- **1b. ε_SP = 0.2385** (BR) / 0.3712 (EU secondary) — Entry 60's regional
+  pools (`e60_regional.csv`, arm "B regional eps"), applied per the ride's
+  region. Column `exSP`.
+- **2. ε_geo(s) = clamp01(min(1, (a/b)/s) − 0.13)** — the deployed
+  grade-local estimator (Entries 8/18/32). IS the existing v2 column.
+- **4. ε_GI(s) = clamp01(min(1, (a/b)/s) − k/s)**, k = 0.0051 — Entry 45's
+  eq. (8), the grade-inverse deficit (form G; deficit-space fit, reproduced
+  independently by Entry 47 at 0.0052). k is a published derivation constant
+  and carries a sourcing comment, the ε₀ = 0.13 treatment. Column `exGI`.
+- **5. ε_VD(s) = clamp01(min(1, (a/b)/s) − δ₄₅(s))** — Entry 45's cell-level
+  mechanism curve per edge: δ₄₅(s) = occ(s; s₅₀, w)·Î·k_eff/(m·G·s·v(s)),
+  with the rider's occupancy sigmoid (s₅₀, w) from `e44_scurve_fits.csv`,
+  the rider's median interruption intensity Î from `e45_ridelevel.csv`, and
+  v(s) = max(v_t(s), v_f) (coasting terminal speed, floored at the flat
+  speed — Entry 63's v_e convention). Rider-level telemetry pins, the m̂
+  protocol's standing. Column `exVD`.
+- **ε = 0** — the pricing row (Entry 51's convention), column `ex0`.
+
+**Predictions.** (P1₇₄) The deployed ε_geo keeps the best treated-map
+accuracy — the incumbent holds. (P2₇₄) ε_SP scores WORSE than ε₂ on the
+treated chains vs measured energy despite being the regionally honest
+constant: the treated-chain bias is already positive (+3.8 to +9.2), and a
+lower ε raises it — the Entry-60 regional gain does not carry to edge grain
+on treated maps. Stated risk either way: 0.2385 was fitted beside the τ = 6
+deadband, and pairing it with σ30 breaks that bundle (the Entry-72 lesson).
+(P3₇₄) ε_GI lands within ~0.5 pp of ε_geo everywhere — same physics family.
+(P4₇₄) ε_VD beats the flat constants on raw chains but not ε_geo on treated
+ones. (P5₇₄) ε = 0 is several pp worse than every candidate — the descent
+term's price.
+
+**Gates.** Constants read from producing CSVs (asserted at load); ε = 0 is
+the worst column in every cell (ordering); the contest columns leave every
+existing Entry-73 column bit-identical (the skeleton is shared, so this is a
+no-op check on ef2/v2); population unchanged (1,034 / 1,844).
+
+### Results (run of record: the Entry-73 harness, warm; ε = 0 gate PASS, all Entry-73 gates green)
+
+med|Δ%| (signed), the eF2 skeleton with only the descent policy varying:
+
+| cell | ε₂ 0.4621 | ε_SP | ε_geo(s) | ε_GI(s) | ε_VD(s) | ε = 0 |
+|---|---|---|---|---|---|---|
+| igc5s30_n8 | 9.21 | 14.04 | **6.57** | 10.38 | 13.30 | 23.42 |
+| igc5s30_n16 | 5.11 | 10.24 | **3.31** | 6.17 | 9.01 | 19.91 |
+| fab30s30_n8 [BR] | 12.26 | 19.23 | **9.43** | 12.45 | 16.49 | 29.79 |
+| fab30s30_n16 [BR] | 7.11 | 13.76 | **5.60** | 7.44 | 11.48 | 23.66 |
+| fab30s30_n8 [EU] | 9.70 | 12.35 | **7.31** | 8.76 | 18.13 | 28.09 |
+| igc5_n8 (raw) | **35.66** | 44.42 | 38.20 | 37.37 | 39.83 | 62.23 |
+| fab30_n8 raw [BR] | **52.88** | 57.89 | 58.39 | 55.14 | 56.15 | 74.09 |
+
+**P1₇₄ CONFIRMED — the incumbent holds, decisively.** The deployed
+grade-local ε_geo wins every treated-map cell on both DTMs and both regions
+(3.31 at the SP σ30 n = 16 cell). The mechanism is the analytic curve table
+in the registration: treated profiles are shallow-descent-dominated, and
+ε_geo is the only policy crediting the 1–3% band near its coasting limit
+(0.87 vs the flats' 0.24–0.46).
+
+**P2₇₄ CONFIRMED — the regionally honest flat constant loses.** ε_SP = 0.2385
+is the worst real candidate on every treated cell (14.04 vs ε₂'s 9.21 at
+n = 8), ~5 pp behind the published control: the treated-chain bias is already
+positive and the stingier constant raises it. The Entry-60 regional gain does
+NOT carry to edge grain on treated maps — and the τ6-bundle mismatch risk
+registered against this arm is the residual explanation on offer.
+
+**P3₇₄ REFUTED** — ε_GI trails ε_geo by 2.9–3.8 pp on treated cells, not
+~0.5: the k/s deficit under-credits exactly the shallow band the treated
+chains live in. **P4₇₄ REFUTED** — ε_VD is poor on treated chains
+(9.01–18.13) and loses to the flat ε₂ on raw chains too; Entry 45's cell
+curve does not transfer from route cells to edges (its near-zero shallow
+credit is the whole story). **P5₇₄ CONFIRMED** — ε = 0 is the worst column
+in every cell (gate PASS).
+
+**The raw-chain inversion, now an ε-policy fact:** on untreated chains the
+flat ε₂ beats every adaptive policy (35.66 / 52.88) — noise manufactures
+steep micro-descents that grade-local policies refuse to credit. The
+chain-dependence Entry 73 found between v2 and eF2 is a property of the ε
+policy, not of the form family.
+
+**Recommendation supported for São Paulo routing: keep the deployed
+grade-local ε on the σ30-treated map.**
+
+*Decision (Danilo): "our recommendation should be eps_geo."* §3.2(d) now
+recommends the deployed grade-local cost on the σ30 map at **n = 16** —
+3.31 (+2.41) / 5.05 (+3.34), the med|Δ%| optimum on the local survey and
+0.20 pp from FABDEM's n = 32 optimum — with n = 8 fast (6.57 / 8.52) and
+portals on (policy-independent, ~0.4 pp on touched rides after σ30, the P9
+measurement). No site measurement, no engine change: two config defaults
+move (σ10 → σ30 incl. coarse sources; n 8 → 16). Claim `a3.default` → 3.31;
+the ε_geo cells, the n = 16-optimum property and the contest-winner count
+gated in 3l.
 
 ---
 
