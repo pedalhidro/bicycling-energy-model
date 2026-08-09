@@ -116,7 +116,11 @@ per segment:
   **measured c pin** — c(τ = 2) per chain × region, the median of
   (h₊ − h₊(τ=2))/km over the chain's own n = 1 profiles (paper 2 eq. L3,
   the measured-pin doctrine; the fitted (ε₄, c) bundle is knowingly broken
-  and disclosed, cross-checked against e71's CRATE rows).
+  and disclosed, cross-checked against e71's CRATE rows). The arm the paper
+  quotes is **eF4L** — the leave-one-rider-out pin, each ride scored with
+  the median c of the OTHER riders of its region (registration v4, after
+  the pooled pin was caught borrowing rider terrain; ≤ 0.5 pp from pooled
+  everywhere, because σ-treatment collapses the per-rider c spread).
 
 The correspondence paper 3 traces (each paper-1 model → a deployable
 treatment):
@@ -138,8 +142,45 @@ grade-local ε wins every cell — treated profiles live in the shallow 1–3%
 descent band, which only ε_geo credits near its coasting limit — while on
 raw chains the ordering inverts and the flat ε₂ wins, because noise
 manufactures steep micro-descents a grade-local policy refuses to credit.
-Paper 3's default is therefore the deployed cost unchanged, on a
-σ30-treated map at n = 16, portals on.
+Also refuted there: the regionally honest flat ε_SP = 0.2385 (E60's BR
+pool) loses ~5 pp on treated chains — the treated-chain bias is already
+positive and a stingier constant raises it — and E45's mechanism curve
+does not transfer from route cells to edges.
+
+## 2c. The map treatment — what Entries 73–75 settled
+
+The treatment axis outweighs every cost-function choice, and its internal
+contest is decided:
+
+- **σ30 beats σ10 uniformly** — every n, every policy, non-overlapping CIs
+  at the default cell (v2 at n = 16: 3.31 vs 6.73). This reproduces paper
+  2's route-grain Table 2 ordering at edge grain, and is one of the two
+  configuration changes the default asks of the deployed app (whose "auto"
+  is σ10, with coarse sources skipped entirely — the second change is
+  n 8 → 16).
+- **Prominence-τ (h-extrema) filtering is REFUTED as a σ replacement**
+  (Entry 75): at the primary cell prom6 reads 7.43 / 22.80 against σ30's
+  4.23 / 4.96 (IGC lattice / FABDEM). The mechanism, read from the c pins:
+  DEM noise is predominantly **connected 2-D micro-structure** — ridges
+  and saddles with through-paths everywhere — not the closed pits and
+  summits a prominence filter can see, while a 1-D transect crosses it at
+  full amplitude. The deadband's amplitude selectivity has no faithful
+  raster analog; the remaining gap to the F3 bound is a path/search-side
+  problem (line-graph reversal refund; band-state automaton — parked).
+- **Portals are orthogonal and always on**: the deck helps under every
+  policy and both σ levels (860/883 touched rides at σ10, 802/880 at σ30 —
+  the route-grain "correct or smooth, not both" does not carry to edge
+  grain). σ handles noise, ε handles recovery, the deck handles structures.
+- Side-finding for grid design (Entry 75, disclosed): a 30 m lattice
+  point-sampled from a 5 m raster is a *noisier* chain than along-track
+  sampling of the same survey (c 5.91 vs 3.75 m/km) — regular-lattice
+  aliasing is a cost of grid construction itself, beside paper 2's
+  "do not oversample" rule.
+
+**The deployable default (paper 3 §3.2(d))**: the deployed grade-local
+cost on a σ30-treated map at **n = 16**, portals on — 3.31 / 5.05 med|Δ%|
+(IGC / FABDEM), n = 8 fast (6.57 / 8.52), n = 16 the measured optimum on
+the local survey; past it only the signed bias improves.
 
 ## 3. F1 — the bare closed form
 
@@ -263,6 +304,9 @@ deployability ordering.
 | ε₅ (F5f), τ_n | 0.3632 · 2.0 | `e63_split.E63_TAUN2p0.csv` (the arm IS the suffix) |
 | ε₀, climbThr | 0.13 · 0.02 | derivation constants (`original_notes.md`) |
 | per-ride m̂/Ĉrr/ĈdA, emp | — | `e52_aggregates.csv` |
+| c pins (eF4/eF4L) | measured in-run per (chain, region), τ = 2; LORO per rider | `e73_gridpath.csv` `cn_*` columns (cross-checked vs `e71_dem_pop.csv` CRATE) |
+| ε_SP (contest arm, refuted per-edge) | 0.2385 BR / 0.3712 EU | `e60_regional.csv` |
+| eq. (8) k · (s₅₀, w) · Î (contest arms, refuted per-edge) | 0.0051 · per rider · per rider | E45 derivation constant · `e44_scurve_fits.csv` · `e45_ridelevel.csv` |
 
 All ε were fitted at **route grain** on paper 1's population and applied
 unchanged at edge grain — deliberately: Entry 73 measures what discretisation
@@ -278,3 +322,7 @@ costs the published models, not what refitted models could recover.
   mirror set's Python reference.
 - `src/harness/e63_f5_kebuffer.py::ride_tolls` — the toll (one algebra copy;
   callers set the module floor `TAU_N` per call).
+- `src/harness/e73_gridpath.py::edge_form` / `edge_eps` — the eF family and
+  the Entry-74 ε-policy walks (one skeleton, policies injected).
+- `src/harness/e75_prominence.py` — the prominence-τ raster filter (capped
+  geodesic reconstruction) and its refutation gates.

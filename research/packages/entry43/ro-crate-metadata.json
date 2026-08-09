@@ -171,9 +171,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/skc_compare.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/05516a9e4545957effd371bae367d0d1a4f53ca5/src/harness/skc_compare.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/434ec220487e7ec5f04f479413f26ea84a0fceca/src/harness/skc_compare.py",
       "sha256": "b9910fd9559ee43981ac9a6a2c9addd004cc6bfb65b712ccd8bad778ad8e8a3c",
-      "version": "05516a9e4545957effd371bae367d0d1a4f53ca5",
+      "version": "434ec220487e7ec5f04f479413f26ea84a0fceca",
       "programmingLanguage": "Python"
     },
     {
@@ -184,9 +184,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/skc_invert.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/05516a9e4545957effd371bae367d0d1a4f53ca5/src/harness/skc_invert.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/434ec220487e7ec5f04f479413f26ea84a0fceca/src/harness/skc_invert.py",
       "sha256": "f7f2f76874d3fe6fa965c757d83aef387054b1afa967cc003293156d0ec77a9b",
-      "version": "05516a9e4545957effd371bae367d0d1a4f53ca5",
+      "version": "434ec220487e7ec5f04f479413f26ea84a0fceca",
       "programmingLanguage": "Python"
     },
     {
@@ -197,9 +197,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/skc_eps_vs_pedal.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/05516a9e4545957effd371bae367d0d1a4f53ca5/src/harness/skc_eps_vs_pedal.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/434ec220487e7ec5f04f479413f26ea84a0fceca/src/harness/skc_eps_vs_pedal.py",
       "sha256": "8628d04f51da844a04a946efc6cea73405e0ff4e01932ea69f6af890e2da4cd1",
-      "version": "05516a9e4545957effd371bae367d0d1a4f53ca5",
+      "version": "434ec220487e7ec5f04f479413f26ea84a0fceca",
       "programmingLanguage": "Python"
     },
     {

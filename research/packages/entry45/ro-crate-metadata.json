@@ -149,9 +149,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e45_ridelevel.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/05516a9e4545957effd371bae367d0d1a4f53ca5/src/harness/e45_ridelevel.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/434ec220487e7ec5f04f479413f26ea84a0fceca/src/harness/e45_ridelevel.py",
       "sha256": "2ca5233b8e4eb3adc9af6c7fdb6f0bbfe2e0ba1e5f2686d46fd39ad70505f2b5",
-      "version": "05516a9e4545957effd371bae367d0d1a4f53ca5",
+      "version": "434ec220487e7ec5f04f479413f26ea84a0fceca",
       "programmingLanguage": "Python"
     },
     {
@@ -162,9 +162,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e45_flatseg.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/05516a9e4545957effd371bae367d0d1a4f53ca5/src/harness/e45_flatseg.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/434ec220487e7ec5f04f479413f26ea84a0fceca/src/harness/e45_flatseg.py",
       "sha256": "18b067738ed3afa3f06a051baeb1549d868f9114d9923d2404dd94115ebf27c7",
-      "version": "05516a9e4545957effd371bae367d0d1a4f53ca5",
+      "version": "434ec220487e7ec5f04f479413f26ea84a0fceca",
       "programmingLanguage": "Python"
     },
     {

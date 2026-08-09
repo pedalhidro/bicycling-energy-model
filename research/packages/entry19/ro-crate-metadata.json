@@ -129,9 +129,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/igc_resolution_test.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/05516a9e4545957effd371bae367d0d1a4f53ca5/src/harness/igc_resolution_test.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/434ec220487e7ec5f04f479413f26ea84a0fceca/src/harness/igc_resolution_test.py",
       "sha256": "ddf0c363d792e5a9fa96c7ba13f9ce63222aa69d1204df6a7add83328d35b9ee",
-      "version": "05516a9e4545957effd371bae367d0d1a4f53ca5",
+      "version": "434ec220487e7ec5f04f479413f26ea84a0fceca",
       "programmingLanguage": "Python"
     },
     {

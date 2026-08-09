@@ -117,9 +117,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e58_intervals.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/05516a9e4545957effd371bae367d0d1a4f53ca5/src/harness/e58_intervals.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/434ec220487e7ec5f04f479413f26ea84a0fceca/src/harness/e58_intervals.py",
       "sha256": "533a640ce6eaa0fb9fb55f0205a99dc2099a8a28a0f4ab465683b303ca5e4ccc",
-      "version": "05516a9e4545957effd371bae367d0d1a4f53ca5",
+      "version": "434ec220487e7ec5f04f479413f26ea84a0fceca",
       "programmingLanguage": "Python"
     },
     {

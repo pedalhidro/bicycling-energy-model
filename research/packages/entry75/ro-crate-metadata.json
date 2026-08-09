@@ -19,16 +19,16 @@
     {
       "@id": "./",
       "@type": "Dataset",
-      "name": "Entry 35 evidence package — the honest-physics residual — where do the missing 4–5 points live?",
-      "description": "Evidence package for journal Entry 35 (2026-07-28): aggregates, hashes and provenance only — the prose remains authoritative in the journal. Regenerate all packages: `python3 research/packages/make_crates.py`.",
+      "name": "Entry 75 evidence package — prominence-τ map treatment — the deadband's amplitude selectivity as raster preprocessing",
+      "description": "Evidence package for journal Entry 75 (2026-08-08): aggregates, hashes and provenance only — the prose remains authoritative in the journal. Regenerate all packages: `python3 research/packages/make_crates.py`.",
       "author": {
         "@id": "#danilo"
       },
-      "dateCreated": "2026-07-28",
+      "dateCreated": "2026-08-08",
       "isPartOf": {
         "@id": "https://doi.org/10.5281/zenodo.21282165"
       },
-      "url": "https://github.com/danlessa/bicycling-energy-model/tree/main/research/packages/entry35",
+      "url": "https://github.com/danlessa/bicycling-energy-model/tree/main/research/packages/entry75",
       "hasPart": [],
       "mentions": [
         {
@@ -43,7 +43,12 @@
       },
       "conformsTo": {
         "@id": "https://w3id.org/ro/wfrun/process/0.5"
-      }
+      },
+      "citation": [
+        {
+          "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/discrete-model.md"
+        }
+      ]
     },
     {
       "@id": "#danilo",
@@ -66,8 +71,8 @@
     {
       "@id": "#claim",
       "@type": "Claim",
-      "name": "Entry 35: the honest-physics residual — where do the missing 4–5 points live?",
-      "text": "the honest-physics residual — where do the missing 4–5 points live?",
+      "name": "Entry 75: prominence-τ map treatment — the deadband's amplitude selectivity as raster preprocessing",
+      "text": "No — refuted on both grids. At the primary cell (eps_geo, n = 16) the prominence-6 chain reads 7.43 med|d%| on the IGC 30 m lattice and 22.80 on FABDEM against the Gaussian's 4.23 / 4.96, with the paired test decisively against (41/150 and 16/140). The c pins carry the mechanism: prominence removes phantom ascent at 5.91 to 3.63 m/km (IGC) and barely 5.73 to 5.20 (FABDEM) vs the Gaussian's 2.53 / 2.99 — DEM noise is predominantly CONNECTED 2-D micro-structure with through-paths everywhere, not the closed pits and summits a prominence filter can see, while a 1-D transect crosses it at full amplitude. The deadband's amplitude filtering has no faithful raster analog via h-extrema; sigma-30 keeps the crown and the deployable default stands. Side-finding: a 30 m lattice point-sampled from the 5 m survey is itself a noisier chain than along-track sampling (c 5.91 vs 3.75 m/km) — regular-lattice aliasing is a grid-design cost.",
       "appearance": [
         {
           "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
@@ -85,20 +90,20 @@
       "conditionsOfAccess": "Available on request from the author, coordinates stripped."
     },
     {
-      "@id": "#data/results/e35_residual.csv",
+      "@id": "#data/results/e75_prominence.csv",
       "@type": "File",
-      "name": "data/results/e35_residual.csv",
-      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `python3 src/harness/e35_residual.py`.",
-      "sha256": "94efc491f1c4815f6c296e3c87a8e0e7f106781ebac754334e29504ff660e6cb",
-      "contentSize": "407004",
+      "name": "data/results/e75_prominence.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `/Users/danlessa/conda/bin/python src/harness/e75_prominence.py`.",
+      "sha256": "fa516c6344309df10e24d84647ad8c3257297a9e38592c3933b5a6e1670ab00c",
+      "contentSize": "206645",
       "encodingFormat": "text/csv"
     },
     {
       "@id": "#run",
       "@type": "CreateAction",
-      "name": "Entry 35 harness run",
+      "name": "Entry 75 harness run",
       "description": "Re-executable from the repository and the private inputs; see the journal entry for protocol, endpoints and verdicts.",
-      "endTime": "2026-07-28",
+      "endTime": "2026-08-08",
       "actionStatus": {
         "@id": "http://schema.org/CompletedActionStatus"
       },
@@ -107,7 +112,7 @@
       },
       "instrument": [
         {
-          "@id": "#src/harness/e35_residual.py"
+          "@id": "#src/harness/e75_prominence.py"
         }
       ],
       "object": [
@@ -117,22 +122,28 @@
       ],
       "result": [
         {
-          "@id": "#data/results/e35_residual.csv"
+          "@id": "#data/results/e75_prominence.csv"
         }
       ]
     },
     {
-      "@id": "#src/harness/e35_residual.py",
+      "@id": "#src/harness/e75_prominence.py",
       "@type": [
         "File",
         "SoftwareApplication",
         "SoftwareSourceCode"
       ],
-      "name": "src/harness/e35_residual.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/434ec220487e7ec5f04f479413f26ea84a0fceca/src/harness/e35_residual.py",
-      "sha256": "cbfd249b8dd9fe21d82acb691e3c39a6c7f2c674de4bc10dd57980be9d95910f",
+      "name": "src/harness/e75_prominence.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/434ec220487e7ec5f04f479413f26ea84a0fceca/src/harness/e75_prominence.py",
+      "sha256": "faf97a66f057640761469a60d44e9c33b2ad3fba5ef75ab309cf4dac6545dc10",
       "version": "434ec220487e7ec5f04f479413f26ea84a0fceca",
       "programmingLanguage": "Python"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/discrete-model.md",
+      "@type": "CreativeWork",
+      "name": "research/notes/discrete-model.md",
+      "encodingFormat": "text/markdown"
     },
     {
       "@id": "ro-crate-preview.html",

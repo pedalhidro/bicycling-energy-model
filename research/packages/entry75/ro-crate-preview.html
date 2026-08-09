@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Entrada 37 — pacote de evidência</title>
+<title>Entrada 75 — pacote de evidência</title>
 <style>
 :root {
   --paper:#f6f9f8; --ink:#1d2b30; --muted:#5b7076; --accent:#16717f;
@@ -58,19 +58,19 @@ ul { margin:.4rem 0; padding-left:1.2rem; }
 <body>
 <main>
 <header>
-  <div class="eyebrow">Pacote de evidência · RO-Crate</div>
-  <h1>Entrada 37 — the KE-equivalent height — momentum under rollers (hypothesis note, no run)</h1>
+  <div class="eyebrow">Pacote de evidência · RO-Crate (Process Run)</div>
+  <h1>Entrada 75 — prominence-τ map treatment — the deadband&#x27;s amplitude selectivity as raster preprocessing</h1>
   <div class="badges">
-    <span>2026-07-28</span>
+    <span>2026-08-08</span>
     <span>commit 434ec220487e</span>
-    <span>somente afirmação</span>
+    <span>com execução de harness</span>
   </div>
 </header>
 
 <section>
   <h2>A afirmação</h2>
   <blockquote>
-    the KE-equivalent height — momentum under rollers (hypothesis note, no run)
+    No — refuted on both grids. At the primary cell (eps_geo, n = 16) the prominence-6 chain reads 7.43 med|d%| on the IGC 30 m lattice and 22.80 on FABDEM against the Gaussian&#x27;s 4.23 / 4.96, with the paired test decisively against (41/150 and 16/140). The c pins carry the mechanism: prominence removes phantom ascent at 5.91 to 3.63 m/km (IGC) and barely 5.73 to 5.20 (FABDEM) vs the Gaussian&#x27;s 2.53 / 2.99 — DEM noise is predominantly CONNECTED 2-D micro-structure with through-paths everywhere, not the closed pits and summits a prominence filter can see, while a 1-D transect crosses it at full amplitude. The deadband&#x27;s amplitude filtering has no faithful raster analog via h-extrema; sigma-30 keeps the crown and the deployable default stands. Side-finding: a 30 m lattice point-sampled from the 5 m survey is itself a noisier chain than along-track sampling (c 5.91 vs 3.75 m/km) — regular-lattice aliasing is a grid-design cost.
     <footer>Conforme registrado no
     <a href="https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md">diário de comparação de modelos</a> e no grafo de
     afirmações (<a href="https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl">claims.ttl</a>) — a prosa da entrada
@@ -79,11 +79,30 @@ ul { margin:.4rem 0; padding-left:1.2rem; }
 </section>
 
 <section>
+  <h2>Como foi produzida</h2>
+  <p>Instrumento(s): <code>src/harness/e75_prominence.py</code> (sha256 <code class='hash'>faf97a66f0576407…</code>, <a href="https://github.com/danlessa/bicycling-energy-model/blob/434ec220487e7ec5f04f479413f26ea84a0fceca/src/harness/e75_prominence.py">fonte no commit</a>).</p>
+  <p class='muted'>Insumos primários: gravações de pedaladas privadas (FIT com GPS e potência) — fora do repositório e deste pacote; agregados sem coordenadas disponíveis sob pedido.</p>
+  <p class="muted">Reconstruir os pacotes:
+  <code>python3 research/packages/make_crates.py</code>.</p>
+</section>
+
+<section>
+  <h2>Arquivos de resultado (apenas hash — dados privados)</h2>
+  <p class="muted">CSVs por pedalada ficam fora do repositório (nomes e datas de
+  atividades privadas). Os hashes permitem a um verificador com acesso
+  consentido confirmar que recebeu os mesmos arquivos.</p>
+  <div class="tablewrap"><table>
+    <tr><th>arquivo</th><th>tamanho</th><th>sha256</th><th>regenera via</th></tr>
+    <tr><td><code>data/results/e75_prominence.csv</code></td><td class='num'>206,645 B</td><td><code class='hash'>fa516c6344309df1…</code></td><td>/Users/danlessa/conda/bin/python src/harness/e75_prominence.py</td></tr>
+  </table></div>
+</section>
+
+<section>
   <h2>Contexto</h2>
   <ul>
-    <li>Diário (entrada 37): <a href="https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md">MODEL_COMPARISON_JOURNAL.md</a></li>
+    <li>Diário (entrada 75): <a href="https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md">MODEL_COMPARISON_JOURNAL.md</a></li>
     <li>Grafo de afirmações: <a href="https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl">claims.ttl</a></li>
-    <li>Documento relacionado: <a href="https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/original_notes.md">research/notes/original_notes.md</a></li>
+    <li>Documento relacionado: <a href="https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/discrete-model.md">research/notes/discrete-model.md</a></li>
     <li>Pacote de pesquisa: <a href="https://doi.org/10.5281/zenodo.21282165">https://doi.org/10.5281/zenodo.21282165</a></li>
     <li>Metadados legíveis por máquina: <code>ro-crate-metadata.json</code></li>
   </ul>
