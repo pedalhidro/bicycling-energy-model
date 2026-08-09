@@ -117,9 +117,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e51_flatconst.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b345cbbc055f985ae3fcab06a408c951f86fa012/src/harness/e51_flatconst.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/05516a9e4545957effd371bae367d0d1a4f53ca5/src/harness/e51_flatconst.py",
       "sha256": "7f31e256a91c6aa021756085c1e134ed2a7024bdeb9a638433a8bd0bb73a4bb1",
-      "version": "b345cbbc055f985ae3fcab06a408c951f86fa012",
+      "version": "05516a9e4545957effd371bae367d0d1a4f53ca5",
       "programmingLanguage": "Python"
     },
     {

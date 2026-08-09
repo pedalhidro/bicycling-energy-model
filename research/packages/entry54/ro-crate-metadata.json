@@ -117,9 +117,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e54_transfer.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b345cbbc055f985ae3fcab06a408c951f86fa012/src/harness/e54_transfer.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/05516a9e4545957effd371bae367d0d1a4f53ca5/src/harness/e54_transfer.py",
       "sha256": "a7bd61ea0e1e4c3d5910a2fcbf6d8a7e0130167bf7d4dfbeaf9c1b3f24335668",
-      "version": "b345cbbc055f985ae3fcab06a408c951f86fa012",
+      "version": "05516a9e4545957effd371bae367d0d1a4f53ca5",
       "programmingLanguage": "Python"
     },
     {

@@ -117,9 +117,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e49_affine.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b345cbbc055f985ae3fcab06a408c951f86fa012/src/harness/e49_affine.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/05516a9e4545957effd371bae367d0d1a4f53ca5/src/harness/e49_affine.py",
       "sha256": "cecad5da3cdd6540cec463a7d3a8049e88a2b8238df52918849b695201798fa0",
-      "version": "b345cbbc055f985ae3fcab06a408c951f86fa012",
+      "version": "05516a9e4545957effd371bae367d0d1a4f53ca5",
       "programmingLanguage": "Python"
     },
     {

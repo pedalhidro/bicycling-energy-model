@@ -117,9 +117,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e70_taucurves.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b345cbbc055f985ae3fcab06a408c951f86fa012/src/harness/e70_taucurves.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/05516a9e4545957effd371bae367d0d1a4f53ca5/src/harness/e70_taucurves.py",
       "sha256": "65ce88ba15041b1fb8971c41f377ae8f74c49c1121faa002373837e0690fb911",
-      "version": "b345cbbc055f985ae3fcab06a408c951f86fa012",
+      "version": "05516a9e4545957effd371bae367d0d1a4f53ca5",
       "programmingLanguage": "Python"
     },
     {

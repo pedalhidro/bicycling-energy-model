@@ -141,9 +141,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e44_scurve.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b345cbbc055f985ae3fcab06a408c951f86fa012/src/harness/e44_scurve.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/05516a9e4545957effd371bae367d0d1a4f53ca5/src/harness/e44_scurve.py",
       "sha256": "01fe14d57f82858e73d15b30317a1116e1e7454f69ad66cec7cad4a4143d371b",
-      "version": "b345cbbc055f985ae3fcab06a408c951f86fa012",
+      "version": "05516a9e4545957effd371bae367d0d1a4f53ca5",
       "programmingLanguage": "Python"
     },
     {

@@ -139,6 +139,13 @@ E73 default igc5s30 marginality: n=32 4.36 → n=128 4.06 GATE-OK
 E73 default fab30s30 n=8: 11.49 (+11.40) GATE-OK
 E73 default fab30s30 n=16: 6.46 (+6.29) GATE-OK
 E73 default fab30s30 marginality: n=32 5.39 → n=128 4.79 GATE-OK
+E74 default(ε_geo) igc5s30 n=8: 6.57 (+6.54) GATE-OK
+E74 default(ε_geo) igc5s30 n=16: 3.31 (+2.41) GATE-OK
+E74 default igc5s30: n=16 within 0.25 pp of the ≥16 optimum: 16:3.31 32:3.40 64:3.45 128:3.42 GATE-OK
+E74 default(ε_geo) fab30s30 n=8: 8.52 (+8.42) GATE-OK
+E74 default(ε_geo) fab30s30 n=16: 5.05 (+3.34) GATE-OK
+E74 default fab30s30: n=16 within 0.25 pp of the ≥16 optimum: 16:5.05 32:4.85 64:4.96 128:5.19 GATE-OK
+E74 ε contest: ε_geo best real candidate in the quoted treated cells: 4/4 GATE-OK
 E73 portal deck on σ30 (P9): closer on 802/880 GATE-OK
 E73 F3(raw) vs eF2(σ30 map): IGC 5.67 < 9.21 · FAB 7.01 < 11.49 GATE-OK
 E73 portal deck closer (touched rides): 860/883 GATE-OK

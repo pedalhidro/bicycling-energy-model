@@ -97,8 +97,8 @@
       "@type": "File",
       "name": "data/results/e73_gridpath.csv",
       "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `/Users/danlessa/conda/bin/python src/harness/e73_gridpath.py`.",
-      "sha256": "556fbdf258e3cae49ae64216aa25ac57e0e6683ee7d21c0483d0a7acd833c1ec",
-      "contentSize": "10898195",
+      "sha256": "7d54e23979fa0b58fdef5bb2b1ba8415b8654b592cbe257de79d720d1e0a637b",
+      "contentSize": "12732311",
       "encodingFormat": "text/csv"
     },
     {
@@ -137,9 +137,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e73_gridpath.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b345cbbc055f985ae3fcab06a408c951f86fa012/src/harness/e73_gridpath.py",
-      "sha256": "9d422a380bad99a6b6619a2ea92f1e969f81c503154fad7f514d42b5a03e832a",
-      "version": "b345cbbc055f985ae3fcab06a408c951f86fa012",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/05516a9e4545957effd371bae367d0d1a4f53ca5/src/harness/e73_gridpath.py",
+      "sha256": "2f9da41027e8add36ce3dbb28324cf33ed9a6323997c567ef0948e519ab4645c",
+      "version": "05516a9e4545957effd371bae367d0d1a4f53ca5",
       "programmingLanguage": "Python"
     },
     {

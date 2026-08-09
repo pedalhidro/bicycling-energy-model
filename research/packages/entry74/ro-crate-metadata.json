@@ -19,8 +19,8 @@
     {
       "@id": "./",
       "@type": "Dataset",
-      "name": "Entry 72 evidence package — paper 3's first tranche — edge-grain fidelity, the scale U, and the valley patch at the deployed pitch",
-      "description": "Evidence package for journal Entry 72 (2026-08-08): aggregates, hashes and provenance only — the prose remains authoritative in the journal. Regenerate all packages: `python3 research/packages/make_crates.py`.",
+      "name": "Entry 74 evidence package — which ε belongs in the edge? — a frozen-transfer contest of five descent policies",
+      "description": "Evidence package for journal Entry 74 (2026-08-08): aggregates, hashes and provenance only — the prose remains authoritative in the journal. Regenerate all packages: `python3 research/packages/make_crates.py`.",
       "author": {
         "@id": "#danilo"
       },
@@ -28,7 +28,7 @@
       "isPartOf": {
         "@id": "https://doi.org/10.5281/zenodo.21282165"
       },
-      "url": "https://github.com/danlessa/bicycling-energy-model/tree/main/research/packages/entry72",
+      "url": "https://github.com/danlessa/bicycling-energy-model/tree/main/research/packages/entry74",
       "hasPart": [],
       "mentions": [
         {
@@ -47,6 +47,9 @@
       "citation": [
         {
           "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/article/paper3-edge-cost.md"
+        },
+        {
+          "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/discrete-model.md"
         }
       ]
     },
@@ -71,8 +74,8 @@
     {
       "@id": "#claim",
       "@type": "Claim",
-      "name": "Entry 72: paper 3's first tranche — edge-grain fidelity, the scale U, and the valley patch at the deployed pitch",
-      "text": "paper 3's first tranche — edge-grain fidelity, the scale U, and the valley patch at the deployed pitch",
+      "name": "Entry 74: which ε belongs in the edge? — a frozen-transfer contest of five descent policies",
+      "text": "The incumbent holds, decisively: the deployed grade-local eps_geo wins every treated-map cell on both DTMs and both regions (3.31 med|d%| at the Sao Paulo sigma-30 n = 16 cell vs 5.11 for the published flat eps-2 and 10.24 for the regionally honest eps_SP = 0.2385 — the lower regional constant loses ~5 pp because the treated-chain bias is already positive). Entry 45's grade-inverse deficit trails by ~3 pp (its k/s term under-credits the shallow band treated chains live in) and the occupancy mechanism curve does not transfer from route cells to edges. On RAW chains the ordering inverts and flat eps-2 wins: noise manufactures steep micro-descents that grade-local policies refuse to credit — adaptive recovery and untreated noise do not mix. eps = 0 prices the descent term as worst everywhere. Five policies, identical edge skeleton, all constants frozen from producing CSVs; no candidate fitted on this experiment's energies.",
       "appearance": [
         {
           "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
@@ -90,18 +93,18 @@
       "conditionsOfAccess": "Available on request from the author, coordinates stripped."
     },
     {
-      "@id": "#data/results/e72_edgegrain.csv",
+      "@id": "#data/results/e73_gridpath.csv",
       "@type": "File",
-      "name": "data/results/e72_edgegrain.csv",
-      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `python3 src/harness/e72_edgegrain.py`.",
-      "sha256": "d1aeec2fb0f5c97fd62ba46018a7ed40d596d51701b5680732bdcb708079be48",
-      "contentSize": "473102",
+      "name": "data/results/e73_gridpath.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `/Users/danlessa/conda/bin/python src/harness/e73_gridpath.py`.",
+      "sha256": "7d54e23979fa0b58fdef5bb2b1ba8415b8654b592cbe257de79d720d1e0a637b",
+      "contentSize": "12732311",
       "encodingFormat": "text/csv"
     },
     {
       "@id": "#run",
       "@type": "CreateAction",
-      "name": "Entry 72 harness run",
+      "name": "Entry 74 harness run",
       "description": "Re-executable from the repository and the private inputs; see the journal entry for protocol, endpoints and verdicts.",
       "endTime": "2026-08-08",
       "actionStatus": {
@@ -112,7 +115,7 @@
       },
       "instrument": [
         {
-          "@id": "#src/harness/e72_edgegrain.py"
+          "@id": "#src/harness/e73_gridpath.py"
         }
       ],
       "object": [
@@ -122,20 +125,20 @@
       ],
       "result": [
         {
-          "@id": "#data/results/e72_edgegrain.csv"
+          "@id": "#data/results/e73_gridpath.csv"
         }
       ]
     },
     {
-      "@id": "#src/harness/e72_edgegrain.py",
+      "@id": "#src/harness/e73_gridpath.py",
       "@type": [
         "File",
         "SoftwareApplication",
         "SoftwareSourceCode"
       ],
-      "name": "src/harness/e72_edgegrain.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/05516a9e4545957effd371bae367d0d1a4f53ca5/src/harness/e72_edgegrain.py",
-      "sha256": "a2219211badbd795727b00c996561575be2beb93ac255a5a799a53e0330cf86e",
+      "name": "src/harness/e73_gridpath.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/05516a9e4545957effd371bae367d0d1a4f53ca5/src/harness/e73_gridpath.py",
+      "sha256": "2f9da41027e8add36ce3dbb28324cf33ed9a6323997c567ef0948e519ab4645c",
       "version": "05516a9e4545957effd371bae367d0d1a4f53ca5",
       "programmingLanguage": "Python"
     },
@@ -143,6 +146,12 @@
       "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/article/paper3-edge-cost.md",
       "@type": "CreativeWork",
       "name": "research/article/paper3-edge-cost.md",
+      "encodingFormat": "text/markdown"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/discrete-model.md",
+      "@type": "CreativeWork",
+      "name": "research/notes/discrete-model.md",
       "encodingFormat": "text/markdown"
     },
     {
