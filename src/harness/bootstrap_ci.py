@@ -847,7 +847,7 @@ for _k, _want, _lbl in (("f3_test_med_abs", 3.39, "F3 test med|D%|"),
     if not _ok:
         failed = True
 
-# the selection itself is a claim: F3 must win, and tau must land on 2 m
+# the selection itself is a claim: F3 must win, and tau must land on 6 m
 _ok = _e52.get("winner") == "F3"
 print("  winner is F3" + (" GATE-OK" if _ok else f" GATE-FAIL({_e52.get('winner')})"))
 if not _ok:
@@ -901,11 +901,11 @@ if not _ok:
 
 
 # ---------------------------------------------------------- 3s. Entry 56
-# Paper 1's Table 4: every constant priced on one loss-inflation scale. The two
+# Paper 1's Table 6: every constant priced on one loss-inflation scale. The two
 # the METHOD supplies must rank LAST -- that ordering is the table's argument,
 # so it is gated rather than merely printed.
 sec("3s")
-print("\n== Entry 56 — structural-parameter sensitivity (paper Table 4) ==")
+print("\n== Entry 56 — structural-parameter sensitivity (paper Table 6) ==")
 _s = {r["parameter"].strip('"'): parse_float(r["loss_inflation_pct"])
       for r in parse_csv(os.path.join(RESULTS, "e56_struct.csv"))}
 for _k, _want in (("tau (F3 deadband)", 0.2), ("c (F4 scalar)", 0.1),
@@ -929,7 +929,7 @@ if not _ok:
 # the argument is that one pool biases the two regions in opposite directions
 # -- a fact an accuracy-only gate would not protect.
 sec("3t")
-print("\n== Entry 60 — regional eps pools (paper Table 5) ==")
+print("\n== Entry 60 — regional eps pools (paper Table 4) ==")
 _e60 = {}
 for _r in parse_csv(os.path.join(RESULTS, "e60_regional.csv")):
     _e60[(_r["region"].strip('"'), _r["arm"].strip('"'))] = _r

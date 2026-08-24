@@ -30,9 +30,9 @@
 @prefix claims:  <https://danlessa.github.io/bicycling-energy-model/claims#> .
 
 <#c-a3.discretisation.fidelity> a schema:Claim ;
-  schema:text "The per-edge cost sits a median +1.8 pp above its own route-level integral at 5 m — the grade-local epsilon and the clamp floor are the entire discretisation gap" ;
+  schema:text "The per-edge cost sits a median +1.83 pp (med |gap| 1.84) above its own route-level integral at 5 m — the grade-local epsilon and the clamp floor are the entire discretisation gap" ;
   dcterms:type "derived" ;
-  pc:value 1.8 ;
+  pc:value 1.84 ;
   pc:gateSection "3k" ;
   cito:citesAsEvidence dg:o_e72 ;
   prov:wasDerivedFrom claims:assert33 ;
