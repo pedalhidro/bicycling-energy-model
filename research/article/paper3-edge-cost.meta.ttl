@@ -84,7 +84,7 @@
   rdfs:comment "Entry 73 prediction P4 confirmed. H4's registered sigma-30 stacking arm (registration v3, P9) REFUTED the route-grain carry-over: the deck still helps on the sigma-30-treated chain, 802/880 closer, eF2 8.95 to 8.51 — gated in 3l" .
 
 <#c-a3.default> a schema:Claim ;
-  schema:text "The deployable default: the deployed grade-local cost (v2Edge's eps_geo) on a sigma-30-treated map at n = 16 directions — med|delta%| 3.31 on the local 5 m survey, 5.05 on FABDEM — with n = 8 as the fast choice (6.57 / 8.52), portals on, and n = 16 the measured med|delta%| optimum on the local survey (0.20 pp from FABDEM's n = 32 optimum); only the signed bias improves past 16" ;
+  schema:text "The deployable default: the deployed grade-local cost (v2Edge's eps_geo) on a sigma-30-treated map at n = 16 directions — med|delta%| 3.31 [2.94, 3.80] · +2.41 [+2.05, +2.93] on the local 5 m survey, 5.05 [4.72, 5.35] · +3.34 [+2.92, +4.02] on FABDEM — with n = 8 as the fast choice (6.57 / 8.52), portals on, and n = 16 the measured med|delta%| optimum on the local survey (0.20 pp from FABDEM's n = 32 optimum); only the signed bias improves past 16" ;
   dcterms:type "derived" ;
   pc:value 3.31 ;
   pc:gateSection "3l" ;

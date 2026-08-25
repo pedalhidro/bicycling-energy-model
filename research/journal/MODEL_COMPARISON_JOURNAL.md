@@ -508,6 +508,32 @@ move (σ10 → σ30 incl. coarse sources; n 8 → 16). Claim `a3.default` → 3.
 the ε_geo cells, the n = 16-optimum property and the contest-winner count
 gated in 3l.
 
+### Amendment (2026-08-24) — 95% bands for the four default cells
+
+The recommendation's cells were published as point medians only, the one
+place in paper 3 short of the house rule that every published accuracy
+carries error AND bias, each with a 95% CI. The bands are pure arithmetic on
+the existing `e73_gridpath.csv` — no new run — under the battery's exact
+convention (percentile bootstrap, mulberry32, seeds 42/43, $B = 10^4$, iid
+resample within the population; the replication reproduced all four gated
+medians to the digit before computing intervals):
+
+| cell | med\|Δ%\| [95% CI] | signed [95% CI] |
+|---|--:|--:|
+| igc5σ30 · n = 16 | 3.31 [2.94, 3.80] | +2.41 [+2.05, +2.93] |
+| fab30σ30 · n = 16 | 5.05 [4.72, 5.35] | +3.34 [+2.92, +4.02] |
+| igc5σ30 · n = 8 (fast) | 6.57 [6.28, 6.86] | +6.54 [+6.16, +6.80] |
+| fab30σ30 · n = 8 (fast) | 8.52 [8.04, 9.07] | +8.42 [+7.88, +9.00] |
+
+Gate 3l's E74 default block now routes these four cells through `report()`
+like every other bracketed statistic, asserting the bands; paper 3 §3.2.4
+and the `a3.default` sidecar text carry them. The same verification run
+confirmed the marginality claims from the full grid: on the survey n = 16
+IS the optimum outright (32: 3.40), and FABDEM's n = 32 optimum is 4.85.
+No conclusion moves — the n = 16 σ30 bands exclude the n = 8 medians on
+both chains, so the "two config defaults" recommendation is now
+interval-separated from the fast choice, not just median-separated.
+
 ---
 
 ## 2026-08-08 — Entry 73: the discrete-routing ladder — direction count, terrain lattice and portals on the matched ridden path

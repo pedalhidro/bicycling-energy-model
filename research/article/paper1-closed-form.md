@@ -722,7 +722,7 @@ The law's two historical failure modes are identified and cheap to fix: gate the
 
 ## Data and code availability
 
-All analysis code, the forward simulator, the parsers, the per-entry lab journal, its executable mirror, and the statistical gate battery are public at `github.com/danlessa/bicycling-energy-model` (stdlib-only Python; no build step). Per-ride GPS tracks and the independent riders' exports are private by design (shared with consent, never committed); every published number regenerates from one documented harness command per dataset, and a bootstrap gate script fails loudly if any published median stops reproducing.
+All analysis code, the forward simulator, the parsers, the per-entry lab journal, its executable mirror, and the statistical gate battery are public at `github.com/pedalhidro/bicycling-energy-model` (stdlib-only Python; no build step). Per-ride GPS tracks and the independent riders' exports are private by design (shared with consent, never committed); every published number regenerates from one documented harness command per dataset, and a bootstrap gate script fails loudly if any published median stops reproducing.
 
 D6 is third-party open data, not ours to redistribute: the scikit-cycling `power_regression` deposit, Zenodo [10.5281/zenodo.1202440](https://doi.org/10.5281/zenodo.1202440), CC BY 4.0, four riders, 2012–2015. We publish aggregates and the harness that reads it, never its geometry — the tracks begin at the riders' home addresses despite the deposit's `user_N` anonymisation, so redistributing derived routes would undo that. Cite the DOI to obtain it.
 

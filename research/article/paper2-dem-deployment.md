@@ -188,7 +188,7 @@ FABDEM oversampled at 5 m gives 689 m and +8.7%; at 30 m steps, 575 m and +4.5%.
 
 ## Data and code availability
 
-The instrument is `src/harness/e41_dem_route.py`; it writes one per-ride CSV per walk — the canonical five-corpus walk and the re-based population walk of this letter's tables — and every published number in this letter is re-derived from those CSVs by the project's gate battery (`src/harness/bootstrap_ci.py`, sections 3i/3j), which exits non-zero on any mismatch. All analysis code is public at `github.com/danlessa/bicycling-energy-model` (stdlib-only Python, no build step). Per-ride GPS tracks and the independent riders' exports are private by design. The local 5 m survey (IGC-SP 2010) is a third-party product not redistributed here; the FABDEM tiles are public. The full protocol, its registered predictions and its deviations are lab-journal Entries 41 and 71.
+The instrument is `src/harness/e41_dem_route.py`; it writes one per-ride CSV per walk — the canonical five-corpus walk and the re-based population walk of this letter's tables — and every published number in this letter is re-derived from those CSVs by the project's gate battery (`src/harness/bootstrap_ci.py`, sections 3i/3j), which exits non-zero on any mismatch. All analysis code is public at `github.com/pedalhidro/bicycling-energy-model` (stdlib-only Python, no build step). Per-ride GPS tracks and the independent riders' exports are private by design. The local 5 m survey (IGC-SP 2010) is a third-party product not redistributed here; the FABDEM tiles are public. The full protocol, its registered predictions and its deviations are lab-journal Entries 41 and 71.
 
 ## AI-assistance declaration
 

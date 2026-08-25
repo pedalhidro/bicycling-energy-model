@@ -706,18 +706,17 @@ for _lbl, _pop, _ch, _exp in (
         failed = True
 
 # the eps_geo default the paper NOW quotes (Danilo: "our recommendation
-# should be eps_geo") and Entry 74's contest verdict behind it
+# should be eps_geo") and Entry 74's contest verdict behind it. The four cells
+# carry published 95% bands (added 2026-08-24 per the accuracy+bias+CI rule),
+# so they go through report() like every other bracketed statistic.
 for _lbl, _pop, _ch, _exp in (
-        ("IGC", _igc, "igc5s30", {8: (6.57, 6.54), 16: (3.31, 2.41)}),
-        ("FAB", _fab, "fab30s30", {8: (8.52, 8.42), 16: (5.05, 3.34)})):
-    for _n, (_ea, _es) in _exp.items():
-        _v = col(_pop, f"{_ch}_n{_n}_v2")
-        _m, _ms = median([abs(x) for x in _v]), median(_v)
-        _ok = abs(_m - _ea) <= 0.011 and abs(_ms - _es) <= 0.011
-        print(f"E74 default(ε_geo) {_ch} n={_n}: {_m:.2f} ({_ms:+.2f})"
-              + (" GATE-OK" if _ok else f" GATE-FAIL(exp {_ea}/{_es})"))
-        if not _ok:
-            failed = True
+        ("IGC", _igc, "igc5s30", {8: (6.57, 6.54, (6.28, 6.86), (6.16, 6.80)),
+                                  16: (3.31, 2.41, (2.94, 3.80), (2.05, 2.93))}),
+        ("FAB", _fab, "fab30s30", {8: (8.52, 8.42, (8.04, 9.07), (7.88, 9.00)),
+                                   16: (5.05, 3.34, (4.72, 5.35), (2.92, 4.02))})):
+    for _n, (_ea, _es, _eci, _ecis) in _exp.items():
+        report(f"E74 default(ε_geo) {_ch} n={_n}", col(_pop, f"{_ch}_n{_n}_v2"),
+               _ea, _es, expect_ci=_eci, expect_ci_signed=_ecis)
     _meds = {n: median([abs(x) for x in col(_pop, f"{_ch}_n{n}_v2")])
              for n in (16, 32, 64, 128)}
     _ok = _meds[16] - min(_meds.values()) <= 0.25
