@@ -82,34 +82,34 @@
 # were rather than how good the law is.
 
 <#c-e52.f3.med> a schema:Claim ;
-  schema:text "F3 median |D%| 3.39 [3.03, 3.69] on the held-out half of D3-D6, n = 305" ;
+  schema:text "F3 median |D%| 3.24 [2.75, 3.50] on the held-out half of D3-D6, n = 305" ;
   dcterms:type "out-of-sample" ;
-  pc:value 3.39 ;
+  pc:value 3.24 ;
   pc:gateSection "3q" ;
   cito:citesAsEvidence dg:o_ppaz, dg:o_jaam, dg:o_danlessa, dg:o_skc ;
   prov:wasDerivedFrom claims:assert12 ;
-  rdfs:comment "THE headline. Rides used neither to fit eps nor to choose the form. Held out in eps and form, NOT in the per-ride constants -- the inversion is data preparation and runs before the split" .
+  rdfs:comment "THE headline. Rides used neither to fit eps nor to choose the form. Held out in eps and form, NOT in the per-ride constants -- the inversion is data preparation and runs before the split -- and re-scored as that inversion was revised (Entries 52/55/57; paper section 3.1.4). Value after the Entry 57 rider-median fallbacks; 3.39 before them" .
 
 <#c-e52.f3.bias> a schema:Claim ;
-  schema:text "F3 median signed D% +0.06 [-0.27, 0.92] on the held-out half of D3-D6" ;
+  schema:text "F3 median signed D% +0.07 [-0.31, 0.70] on the held-out half of D3-D6" ;
   dcterms:type "out-of-sample" ;
-  pc:value 0.06 ;
+  pc:value 0.07 ;
   pc:gateSection "3q" ;
   cito:citesAsEvidence dg:o_ppaz, dg:o_jaam, dg:o_danlessa, dg:o_skc ;
   prov:wasDerivedFrom claims:assert12 ;
   rdfs:comment "Paired with the accuracy figure per the house rule: accuracy alone hides bias cancellation" .
 
 <#c-e52.fbase.med> a schema:Claim ;
-  schema:text "F_base median |D%| 3.05 [2.71, 3.44] on the same held-out half, as a comparator outside selection" ;
+  schema:text "F_base median |D%| 3.19 [2.73, 3.74] on the same held-out half, as a comparator outside selection" ;
   dcterms:type "out-of-sample" ;
-  pc:value 3.05 ;
+  pc:value 3.19 ;
   pc:gateSection "3q" ;
   cito:citesAsEvidence dg:o_ppaz, dg:o_jaam, dg:o_danlessa, dg:o_skc ;
   prov:wasDerivedFrom claims:assert12 ;
-  rdfs:comment "NOT a claim that the closed form is better physics. The gap is concentrated in the three Sao Paulo corpora and traces to the inversion fitting constants on sustained segments the simulation then leaves" .
+  rdfs:comment "The comparator, outside selection. Parity with F3, not superiority either way: the paired sign test is a coin flip. The earlier gap (Entry 52) traced to a drag area inferred at one speed and used at another, and closed with eq. (5) (Entry 55)" .
 
 <#c-e52.eps> a schema:Claim ;
-  schema:text "the descent constant refits to eps = 0.294 on the training half, against 0.255 on the test half's own optimum" ;
+  schema:text "the descent constant refits to eps = 0.294 on the training half, against 0.282 on the test half's own optimum (tau held at 6 m)" ;
   dcterms:type "out-of-sample" ;
   pc:value 0.294 ;
   pc:gateSection "3q" ;
@@ -124,21 +124,21 @@
   pc:gateSection "3q" ;
   cito:citesAsEvidence dg:o_ppaz, dg:o_jaam, dg:o_danlessa, dg:o_skc ;
   prov:wasDerivedFrom claims:assert12 ;
-  rdfs:comment "The exposure a random split carries, measured rather than assumed away. 3.98 is a repeat-route error" .
+  rdfs:comment "The exposure a random split carries, measured rather than assumed away. 3.24 is a repeat-route error" .
 
 <#c-e52.f3.med.abs> a schema:Claim ;
-  schema:text "F3 median |D%| 3.39 [3.03, 3.69] on the held-out half of D3-D6, n = 305 (abstract restatement)" ;
+  schema:text "F3 median |D%| 3.24 [2.75, 3.50] on the held-out half of D3-D6, n = 305 (abstract restatement)" ;
   dcterms:type "out-of-sample" ;
-  pc:value 3.39 ;
+  pc:value 3.24 ;
   pc:gateSection "3q" ;
   cito:citesAsEvidence dg:o_ppaz, dg:o_jaam, dg:o_danlessa, dg:o_skc ;
   prov:wasDerivedFrom claims:assert12 ;
   rdfs:comment "Same statistic as c-e52.f3.med, anchored separately because the abstract prints it independently of section 3.3 and a human drafter may rewrite either without the other" .
 
 <#c-e52.f4.med> a schema:Claim ;
-  schema:text "F4 median |D%| 2.85 [2.40, 3.50] on the held-out half of D3-D6, n = 305" ;
+  schema:text "F4 median |D%| 2.86 [2.58, 3.39] on the held-out half of D3-D6, n = 305" ;
   dcterms:type "out-of-sample" ;
-  pc:value 2.85 ;
+  pc:value 2.86 ;
   pc:gateSection "3q" ;
   cito:citesAsEvidence dg:o_ppaz, dg:o_jaam, dg:o_danlessa, dg:o_skc ;
   prov:wasDerivedFrom claims:assert12 ;

@@ -84,7 +84,9 @@ paper — live in **`research/`** (`MODEL_COMPARISON_JOURNAL.md`, `article-draft
 **<https://simujaules.pedalhidrografi.co/modelo/en.html>** (English) — built from
 `research/article/article-draft*.md` by `research/article/build-modelo.sh`. Citation metadata in
 [`CITATION.cff`](CITATION.cff); DOI [10.5281/zenodo.21282165](https://doi.org/10.5281/zenodo.21282165)
-(Zenodo).
+(Zenodo). That page and DOI are the July 2026 working paper (v1.0); its numbers are superseded
+by the three papers now in [`research/article/`](research/article/) (`paper1-closed-form.md`,
+`paper2-dem-deployment.md`, `paper3-edge-cost.md`, in preparation) and by the lab journal.
 
 ---
 

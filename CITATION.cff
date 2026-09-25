@@ -6,13 +6,13 @@ authors:
   - family-names: "Lessa Bernardineli"
     given-names: "Danilo"
     email: danilo.lessa@gmail.com
-repository-code: "https://github.com/danlessa/bicycling-energy-model"
+repository-code: "https://github.com/pedalhidro/bicycling-energy-model"
 url: "https://simujaules.pedalhidrografi.co/modelo/"
 abstract: >-
   Two models of the mechanical energy (and time) of pedalling a route — a
   closed-form law E ≈ α·x + β·(h₊ − ε·h₋) and a Martin-1998 forward-dynamics
-  simulation — run on shared physical constants, validated against ~1,400
-  power-meter rides. Home of the derivation notes, the comparison app, and the
+  simulation — run on shared physical constants, validated against 2,039
+  power-meter rides from seven riders. Home of the derivation notes, the comparison app, and the
   validation harnesses.
 identifiers:
   - type: doi

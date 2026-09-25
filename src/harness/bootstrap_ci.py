@@ -827,20 +827,22 @@ except OSError:
     print("  e52_summary.csv MISSING — run src/harness/e52_split.py  GATE-FAIL")
     failed = True
 
-for _k, _want, _lbl in (("f3_test_med_abs", 3.39, "F3 test med|D%|"),
-                        ("f3_test_med_signed", 0.06, "F3 test signed"),
-                        ("f4_test_med_abs", 2.85, "F4 test med|D%|"),
-                        ("f4_test_med_signed", -0.24, "F4 test signed"),
-                        ("fbase_test_med_abs", 3.05, "F_base test med|D%|"),
-                        ("fbase_test_med_signed", -0.03, "F_base test signed"),
-                        ("eps", 0.294, "selected eps"),
-                        ("twin_pct", 82.0, "twin exposure %")):
+# Each expectation is the value paper 1 prints, held to half a unit of its last
+# printed digit. A flat 0.5 pp slack once let a stale table (3.39 against the
+# chain's 3.24, after Entry 57) pass unnoticed; twin_pct is printed as "82%".
+for _k, _want, _tol, _lbl in (("f3_test_med_abs", 3.24, 0.005, "F3 test med|D%|"),
+                              ("f3_test_med_signed", 0.07, 0.005, "F3 test signed"),
+                              ("f4_test_med_abs", 2.86, 0.005, "F4 test med|D%|"),
+                              ("f4_test_med_signed", -0.40, 0.005, "F4 test signed"),
+                              ("fbase_test_med_abs", 3.19, 0.005, "F_base test med|D%|"),
+                              ("fbase_test_med_signed", -0.10, 0.005, "F_base test signed"),
+                              ("eps", 0.294, 0.0005, "selected eps"),
+                              ("twin_pct", 82.0, 0.5, "twin exposure %")):
     try:
         _v = float(_e52.get(_k, "nan"))
     except ValueError:
         _v = float("nan")
-    _tol = 0.005 if _k == "eps" else 0.5
-    _ok = is_finite(_v) and abs(_v - _want) <= _tol
+    _ok = is_finite(_v) and abs(_v - _want) <= _tol + 1e-9
     print(f"  {_lbl:<24} {to_fixed(_v, 4):>9}  (expect {_want})"
           + (" GATE-OK" if _ok else " GATE-FAIL"))
     if not _ok:

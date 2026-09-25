@@ -2902,6 +2902,12 @@ recipe's own proviso, "skip this step if your source already smooths", already s
 double-correction reading stands; the "harmful at its published value" phrasing does not, since
 the published value was never meant for this input.)*
 
+*(Corrected again 2026-09-25: Entry 71 later measured the deadband's removal on D3–D5's own
+recorded streams at 3.01 m/km (τ = 2 m) — the D1 raw-barometric rate — so "already smoothed by
+the recording platforms" holds for D6 (1.26 m/km) but not for D3–D5. The low value F4's scalar
+fits to on D3–D6 is the (ε, c) pairing Entry 72 names — c fitted jointly with ε = 0.409 — not
+pre-smoothing. Paper 1's §2.5, Terminology, Contribution 4 and recipe now say so.)*
+
 **F4's damping and F3's deadband are the same correction from opposite ends, and only one
 survives.** $k_m = \max(0, 1 - c\,x_{km}/h_+)$ is a *route-level* proxy for what the
 deadband does *point-wise*: both exist to undo $h_+$ inflation from elevation noise. The
