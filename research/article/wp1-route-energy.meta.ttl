@@ -19,6 +19,15 @@
 #      whose output is a statistic is registered as a `planned` claim, so
 #      check_paper_stats.py keeps reporting it until it acquires a value.
 #
+# NOT anchored here, deliberately: paper 1's held-out medians (e52.f3.med 3.39,
+# e52.f3.bias 0.06, e52.fbase.med 3.05, e52.f4.med 2.85). Those are the chain
+# BEFORE Entry 57's rider-median fallbacks; the current chain reads 3.24 / +0.07 /
+# 3.19 / 2.86 (Entries 57, 63; data-graph :o_e52_split). Gate 3q still expects the
+# old literals, at a +/-0.5 tolerance that passes both, so anchoring either value
+# here would be dishonest: the old one is stale, the new one is not what 3q
+# asserts. The working paper prints the current values with a dagger and
+# registers the re-baseline as c-wp.headline.rebaseline (planned).
+#
 # The rdfs:comment on each reused P0 claim carries the protocol label, because
 # the external review's central point was that "out-of-sample" is true for eps
 # and the form and false for the per-ride physics — the scope word alone cannot
@@ -38,42 +47,6 @@
 
 # ---------------------------------------------------------------------------
 # Ride grain — paper 1's A-chain (Entry 52), protocol P0, bundle B1.
-
-<#c-e52.f3.med> a schema:Claim ;
-  schema:text "F3 median |D%| 3.39 [3.03, 3.69] on the held-out half of D3-D6, n = 305 (working paper Table 1, row P0)" ;
-  dcterms:type "out-of-sample" ;
-  pc:value 3.39 ;
-  pc:gateSection "3q" ;
-  cito:citesAsEvidence dg:o_ppaz, dg:o_jaam, dg:o_danlessa, dg:o_skc ;
-  prov:wasDerivedFrom claims:assert12 ;
-  rdfs:comment "Protocol P0: out-of-sample in eps and the form, in-sample in the per-ride physics and the regime powers. The working paper's reading: accounting consistency, not prediction" .
-
-<#c-e52.f3.bias> a schema:Claim ;
-  schema:text "F3 median signed D% +0.06 [-0.27, 0.92] on the held-out half of D3-D6" ;
-  dcterms:type "out-of-sample" ;
-  pc:value 0.06 ;
-  pc:gateSection "3q" ;
-  cito:citesAsEvidence dg:o_ppaz, dg:o_jaam, dg:o_danlessa, dg:o_skc ;
-  prov:wasDerivedFrom claims:assert12 ;
-  rdfs:comment "Protocol P0" .
-
-<#c-e52.fbase.med> a schema:Claim ;
-  schema:text "the forward simulation reads 3.05 [2.71, 3.44] median |D%| on the same held-out half, as a comparator outside selection" ;
-  dcterms:type "out-of-sample" ;
-  pc:value 3.05 ;
-  pc:gateSection "3q" ;
-  cito:citesAsEvidence dg:o_ppaz, dg:o_jaam, dg:o_danlessa, dg:o_skc ;
-  prov:wasDerivedFrom claims:assert12 ;
-  rdfs:comment "Protocol P0. The simulation reads the same per-ride inputs as the closed form, so parity between them is internal consistency given those inputs; the registered TOST on this split is c-wp.tost.parity (planned)" .
-
-<#c-e52.f4.med> a schema:Claim ;
-  schema:text "F4 median |D%| 2.85 [2.40, 3.50] on the held-out half of D3-D6, n = 305" ;
-  dcterms:type "out-of-sample" ;
-  pc:value 2.85 ;
-  pc:gateSection "3q" ;
-  cito:citesAsEvidence dg:o_ppaz, dg:o_jaam, dg:o_danlessa, dg:o_skc ;
-  prov:wasDerivedFrom claims:assert12 ;
-  rdfs:comment "Protocol P0, bundle B1 (eps = 0.409, c = 1.10 m/km)" .
 
 <#c-e52.eps> a schema:Claim ;
   schema:text "B1's descent constant: eps = 0.294, fitted on the training half of D3-D6" ;
@@ -208,6 +181,12 @@
 # OWED — the working paper's section 6, registered so the checker keeps them
 # visible. Each becomes an anchored claim with a value when its run lands.
 
+<#c-wp.headline.rebaseline> a schema:Claim ;
+  schema:text "Paper 1's held-out row re-baselined to the current (rider-fallback) chain: F3 3.24 [2.75, 3.50] · +0.07, F4 2.86 [2.58, 3.39] · -0.40, F_base 3.19 · -0.10, paired sign test 152/305, p = 1.00 — with gate 3q's expected literals updated and its tolerance tightened to printed precision" ;
+  dcterms:type "planned" ;
+  cito:citesAsEvidence dg:o_e52_split, dg:o_e52_rider_fallback ;
+  rdfs:comment "A correction, not a measurement: the values exist in the lab journal (Entries 57 and 63) and the data graph, but paper 1 and gate 3q still carry the pre-Entry-57 values (3.39 / 2.85 / 3.05 / 149 of 305). Becomes an anchored claim once 3q asserts the current literals" .
+
 <#c-wp.bd.arm> a schema:Claim ;
   schema:text "The deployed bundle BD (eps_d with eps_0 = 0.13, tau = 2 m) scored as an arm on paper 1's current split, beside B1" ;
   dcterms:type "planned" ;
@@ -218,13 +197,13 @@
   schema:text "Protocol P1: rider-median m, C_rr, CdA and v_f (regime powers for the simulation) taken from the training half, scored on the held-out half under a route-grouped split" ;
   dcterms:type "planned" ;
   cito:citesAsEvidence dg:o_e52_split ;
-  rdfs:comment "Section 6, item 2. The number a planner holding a rider profile would get — the working paper asks for it in the abstract beside 3.39. Needs no new data" .
+  rdfs:comment "Section 6, item 2. The number a planner holding a rider profile would get — the working paper asks for it in the abstract beside the P0 figure. Needs no new data" .
 
 <#c-wp.tost.parity> a schema:Claim ;
   schema:text "TOST equivalence of F3 against the forward simulation on the held-out half, margin +/-1.0 pp, difference of medians under paired stratified resampling" ;
   dcterms:type "planned" ;
   cito:citesAsEvidence dg:o_e52_split, dg:o_e48 ;
-  rdfs:comment "Section 6, item 3. Paper 1 section 2.4.3 describes the TOST protocol but the held-out parity rests on a sign test (149/305, p = 0.73), which is an absence of evidence, not equivalence. Entry 48's machinery, seed 44" .
+  rdfs:comment "Section 6, item 3. Paper 1 section 2.4.3 describes the TOST protocol but the held-out parity rests on a sign test (152/305, p = 1.00 on the current chain; paper 1 still prints the pre-Entry-57 149/305, p = 0.73), which is an absence of evidence, not equivalence. Entry 48's machinery, seed 44" .
 
 <#c-wp.eps.perrider> a schema:Claim ;
   schema:text "Per-rider eps optima with bootstrap intervals, and the rider-versus-region share of their variance" ;
