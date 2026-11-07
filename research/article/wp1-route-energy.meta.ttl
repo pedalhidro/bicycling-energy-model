@@ -1,0 +1,218 @@
+# wp1-route-energy.meta.ttl — claim annotations for wp1-route-energy.md
+#
+# Same mechanism as the three companion sidecars (paper1/2/3-*.meta.ttl): each
+# anchored statistic in the working paper carries an invisible anchor at the
+# number, <!--@c-<id>-->, and is described here as a schema:Claim keyed to that id.
+#
+# What is different about this sidecar. The working paper reports NO new
+# measurement — it restates the companion drafts' numbers under one parameter
+# anchor and one protocol vocabulary. So:
+#
+#   1. Claims that restate a companion claim REUSE its id, value, gate section,
+#      scope and evidence exactly (e52.*, e50.*, e54.*, a2.*, a3.*). Ids are
+#      resolved against each sidecar's own base IRI, so a reused id here names
+#      the working paper's restatement, not the original claim.
+#   2. wp.* claims anchor gated numbers the drafts print but never anchored —
+#      the signed regional pair (3t), the per-chain noise rates (3j), the
+#      edge-grain rows the working paper leans on (3k, 3l).
+#   3. Every measurement the working paper lists as OWED (its section 6) and
+#      whose output is a statistic is registered as a `planned` claim, so
+#      check_paper_stats.py keeps reporting it until it acquires a value.
+#
+# NOT anchored here, deliberately: paper 1's held-out medians (e52.f3.med 3.39,
+# e52.f3.bias 0.06, e52.fbase.med 3.05, e52.f4.med 2.85). Those are the chain
+# BEFORE Entry 57's rider-median fallbacks; the current chain reads 3.24 / +0.07 /
+# 3.19 / 2.86 (Entries 57, 63; data-graph :o_e52_split). Gate 3q still expects the
+# old literals, at a +/-0.5 tolerance that passes both, so anchoring either value
+# here would be dishonest: the old one is stale, the new one is not what 3q
+# asserts. The working paper prints the current values with a dagger and
+# registers the re-baseline as c-wp.headline.rebaseline (planned).
+#
+# The rdfs:comment on each reused P0 claim carries the protocol label, because
+# the external review's central point was that "out-of-sample" is true for eps
+# and the form and false for the per-ride physics — the scope word alone cannot
+# say that.
+#
+# Validate: python3 -c "import rdflib; rdflib.Graph().parse('research/article/wp1-route-energy.meta.ttl')"
+# Checked by research/scripts/check_paper_stats.py
+
+@prefix schema:  <http://schema.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix cito:    <http://purl.org/spar/cito/> .
+@prefix prov:    <http://www.w3.org/ns/prov#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix pc:      <https://danlessa.github.io/bicycling-energy-model/paper-claims#> .
+@prefix dg:      <https://danlessa.github.io/bicycling-energy-model/data-graph#> .
+@prefix claims:  <https://danlessa.github.io/bicycling-energy-model/claims#> .
+
+# ---------------------------------------------------------------------------
+# Ride grain — paper 1's A-chain (Entry 52), protocol P0, bundle B1.
+
+<#c-e52.eps> a schema:Claim ;
+  schema:text "B1's descent constant: eps = 0.294, fitted on the training half of D3-D6" ;
+  dcterms:type "out-of-sample" ;
+  pc:value 0.294 ;
+  pc:gateSection "3q" ;
+  cito:citesAsEvidence dg:o_ppaz, dg:o_jaam, dg:o_danlessa, dg:o_skc ;
+  prov:wasDerivedFrom claims:assert12 ;
+  rdfs:comment "The anchor bundle's constant. The working paper reads it as F3's closure term on deadbanded recordings at tau = 6 m (it refits to 0.683 / 0.462 / 0.294 / 0.409 across F1-F4), not as a measured behavioural quantity" .
+
+<#c-e52.twin> a schema:Claim ;
+  schema:text "82% of held-out rides have a same-rider training ride within 5% on distance and 10% on ascent" ;
+  dcterms:type "out-of-sample" ;
+  pc:value 82 ;
+  pc:gateSection "3q" ;
+  cito:citesAsEvidence dg:o_ppaz, dg:o_jaam, dg:o_danlessa, dg:o_skc ;
+  prov:wasDerivedFrom claims:assert12 ;
+  rdfs:comment "Why the P1 row must use a route-grouped split" .
+
+<#c-e50.eps.share> a schema:Claim ;
+  schema:text "eps accounts for 0.070 of F3 prediction-error variance (total-order Sobol index), against 0.553 for CdA" ;
+  dcterms:type "derived" ;
+  pc:value 0.070 ;
+  pc:gateSection "3p" ;
+  cito:citesAsEvidence dg:o_e50 ;
+  pc:preRegistered true .
+
+<#c-e54.transfer> a schema:Claim ;
+  schema:text "fitting eps on one rider and scoring it on the other riders' held-out rides costs 0.05 pp of median |D%|" ;
+  dcterms:type "out-of-sample" ;
+  pc:value 0.05 ;
+  pc:gateSection "3r" ;
+  cito:citesAsEvidence dg:o_ppaz, dg:o_jaam, dg:o_danlessa, dg:o_skc ;
+  prov:wasDerivedFrom claims:assert12 ;
+  rdfs:comment "The working paper's reading: inside the registered 1.0 pp margin, as is the 0.82 / 0.92 pp landscape penalty, so the loss-based test does not discriminate a rider property from a landscape property in a shallow basin. The parameter-level test is c-wp.eps.perrider (planned)" .
+
+<#c-wp.e60.br.signed> a schema:Claim ;
+  schema:text "under one pooled eps the Sao Paulo held-out rides (D3-D5, n = 194) are biased -1.31%" ;
+  dcterms:type "out-of-sample" ; pc:value -1.31 ; pc:gateSection "3t" ;
+  cito:citesAsEvidence dg:o_e60 ;
+  prov:wasDerivedFrom claims:assert12 ;
+  rdfs:comment "Half of the opposite-signed pair the working paper treats as stronger regional evidence than the loss penalties" .
+
+<#c-wp.e60.eu.signed> a schema:Claim ;
+  schema:text "under one pooled eps the European held-out rides (D6, n = 111) are biased +1.95%" ;
+  dcterms:type "out-of-sample" ; pc:value 1.95 ; pc:gateSection "3t" ;
+  cito:citesAsEvidence dg:o_e60 ;
+  prov:wasDerivedFrom claims:assert12 ;
+  rdfs:comment "The other half of the opposite-signed pair" .
+
+# ---------------------------------------------------------------------------
+# Map grain — paper 2 re-based (Entry 71), protocol P0, bundle BD.
+
+<#c-a2.swap.cost> a schema:Claim ;
+  schema:text "substituting the local 5 m survey for the ride's own elevation stream reads 4.1% against the barometric control's 3.8%" ;
+  dcterms:type "out-of-sample" ;
+  pc:value 4.1 ;
+  pc:gateSection "3j" ;
+  cito:citesAsEvidence dg:o_e41 ;
+  prov:wasDerivedFrom claims:assert41 ;
+  rdfs:comment "Bundle BD (the deployed one): paper 2 has not been re-based onto the anchor B1 — working paper section 6, item 5" .
+
+<#c-a2.smoothing.prescription> a schema:Claim ;
+  schema:text "smoothing the sampled profile at sigma = 30 m restores the control's bias" ;
+  dcterms:type "out-of-sample" ;
+  pc:value 30 ;
+  pc:gateSection "3i" ;
+  cito:citesAsEvidence dg:o_e41 ;
+  prov:wasDerivedFrom claims:assert41 .
+
+<#c-a2.noise.rate> a schema:Claim ;
+  schema:text "ascent-noise rate of the Sao Paulo barometric chain, 3.01 m/km" ;
+  dcterms:type "out-of-sample" ;
+  pc:value 3.01 ;
+  pc:gateSection "3j" ;
+  cito:citesAsEvidence dg:o_e41 ;
+  prov:wasDerivedFrom claims:assert41 .
+
+<#c-wp.noise.d6> a schema:Claim ;
+  schema:text "ascent-noise rate of the European (D6) recording chains, 1.26 [1.19, 1.32] m/km" ;
+  dcterms:type "out-of-sample" ; pc:value 1.26 ; pc:gateSection "3j" ;
+  cito:citesAsEvidence dg:o_e41_mode, dg:o_e71 ;
+  prov:wasDerivedFrom claims:assert41 ;
+  rdfs:comment "Low end of the factor-of-eight span the working paper quotes" .
+
+<#c-wp.noise.fab5> a schema:Claim ;
+  schema:text "ascent-noise rate of FABDEM sampled at 5 m on the Sao Paulo population, 10.15 [9.84, 10.60] m/km" ;
+  dcterms:type "out-of-sample" ; pc:value 10.15 ; pc:gateSection "3j" ;
+  cito:citesAsEvidence dg:o_e41_mode, dg:o_e71 ;
+  prov:wasDerivedFrom claims:assert41 ;
+  rdfs:comment "High end of the factor-of-eight span" .
+
+# ---------------------------------------------------------------------------
+# Edge grain — paper 3 (Entries 72-74), protocol P0.
+
+<#c-a3.discretisation.fidelity> a schema:Claim ;
+  schema:text "at 5 m pitch the edge sum sits a median +1.83 pp (median |gap| 1.84 pp) above its route-level twin" ;
+  dcterms:type "derived" ;
+  pc:value 1.84 ;
+  pc:gateSection "3k" ;
+  cito:citesAsEvidence dg:o_e72 .
+
+<#c-wp.v2edge.d30> a schema:Claim ;
+  schema:text "v2Edge summed over each ride's own profile at the deployed 30 m pitch reads 3.75 [3.53, 3.99] median |D%| at +1.33 bias, all 2,039 rides" ;
+  dcterms:type "derived" ; pc:value 3.75 ; pc:gateSection "3k" ;
+  cito:citesAsEvidence dg:o_e72 ;
+  rdfs:comment "The minimum of five pitches; the working paper notes the minimum is partly built in, because eps_0 was calibrated on 30 m descent cells" .
+
+<#c-wp.patch30> a schema:Claim ;
+  schema:text "the kinetic-energy valley toll in place of k_s takes the 30 m edge cost to 3.29 [3.12, 3.50] median |D%| at -0.08 bias" ;
+  dcterms:type "derived" ; pc:value 3.29 ; pc:gateSection "3k" ;
+  cito:citesAsEvidence dg:o_e72 ;
+  rdfs:comment "A first look, not paper 3's registered H5 test" .
+
+<#c-wp.v2edge.fab30> a schema:Claim ;
+  schema:text "the deployed edge cost on raw FABDEM at 8 directions reads 53.01 median |D%|, all over-charge, on matched ridden lattice paths (without the production k_s)" ;
+  dcterms:type "derived" ; pc:value 53.01 ; pc:gateSection "3l" ;
+  cito:citesAsEvidence dg:o_e73 ;
+  prov:wasDerivedFrom claims:assert73 ;
+  rdfs:comment "The number behind the working paper's operational check (section 6, item 6): which raster, treatment, direction count and k_s each deployed service actually evaluates" .
+
+<#c-a3.default> a schema:Claim ;
+  schema:text "the proposed edge default (deployed grade-local cost, sigma-30 map, 16 directions) reads 3.31 [2.94, 3.80] · +2.41 on the local survey and 5.05 [4.72, 5.35] · +3.34 on FABDEM" ;
+  dcterms:type "derived" ;
+  pc:value 3.31 ;
+  pc:gateSection "3l" ;
+  cito:citesAsEvidence dg:o_e73 ;
+  prov:wasDerivedFrom claims:assert74 ;
+  rdfs:comment "Selected by a five-policy contest scored on the population it is reported on; held-out re-selection is the working paper's section 6, item 7" .
+
+# ---------------------------------------------------------------------------
+# OWED — the working paper's section 6, registered so the checker keeps them
+# visible. Each becomes an anchored claim with a value when its run lands.
+
+<#c-wp.headline.rebaseline> a schema:Claim ;
+  schema:text "Paper 1's held-out row re-baselined to the current (rider-fallback) chain: F3 3.24 [2.75, 3.50] · +0.07, F4 2.86 [2.58, 3.39] · -0.40, F_base 3.19 · -0.10, paired sign test 152/305, p = 1.00 — with gate 3q's expected literals updated and its tolerance tightened to printed precision" ;
+  dcterms:type "planned" ;
+  cito:citesAsEvidence dg:o_e52_split, dg:o_e52_rider_fallback ;
+  rdfs:comment "A correction, not a measurement: the values exist in the lab journal (Entries 57 and 63) and the data graph, but paper 1 and gate 3q still carry the pre-Entry-57 values (3.39 / 2.85 / 3.05 / 149 of 305). Becomes an anchored claim once 3q asserts the current literals" .
+
+<#c-wp.bd.arm> a schema:Claim ;
+  schema:text "The deployed bundle BD (eps_d with eps_0 = 0.13, tau = 2 m) scored as an arm on paper 1's current split, beside B1" ;
+  dcterms:type "planned" ;
+  cito:citesAsEvidence dg:o_e52_split, dg:o_e51 ;
+  rdfs:comment "Section 6, item 1. Entry 51 (flat beats eps_d by 1.32 pp) predates the regime-consistent drag estimator; this is its current-vintage replacement. Settles which descent estimator the series validates at route grain" .
+
+<#c-wp.p1.rider> a schema:Claim ;
+  schema:text "Protocol P1: rider-median m, C_rr, CdA and v_f (regime powers for the simulation) taken from the training half, scored on the held-out half under a route-grouped split" ;
+  dcterms:type "planned" ;
+  cito:citesAsEvidence dg:o_e52_split ;
+  rdfs:comment "Section 6, item 2. The number a planner holding a rider profile would get — the working paper asks for it in the abstract beside the P0 figure. Needs no new data" .
+
+<#c-wp.tost.parity> a schema:Claim ;
+  schema:text "TOST equivalence of F3 against the forward simulation on the held-out half, margin +/-1.0 pp, difference of medians under paired stratified resampling" ;
+  dcterms:type "planned" ;
+  cito:citesAsEvidence dg:o_e52_split, dg:o_e48 ;
+  rdfs:comment "Section 6, item 3. Paper 1 section 2.4.3 describes the TOST protocol but the held-out parity rests on a sign test (152/305, p = 1.00 on the current chain; paper 1 still prints the pre-Entry-57 149/305, p = 0.73), which is an absence of evidence, not equivalence. Entry 48's machinery, seed 44" .
+
+<#c-wp.eps.perrider> a schema:Claim ;
+  schema:text "Per-rider eps optima with bootstrap intervals, and the rider-versus-region share of their variance" ;
+  dcterms:type "planned" ;
+  cito:citesAsEvidence dg:o_e54, dg:o_e60 ;
+  rdfs:comment "Section 6, item 4. Tests transfer on the parameter rather than on a loss that is shallow in it. Six riders with usable test halves (D6-user_5 is too small), so expect wide intervals and say so" .
+
+<#c-wp.routing.ranking> a schema:Claim ;
+  schema:text "Ranking fitness of the edge cost: for same-endpoint alternatives, concordance of the cost's ordering with measured energy (or a reference simulation on each alternative's own profile), and the regret of the cost's choice; plus an optimizer's-curse audit of chosen paths" ;
+  dcterms:type "planned" ;
+  cito:citesAsEvidence dg:o_e73, dg:o_e26_detour ;
+  rdfs:comment "Section 6, item 8 — the spine paper 3 lacks. Paper 3's a3.divergence (H3) should be built on this metric rather than on ride-energy error" .
