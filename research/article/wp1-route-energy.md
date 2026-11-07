@@ -19,20 +19,17 @@
   appear in none of the three drafts — only in the lab journal, and not re-derived by the
   current gate battery — are marked with a dagger (†) at the point of use. Anchored numbers
   (the invisible @c-<id> markers) are the gated subset; the sidecar maps each to its gate
-  section. NB not every number the drafts print is gated (e.g. paper 1's CIs and its 149/305
-  sign test are not asserted by section 3q), so "unmarked" means "quoted from a draft", not
-  "gated". When a companion draft re-baselines a number, this file is one more restating
-  surface (CLAUDE.md, "Verifying a change").
+  section. NB not every number the drafts print is gated (e.g. paper 3's other §3.1 rows), so
+  "unmarked" means "quoted from a draft", not "gated". When a companion draft re-baselines a
+  number, this file is one more restating surface (CLAUDE.md, "Verifying a change").
 
-  HEADLINE DISCREPANCY (found while writing this): paper 1 prints the held-out row of the chain
-  BEFORE Entry 57's rider-median fallbacks (F3 3.39 [3.03, 3.69] · +0.06, F4 2.85, F_base 3.05,
-  149/305), although its §2.2.2 adopts that fallback as the published chain and its CV column is
-  the post-57 one. The current chain (e52_build.py default E52_FALLBACK=rider since 1f61fe6;
-  Entries 57 and 63; research/data-graph.ttl :o_e52_split) reads F3 3.24 [2.75, 3.50] · +0.07,
-  F4 2.86 [2.58, 3.39] · −0.40, F_base 3.19 · −0.10, 152/305, p = 1.00. Gate 3q's expected
-  literals are the old ones and its ±0.5 tolerance passes both. This working paper prints the
-  current chain (journal-sourced, so †) and anchors none of the four; paper 1 and gate 3q need
-  re-baselining (§6 preamble; sidecar claim wp.headline.rebaseline).
+  Held-out row, re-based 2026-11-07: the first version of this file found paper 1 printing the
+  chain before Entry 57's rider-median fallbacks (3.39 / 2.85 / 3.05 / 149 of 305) and quoted the
+  current chain from the lab journal with a dagger. Paper 1 now prints the current chain (F3
+  3.24 [2.75, 3.50] · +0.07, F4 2.86, F_base 3.19 · −0.10, 153 of 305, p = 1.00 — the harness
+  count; Entry 57 recorded 152), and gate 3q holds every cell of its Table 3 and the sign test
+  to the printed digits, so the row is quoted here undaggered and anchored (sidecar: the
+  planned claim wp.headline.rebaseline became the e52.* claims it promised).
 
   Anchor decision (§3.2): route-grain claims are anchored on paper 1's held-out-selected bundle
   B1 (F3, flat eps = 0.294, tau = 6 m; F4, eps = 0.409, c = 1.10 m/km). The deployed bundle BD
@@ -48,7 +45,7 @@
 
 ## Abstract
 
-We consolidate three companion studies of a closed-form law for the mechanical energy of cycling a route, $E \approx \alpha_r x + \alpha_a x_{\mathrm{flat}} + \beta(\tilde h_+ - \varepsilon\,\tilde h_-)$, under one parameter anchor and with every number labelled by the information it used. On 305 held-out rides from seven riders in São Paulo and Western Europe, the selected form reproduces power-meter energy to 3.24%† median absolute error (bias +0.07%), indistinguishable from a forward simulation (3.19%) reading the same inputs. Those inputs include each ride's own regime powers and constants inverted from its own telemetry, which makes the flat part of the energy ledger nearly an identity: the figure measures the consistency of the energy accounting, not prediction. With literature constants instead, the one blind-physics run — 44 of the author's rides — reads 8.2% for the law and 8.4% for the simulation; the rider-level held-out row a planner would face is registered and not yet run. The descent constant absorbs form error (it refits from 0.68 to 0.29 across forms) and sits in a shallow loss basin, so the published transfer penalties — 0.05 points between riders, 0.8–0.9 between landscapes, both inside the ±1-point margin set in advance — cannot tell a rider property from a landscape property. A digital elevation model costs 0.3 points of error on a local 5 m survey and 0.7–1.3 on the global FABDEM, repaired by smoothing the sampled profile and carrying each elevation chain's own noise rate. Cut into edges, the law gains a descent-side bias that a kinetic-energy valley toll removes; whether the edge cost ranks alternative routes correctly is untested. Eleven measurements are owed, most on data already in hand.
+We consolidate three companion studies of a closed-form law for the mechanical energy of cycling a route, $E \approx \alpha_r x + \alpha_a x_{\mathrm{flat}} + \beta(\tilde h_+ - \varepsilon\,\tilde h_-)$, under one parameter anchor and with every number labelled by the information it used. On 305 held-out rides from seven riders in São Paulo and Western Europe, the selected form reproduces power-meter energy to 3.24%<!--@c-e52.f3.med.abs--> median absolute error (bias +0.07%), indistinguishable from a forward simulation (3.19%) reading the same inputs. Those inputs include each ride's own regime powers and constants inverted from its own telemetry, which makes the flat part of the energy ledger nearly an identity: the figure measures the consistency of the energy accounting, not prediction. With literature constants instead, the one blind-physics run — 44 of the author's rides — reads 8.2% for the law and 8.4% for the simulation; the rider-level held-out row a planner would face is registered and not yet run. The descent constant absorbs form error (it refits from 0.68 to 0.29 across forms) and sits in a shallow loss basin, so the published transfer penalties — 0.05 points between riders, 0.8–0.9 between landscapes, both inside the ±1-point margin set in advance — cannot tell a rider property from a landscape property. A digital elevation model costs 0.3 points of error on a local 5 m survey and 0.7–1.3 on the global FABDEM, repaired by smoothing the sampled profile and carrying each elevation chain's own noise rate. Cut into edges, the law gains a descent-side bias that a kinetic-energy valley toll removes; whether the edge cost ranks alternative routes correctly is untested. Eleven measurements are owed, most on data already in hand.
 
 **Keywords:** cycling energetics, route planning, energy-optimal routing, power meter data, digital elevation models, closed-form approximation, model validation
 
@@ -98,7 +95,7 @@ Accuracy is the median over rides of $\lvert\Delta\%\rvert$, with $\Delta\% = (E
 
 | protocol | physics $m, C_{rr}, C_dA$ | effort | measures | best figure available |
 |--------------|------------------|------------------|------------|---------------------------------------|
-| **P0** per-ride (all drafts) | inverted from the scored ride | its regime powers; $v_f$ from its flat power | accounting consistency | F3 3.24 [2.75, 3.50] · +0.07; simulation 3.19 · −0.10 (305 held-out rides; current chain†, [§4.1](#4.1)) |
+| **P0** per-ride (all drafts) | inverted from the scored ride | its regime powers; $v_f$ from its flat power | accounting consistency | F3 3.24 [2.75, 3.50] · +0.07; simulation 3.19 · −0.10 (305 held-out rides, [§4.1](#4.1)) |
 | **Pf** frozen priors | literature priors; logged mass | its regime powers | blind physics | D1 only†: F3·$\varepsilon_d$ 8.2 [4.5, 10.8] · +2.2; simulation 8.4 [5.1, 10.9] · +2.5 (44 rides; 3.5 and 5.2 with informed constants) |
 | **P1** rider-level | rider medians, training half | rider-median $v_f$ or regime powers | what a planner gets | not run ([§6](#6), item 2) |
 | **P2** blind | as P1 | from a rider power model | forecasting | not attempted |
@@ -139,21 +136,19 @@ Four corpora, 2,039 rides of at least 20 km with per-second power, seven riders:
 
 <a id="tab3"></a>
 
-**Table 3.** Selection on the training half and error on the held-out half (P0, B1). CV: mean $\lvert\log(\hat E/E)\rvert$ ± standard error over 20 folds, as printed in [P1]. Held-out error and bias in %, 95% intervals in brackets, for the current chain (Entries 57 and 63†); F1–F2 are not re-reported for it.
+**Table 3.** Selection on the training half and error on the held-out half (P0, B1). CV: mean $\lvert\log(\hat E/E)\rvert$ ± standard error over 20 folds, as printed in [P1]. Held-out error and bias in %, 95% intervals in brackets, as printed in [P1].
 
 | form | CV | fitted $\varepsilon$ [95% CI] | other | held-out error | held-out bias |
 |------|-------------:|------------------:|----------------:|------------------:|-------------------:|
-| F1 | 0.0711 ± 0.0019 | 0.683 [0.672, 0.700] | — | — | — |
-| F2 | 0.0631 ± 0.0018 | 0.462 [0.457, 0.469] | — | — | — |
-| **F3** | **0.0541 ± 0.0018** | **0.294** [0.285, 0.304] | $\tau$ = 6 m [4.5, 6.6] | **3.24** [2.75, 3.50] | **+0.07** [−0.31, +0.70] |
-| F4 | 0.0629 ± 0.0022 | 0.409 [0.399, 0.417] | $c$ = 1.10 m/km | 2.86 [2.58, 3.39] | −0.40 [−0.73, +0.14] |
-| simulation | — | — | — | 3.19 | −0.10 |
-
-**[P1]'s printed held-out row is one entry stale.** [P1] prints 3.39 [3.03, 3.69] · +0.06 for F3, 2.85 for F4, 3.05 for the simulation and a 149-of-305 sign test: the chain *before* rider-median fallbacks replaced the global priors (Entry 57), although its own §2.2.2 adopts those fallbacks and its CV column is theirs. The current chain — the harness default, the lab journal and the project's data graph agree — reads as in Table 3. The gate meant to catch this tolerates ±0.5 points on these medians and passes both; re-baselining [P1] comes before everything in [§6](#6).
+| F1 | 0.0711 ± 0.0019 | 0.683 [0.672, 0.700] | — | 4.03 [3.58, 4.70] | +1.46 [+0.60, +2.09] |
+| F2 | 0.0631 ± 0.0018 | 0.462 [0.457, 0.469] | — | 3.21 [2.57, 3.78] | +0.14 [−0.29, +0.62] |
+| **F3** | **0.0541 ± 0.0018** | **0.294** [0.285, 0.304] | $\tau$ = 6 m [4.5, 6.6] | **3.24**<!--@c-e52.f3.med--> [2.75, 3.50] | **+0.07**<!--@c-e52.f3.bias--> [−0.31, +0.70] |
+| F4 | 0.0629 ± 0.0022 | 0.409 [0.399, 0.417] | $c$ = 1.10 m/km | 2.86<!--@c-e52.f4.med--> [2.58, 3.39] | −0.40 [−0.73, +0.14] |
+| simulation | — | — | — | 3.19<!--@c-e52.fbase.med--> [2.73, 3.74] | −0.10 [−0.48, +0.42] |
 
 **Two corrections carry the improvement** (CV 0.0711 → 0.0631 → 0.0541); F3 alone is within one standard error of the best. F4 reads lower than F3 on the held-out half with overlapping intervals: 305 rides do not separate them.
 
-**Engine parity is internal consistency.** The paired sign test reads 152 of 305 rides ($p$ = 1.00): given the same per-ride inputs, a stateless pass loses nothing to a forward integration that carries velocity between segments. A non-significant test is not equivalence, and [P1]'s registered equivalence test (±1 point) has not been run on this split. Contests under P0 also test input consistency: under an earlier drag estimator the simulation carried a −3.85% bias and lost on 190 of 305 rides, and fixing the estimator alone produced the tie.
+**Engine parity is internal consistency.** The paired sign test reads 153 of 305<!--@c-e52.parity.signtest--> rides ($p$ = 1.00): given the same per-ride inputs, a stateless pass loses nothing to a forward integration that carries velocity between segments. A non-significant test is not equivalence, and [P1]'s registered equivalence test (±1 point) has not been run on this split. Contests under P0 also test input consistency: under an earlier drag estimator the simulation carried a −3.85% bias and lost on 190 of 305 rides, and fixing the estimator alone produced the tie.
 
 **The descent constant is a closure term.** It refits to 0.683, 0.462, 0.294 and 0.409 across F1–F4 because each form loads its residual onto the refund: the climb aero over-charge in F1, phantom ascent whose matching phantom descent a larger refund cancels in F2, the noise F4's scalar leaves behind. So 0.294 is F3's constant on deadbanded recordings at $\tau$ = 6 m, not a measured behaviour, despite the mechanistic reading eq. (2) gives the refund [P1 §4.4.2]. Constants travel as sets: $(\alpha, \varepsilon)$ at ride grain, $(\varepsilon, c)$ at edge grain [P3 §3.1].
 
@@ -207,7 +202,7 @@ Four corpora, 2,039 rides of at least 20 km with per-second power, seven riders:
 | v2Edge at 90 m | 4.15 [3.91, 4.37] | −0.93 |
 | route-level twin, F2·$\varepsilon_{\mathrm{geom}}$ at 5 m | 4.31 [4.13, 4.54] | +1.25 |
 | v2Edge at 30 m with the valley toll | 3.29<!--@c-wp.patch30--> [3.12, 3.50] | −0.08 |
-| F4 under B1, route level | 2.72 [2.58, 2.86] | −0.35 |
+| F4 under B1, route level | 2.72<!--@c-a3.f4.published--> [2.58, 2.86] | −0.35 |
 
 | (b) cost · map · directions | local 5 m survey | FABDEM 30 m |
 |--------------------------------------------------|------------------------:|------------------------:|
@@ -243,7 +238,7 @@ Four corpora, 2,039 rides of at least 20 km with per-second power, seven riders:
 
 ## 6. Open measurements
 
-First, a correction rather than a measurement: [P1]'s held-out row and the gate's expected values must be re-baselined to the current chain, and the gate's tolerance tightened to printed precision ([§4.1](#4.1)). Items 1–4 of [Table 6](#tab6) need no new data and change what the series can claim; they should precede any submission. Item 5 makes [P2], the most self-contained draft, submittable first. Item 8 is the spine [P3] lacks.
+Items 1–4 of [Table 6](#tab6) need no new data and change what the series can claim; they should precede any submission. Item 5 makes [P2], the most self-contained draft, submittable first. Item 8 is the spine [P3] lacks.
 
 <a id="tab6"></a>
 

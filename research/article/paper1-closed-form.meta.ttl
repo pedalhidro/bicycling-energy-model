@@ -144,6 +144,30 @@
   prov:wasDerivedFrom claims:assert12 ;
   rdfs:comment "The TOTALS-ONLY form, and the one the recipe is built on. Reported beside F3 because the two need different inputs, not because one is better -- their intervals overlap and both biases contain zero" .
 
+<#c-e52.parity.signtest> a schema:Claim ;
+  schema:text "against F_base on the held-out half, the selected form is closer on 153 of 305 rides: paired sign test p = 1.00" ;
+  dcterms:type "out-of-sample" ;
+  pc:value 153 ;
+  pc:gateSection "3q" ;
+  cito:citesAsEvidence dg:o_e52_summary ;
+  rdfs:comment "The parity claim, and an absence of evidence rather than an equivalence result (the registered TOST has not been run on this split). Lab journal Entry 57 recorded 152 of 305; the 2026-09-25 re-run of the same chain printed 153, p = 1.00 either way. Gated since 2026-11-07: e52_split.py writes sign_win / sign_los / sign_p to e52_summary.csv and section 3q holds the count exactly and p to the printed digits. Was 149 of 305, p = 0.73 before Entry 57" .
+
+<#c-e52.parity.signtest.abs> a schema:Claim ;
+  schema:text "against F_base on the held-out half, the selected form is closer on 153 of 305 rides, p = 1.00 (abstract restatement)" ;
+  dcterms:type "out-of-sample" ;
+  pc:value 153 ;
+  pc:gateSection "3q" ;
+  cito:citesAsEvidence dg:o_e52_summary ;
+  rdfs:comment "Same statistic as c-e52.parity.signtest, anchored separately for the reason c-e52.f3.med.abs is: the abstract prints the central claim independently of section 3.1.3" .
+
+<#c-e52.eps.test> a schema:Claim ;
+  schema:text "the held-out half's own eps optimum is 0.282 at the selected tau of 6 m, against 0.294 fitted on the training half" ;
+  dcterms:type "in-sample" ;
+  pc:value 0.282 ;
+  pc:gateSection "3q" ;
+  cito:citesAsEvidence dg:o_e52_summary ;
+  rdfs:comment "The other half of c-e52.eps's identifiability check, and in-sample by construction: fitted ON the held-out half, after scoring, and never fed back into selection. The paper printed 0.255 -- Entry 52's value, under the superseded segment drag estimator -- until 2026-09-25. Gated since 2026-11-07: e52_split.py writes eps_test_opt to e52_summary.csv" .
+
 <#c-e54.transfer> a schema:Claim ;
   schema:text "fitting eps on one rider and scoring it on the other riders' held-out rides costs 0.05 pp of median |D%|, inside the registered 1.0 pp margin (the median pools within- and cross-landscape donor-recipient pairs)" ;
   dcterms:type "out-of-sample" ;

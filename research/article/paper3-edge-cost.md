@@ -145,7 +145,7 @@ The first tranche isolates pure discretisation: v2Edge summed over each ride's *
 | v2Edge @ 90 m | 4.15 [3.91, 4.37] | −0.93 [−1.11, −0.70] |
 | route-level twin (F2 · $\varepsilon_{\mathrm{geom}}$ @ 5 m) | 4.31 [4.13, 4.54] | +1.25 [+0.96, +1.66] |
 | valley patch @ 30 m | 3.29 [3.12, 3.50] | −0.08 [−0.34, +0.08] |
-| **F4 as published** (paper 1: flat $\varepsilon$ = 0.409 · $c$ = 1.10) | **2.72 [2.58, 2.86]** | −0.35 [−0.51, −0.11] |
+| **F4 as published** (paper 1: flat $\varepsilon$ = 0.409 · $c$ = 1.10) | **2.72**<!--@c-a3.f4.published--> **[2.58, 2.86]** | −0.35 [−0.51, −0.11] |
 | F4 all-measured ($\varepsilon_{\mathrm{geom}}$ · paper-2 $c$ = 3.01) | 5.66 [5.42, 5.80] | −3.80 [−4.11, −3.50] |
 
 **Fidelity (H1).** At 5 m the edge sum sits a median **+1.83 pp (med |gap| 1.84 pp)**<!--@c-a3.discretisation.fidelity--> above its route-level twin. The grade-local $\varepsilon(s)$ and E2's clamp floor, which only bind on descents, are the entire discretisation gap, and it is bias-shaped (systematically above), not noise.

@@ -62,7 +62,9 @@ home of the *derivation* and the side-by-side comparison.
   `E52_FALLBACK=prior|rider`, defaults `reg`/`rider`; ~12 min, the only expensive
   step) → `e52_split.py` (A.1–A.8: random 15% hold-out, repeated stratified
   k-fold with **every** parameter refitted in-fold, CV binding with AIC reported,
-  one test scoring; `e52_summary.csv` is what the gates read) ·
+  one test scoring; `e52_summary.csv` is what the gates read — the held-out
+  medians and their stratified CIs (every cell of paper 1's Table 3, F_base's
+  included), the sign test and the test half's own ε optimum) ·
   `e54_transfer.py` (leave-one-rider-out) · `e56_struct.py` (τ and c
   sensitivity) · `e57_rider_fallback.py` (per-rider medians replacing the global
   priors) · `e58_intervals.py` (bootstrap CIs on fitted parameters + the
@@ -165,7 +167,9 @@ home of the *derivation* and the side-by-side comparison.
   full run is 4.5 min instead of 15. Surviving sections are keyed to
   `pc:gateSection` in the article sidecars, and `check_paper_stats.py` asserts
   the correspondence both ways: `1` corpus populations · `3i` elevation
-  substitution (paper 2) · `3p` Sobol shares (E50) · `3q` the A-chain (E52/55/57)
+  substitution (paper 2) · `3p` Sobol shares (E50) · `3q` the A-chain (E52/55/57;
+  every Table 3 cell and the sign test held to HALF A UNIT OF THE PRINTED DIGIT —
+  its old flat ±0.5 pp slack let a stale Table 3 pass)
   · `3r` rider transfer (E54) · `3s` structural sensitivity (E56) · `3t` regional
   pools (E60). Sections for retired results were deleted with the prose they
   served — a gate on a number nobody publishes is a slow test that fails for

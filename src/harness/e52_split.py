@@ -25,6 +25,13 @@ THE GATE is structural: test statistics are unreachable until the A.5 winner has
 been serialised. `_WINNER` starts None and `score_test` refuses to run without
 it, so a coding slip cannot leak the test half into selection.
 
+OUTPUTS. e52_split.csv (one row per form) and e52_summary.csv, the gate-facing
+key,value file bootstrap_ci.py section 3q reads: the held-out medians, their
+stratified 95% CIs (every form and F_base, keys `<stat>_lo` / `<stat>_hi`), the
+paired sign test against F_base (`sign_win`, `sign_los`, `sign_p`) and the test
+half's own eps optimum (`eps_test_opt`). Paper 1's Table 3 prints all of them,
+so all of them live in a file rather than only in a console log.
+
 Run: python3 src/harness/e52_split.py        (E52_SMOKE=1 for the smoke cache)
 """
 
@@ -137,6 +144,20 @@ def cv_loss(rows, form, eps, c=C_PUB, ti=TAU_PUB_I) -> float:
 
 # --------------------------------------------------------------- A.4 fitting
 
+def eps_optimum(rows, form, c, ti) -> float:
+    """The eps minimising the CV loss on `rows` at a fixed (c, tau-index).
+    Grid then refine, deterministic. fit()'s inner search, and the test-half
+    identifiability check in main() -- one copy, so the two cannot differ."""
+    lo, hi = EPS_BOUNDS
+    best = 0.2
+    for _ in range(5):
+        step = (hi - lo) / 200
+        cand = [lo + i * step for i in range(201)]
+        best = min(cand, key=lambda e: cv_loss(rows, form, e, c, ti))
+        lo, hi = best - step, best + step
+    return best
+
+
 def fit(rows, form) -> tuple[float, float, int]:
     """Fit a form's free parameters on `rows` by minimising the CV loss.
     Grid then refine, deterministic.
@@ -147,14 +168,7 @@ def fit(rows, form) -> tuple[float, float, int]:
     chain on rides now in the test half. tau is searched over the cached grid,
     so it is a discrete parameter; that is reported rather than smoothed over."""
     def eps_opt(ti, c):
-        lo, hi = EPS_BOUNDS
-        best = 0.2
-        for _ in range(5):
-            step = (hi - lo) / 200
-            cand = [lo + i * step for i in range(201)]
-            best = min(cand, key=lambda e: cv_loss(rows, form, e, c, ti))
-            lo, hi = best - step, best + step
-        return best
+        return eps_optimum(rows, form, c, ti)
 
     if form == "F3":
         best = min(((eps_opt(ti, C_PUB), C_PUB, ti) for ti in range(len(TAU_GRID))),
@@ -317,25 +331,39 @@ def sensitivity(train, form, eps, c, ti=TAU_PUB_I) -> list[tuple]:
     return out
 
 
-def score_test(test, form, eps, c, label, ti=TAU_PUB_I) -> dict:
-    """A.8 — the single scoring of the held-out half. Refuses to run before the
-    A.5 winner exists: that is the registered gate, enforced structurally."""
-    if _WINNER is None:
-        raise RuntimeError("A.8 reached before A.5 selected a form — gate violation")
-    e = pct(test, form, eps, c, ti)
+def _scored(test, label, err) -> dict:
+    """Median and stratified 95% CI of |D%| and signed D% for one estimator on
+    the held-out half. `err(rows)` returns signed D% per ride. The intervals
+    resample within rider, seeds SEED (|D%|) and SEED + 1 (signed) -- the same
+    estimator for every row of paper 1's Table 3, F_base included."""
+    e = err(test)
     a = [abs(v) for v in e]
-    gs = [[abs(x) for x in pct([r for r in test if r["group"] == g], form, eps, c, ti)]
+    gs = [[abs(x) for x in err([r for r in test if r["group"] == g])]
           for g in GROUPS]
     gs = [x for x in gs if x]
     ci_a = boot_ci_strat(gs, SEED)
-    gs2 = [[x for x in pct([r for r in test if r["group"] == g], form, eps, c, ti)]
+    gs2 = [[x for x in err([r for r in test if r["group"] == g])]
            for g in GROUPS]
     ci_s = boot_ci_strat([x for x in gs2 if x], SEED + 1)
     print(f"    {label:<26} {to_fixed(med_of(a), 2):>6} "
           f"[{to_fixed(ci_a[0], 2)}, {to_fixed(ci_a[1], 2)}]".ljust(19)
           + f"  {to_fixed(med_of(e), 2):>6} "
           f"[{to_fixed(ci_s[0], 2)}, {to_fixed(ci_s[1], 2)}]")
-    return {"med_abs": med_of(a), "med_signed": med_of(e)}
+    return {"med_abs": med_of(a), "med_signed": med_of(e),
+            "ci_abs": ci_a, "ci_signed": ci_s}
+
+
+def score_test(test, form, eps, c, label, ti=TAU_PUB_I) -> dict:
+    """A.8 — the single scoring of the held-out half. Refuses to run before the
+    A.5 winner exists: that is the registered gate, enforced structurally."""
+    if _WINNER is None:
+        raise RuntimeError("A.8 reached before A.5 selected a form — gate violation")
+    return _scored(test, label, lambda rows: pct(rows, form, eps, c, ti))
+
+
+def base_pct(rows) -> list[float]:
+    """Signed D% of the forward simulation F_base, per ride (rows it scored)."""
+    return [100.0 * (r["canon_kj"] - r["emp"]) / r["emp"] for r in rows]
 
 
 def main() -> None:
@@ -415,18 +443,31 @@ def main() -> None:
     for f in FORMS:
         tag = f + (" (WINNER)" if f == w["form"] else "")
         res[f] = score_test(test, f, cv[f]["eps"], cv[f]["c"], tag, cv[f]["ti"])
-    # F_base: a comparator, not a contestant
-    ce = [100.0 * (r["canon_kj"] - r["emp"]) / r["emp"]
-          for r in test if is_finite(r["canon_kj"])]
+    # F_base: a comparator, not a contestant -- scored on the rides it has a
+    # result for, with the same interval estimator as the forms above
+    based = [r for r in test if is_finite(r["canon_kj"])]
+    ce = base_pct(based)
+    base = None
     if ce:
-        print(f"    {'F_base (comparator)':<26} {to_fixed(med_of([abs(v) for v in ce]), 2):>6} "
-              f"{'':<19}  {to_fixed(med_of(ce), 2):>6}")
-        wf = [abs(v) for v in pct(test, w["form"], w["eps"], w["c"], w["ti"])]
-        pair = [(a, abs(b)) for a, b in zip(wf, ce)]
-        win = sum(1 for a, b in pair if a < b)
-        los = sum(1 for a, b in pair if a > b)
-        print(f"    P3 — closed form closer than F_base on {win}/{win + los}, "
-              f"sign test p = {to_fixed(sign_p(win, los), 4)}")
+        base = _scored(based, "F_base (comparator)", base_pct)
+        # paired PER RIDE over the same rows: a ride without a simulation
+        # result must drop out of both lists, not shift every later pair by one
+        wf = [abs(v) for v in pct(based, w["form"], w["eps"], w["c"], w["ti"])]
+        pair = list(zip(wf, [abs(v) for v in ce]))
+        base["win"] = sum(1 for a, b in pair if a < b)
+        base["los"] = sum(1 for a, b in pair if a > b)
+        base["p"] = sign_p(base["win"], base["los"])
+        print(f"    P3 — closed form closer than F_base on "
+              f"{base['win']}/{base['win'] + base['los']}, "
+              f"sign test p = {to_fixed(base['p'], 4)}")
+
+    # identifiability, printed beside the selected eps: the test half's OWN
+    # optimum at the winner's tau and c, same loss and search as A.6. A
+    # diagnostic computed after scoring and never fed back into selection.
+    eps_test = eps_optimum(test, w["form"], w["c"], w["ti"])
+    print(f"\n    identifiability: eps = {to_fixed(w['eps'], 4)} on train, "
+          f"{to_fixed(eps_test, 4)} at the test half's own optimum"
+          + (f" (tau held at {w['tau']} m)" if w["form"] == "F3" else ""))
 
     out = os.path.join(RESULTS, "e52_split" + ("" if AERO == "reg" else "." + AERO) + ("" if FALLBACK == "rider" else "." + FALLBACK) + (".SMOKE" if SMOKE else "") + ".csv")
     with open(out, "w", encoding="utf-8") as fh:
@@ -460,6 +501,24 @@ def main() -> None:
         for f in FORMS:
             fh.write(f"{f.lower()}_test_med_abs,{to_fixed(res[f]['med_abs'], 4)}\n")
             fh.write(f"{f.lower()}_test_med_signed,{to_fixed(res[f]['med_signed'], 4)}\n")
+        # Table 3's brackets, its parity test and the identifiability check --
+        # printed in paper 1 and held by gate 3q to the printed digits. Appended
+        # AFTER the original rows, so a reader that predates them (e54's eps
+        # lookup) sees the same file it always did.
+        for f in FORMS:
+            for stat, ci in (("med_abs", res[f]["ci_abs"]),
+                             ("med_signed", res[f]["ci_signed"])):
+                fh.write(f"{f.lower()}_test_{stat}_lo,{to_fixed(ci[0], 4)}\n")
+                fh.write(f"{f.lower()}_test_{stat}_hi,{to_fixed(ci[1], 4)}\n")
+        if base:
+            for stat, ci in (("med_abs", base["ci_abs"]),
+                             ("med_signed", base["ci_signed"])):
+                fh.write(f"fbase_test_{stat}_lo,{to_fixed(ci[0], 4)}\n")
+                fh.write(f"fbase_test_{stat}_hi,{to_fixed(ci[1], 4)}\n")
+            fh.write(f"sign_win,{base['win']}\n")
+            fh.write(f"sign_los,{base['los']}\n")
+            fh.write(f"sign_p,{to_fixed(base['p'], 4)}\n")
+        fh.write(f"eps_test_opt,{to_fixed(eps_test, 4)}\n")
     print(f"\nwrote {os.path.basename(out)} and {os.path.basename(summ)}")
 
 

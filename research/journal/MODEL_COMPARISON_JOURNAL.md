@@ -2457,6 +2457,17 @@ The rider medians are genuinely rider-specific rather than a repackaged prior: $
 the precision of the test. Paper 1's central claim is parity, and this is as clean a
 demonstration of it as the data can give.
 
+*(Note 2026-11-07: the paired count above is one short of what the harness prints. The
+2026-09-25 re-run of `e52_split.py` on this chain reproduced `e52_split.csv` and
+`e52_summary.csv` byte for byte and gave the closed form **153 of 305** ($p = 1.00$ either way;
+commit 053b24c); every median in the table stands. Until that date paper 1 printed the
+"before" column — gate 3q's flat ±0.5 pp slack passed both columns — and its sign test, Table
+3's brackets (F_base's interval included) and the test half's own ε optimum were console-only
+or computed by hand: the 0.255 that paper 1 paired with 0.294 was Entry 52's
+segment-estimator value, 0.282 on this chain. `e52_split.py` now writes all of them to
+`e52_summary.csv`, and 3q holds every Table 3 cell, the sign test and both ε values to the
+printed digits.)*
+
 ## 2026-07-31 — Entry 56: how much do the STRUCTURAL parameters matter? — τ and c beside the physics
 
 **Lineage** — $I$: $(D_3..D_6, P_{f,r}^{\mathrm{reg}})$ · $T$: $F_3$ (τ) and $F_4$ (c) · $O$: `e56_struct.csv` · $S$: a companion to §3.2's physical-parameter table, on the same scale

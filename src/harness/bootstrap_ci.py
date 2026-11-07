@@ -16,15 +16,21 @@ research/scripts/check_paper_stats.py asserts the correspondence both ways:
 
   1   corpus populations (paper 1, Table 1)
   3i  elevation-source substitution (Entry 41, paper 2)
+  3j  the re-based substitution (Entry 71, paper 2)
+  3k  edge-grain fidelity and scale (Entry 72, paper 3 §3.1)
+  3l  the discrete-routing ladder (Entries 73–74, paper 3 §3.2–3.3)
   3p  parameter sensitivity, Sobol shares (Entry 50, paper 1 §3.2)
-  3q  the A-chain: selection and held-out error (Entries 52/55, paper 1 §3.1)
+  3q  the A-chain: selection and held-out error, every cell of paper 1's
+      Table 3 and its sign test at the printed digits (Entries 52/55/57, §3.1)
   3r  leave-one-rider-out transfer (Entry 54, paper 1 §1.3 — its hypothesis)
-  3s  structural-parameter sensitivity (Entry 56, paper 1 Table 4)
-  3t  regional eps pools (Entry 60, paper 1 Table 5)
+  3s  structural-parameter sensitivity (Entry 56, paper 1 Table 6)
+  3t  regional eps pools (Entry 60, paper 1 Table 4)
 
-Reads ONLY per-ride CSVs already written by the other harnesses — no engine
-runs, no FIT parsing. Every published median is reproduced as a GATE before its
-CI is reported; any gate failure exits non-zero. Bootstrap: percentile method,
+Reads ONLY CSVs already written by the other harnesses — no engine runs, no FIT
+parsing: per-ride outputs where the battery re-derives a statistic, the
+producer's summary file where it holds a printed value to it (3q-3t). Every
+published median it re-derives is reproduced as a GATE before its CI is
+reported; any gate failure exits non-zero. Bootstrap: percentile method,
 B = 10⁴, deterministic mulberry32 seed so the run is reproducible. Paired
 comparisons: exact two-sided sign test on |Δ%|.
 
@@ -543,9 +549,22 @@ if not _ok:
     failed = True
 for _k, _ea, _es, _eci, _ecis in (
         ("v2_d30", 3.75, 1.33, (3.53, 3.99), (1.08, 1.69)),
-        ("patch30", 3.29, -0.08, (3.12, 3.50), (-0.34, 0.08))):
+        ("patch30", 3.29, -0.08, (3.12, 3.50), (-0.34, 0.08)),
+        # "F4 as published": paper 1's (eps, c) pair, which e72 reads from
+        # e52_split.csv -- the strongest row of paper 3's table, and the one its
+        # hierarchy argument ("published F4 beats the patch") rests on
+        ("f4_pub", 2.72, -0.35, (2.58, 2.86), (-0.51, -0.11))):
     report(f"E72 {_k}", [x for x in col(e72, _k) if is_finite(x)],
            _ea, _es, expect_ci=_eci, expect_ci_signed=_ecis)
+# report()'s 0.11 median window is wide for a 2-dp headline, so the F4 row's
+# medians are also held to half a unit of their printed digit
+_f4p = [x for x in col(e72, "f4_pub") if is_finite(x)]
+_m4, _s4 = median([abs(x) for x in _f4p]), median(_f4p)
+_ok = abs(_m4 - 2.72) <= 0.005 + 1e-9 and abs(_s4 - (-0.35)) <= 0.005 + 1e-9
+print(f"E72 F4 as published at printed digits: {to_fixed(_m4, 2)} · {to_fixed(_s4, 2)}"
+      + (" GATE-OK" if _ok else " GATE-FAIL(exp 2.72 · -0.35)"))
+if not _ok:
+    failed = True
 _gap = [num(r, "v2_d5") - num(r, "route5") for r in e72
         if is_finite(num(r, "v2_d5")) and is_finite(num(r, "route5"))]
 _ok = (abs(median([abs(x) for x in _gap]) - 1.84) <= 0.011
@@ -812,10 +831,21 @@ if not _ok:
 
 
 # ---------------------------------------------------------- 3q. Entry 52
-# The A-chain's published numbers. Re-derived from e52_summary.csv, which
-# e52_split.py writes at the end of the run -- so an article claim traces to a
-# file rather than to a console log. The medians are recomputed from the
-# per-ride cache too, so the summary cannot drift from the data it summarises.
+# The A-chain's published numbers (Entries 52/55/57): every cell of paper 1's
+# Table 3 -- median and both CI bounds, error and bias, F1-F4 and F_base -- the
+# paired sign test, the selected eps beside the test half's own optimum, and the
+# twin exposure. Read from e52_summary.csv, which e52_split.py writes at the end
+# of the run, so an article claim traces to a file rather than to a console log.
+# This section re-derives nothing from per-ride data: its job is that what the
+# paper prints and what the chain produced are the same numbers.
+#
+# Each value is held to HALF A UNIT OF ITS LAST PRINTED DIGIT. A flat 0.5 pp
+# slack once let a stale Table 3 (3.39 / 2.85 / 3.05 / 149 of 305 -- the chain
+# before Entry 57's rider-median fallbacks) pass against the chain's 3.24, and
+# its CIs and sign test were never asserted at all. The bound is inclusive
+# because the summary keeps 4 dp: a stored value sitting exactly on a rounding
+# tie at the printed precision cannot say which way its full-precision value
+# rounds, so either printed neighbour is accepted rather than failing at random.
 sec("3q")
 print("\n== Entry 52 — the A-chain (D3-D6, P_f,r) ==")
 _e52 = {}
@@ -827,25 +857,62 @@ except OSError:
     print("  e52_summary.csv MISSING — run src/harness/e52_split.py  GATE-FAIL")
     failed = True
 
-# Each expectation is the value paper 1 prints, held to half a unit of its last
-# printed digit. A flat 0.5 pp slack once let a stale table (3.39 against the
-# chain's 3.24, after Entry 57) pass unnoticed; twin_pct is printed as "82%".
-for _k, _want, _tol, _lbl in (("f3_test_med_abs", 3.24, 0.005, "F3 test med|D%|"),
-                              ("f3_test_med_signed", 0.07, 0.005, "F3 test signed"),
-                              ("f4_test_med_abs", 2.86, 0.005, "F4 test med|D%|"),
-                              ("f4_test_med_signed", -0.40, 0.005, "F4 test signed"),
-                              ("fbase_test_med_abs", 3.19, 0.005, "F_base test med|D%|"),
-                              ("fbase_test_med_signed", -0.10, 0.005, "F_base test signed"),
-                              ("eps", 0.294, 0.0005, "selected eps"),
-                              ("twin_pct", 82.0, 0.5, "twin exposure %")):
-    try:
-        _v = float(_e52.get(_k, "nan"))
-    except ValueError:
-        _v = float("nan")
-    _ok = is_finite(_v) and abs(_v - _want) <= _tol + 1e-9
-    print(f"  {_lbl:<24} {to_fixed(_v, 4):>9}  (expect {_want})"
-          + (" GATE-OK" if _ok else " GATE-FAIL"))
-    if not _ok:
+
+def _q(key: str, want: float, dp: int) -> str | None:
+    """None if e52_summary.csv's `key` matches the printed `want` to half a unit
+    of its last printed digit (`dp` decimals); otherwise the reason."""
+    raw = _e52.get(key)
+    if raw is None:
+        return f"{key} missing — re-run src/harness/e52_split.py"
+    v = parse_float(raw)
+    if is_finite(v) and abs(v - want) <= 0.5 * 10 ** -dp + 1e-9:
+        return None
+    return f"{key} = {raw}, printed {to_fixed(want, dp)}"
+
+
+# Paper 1's Table 3 as printed -- the abstract and sections 3.1.3 and 5 restate
+# rows of it: estimator, med|D%| [95% CI], median signed D% [95% CI]. The
+# brackets are e52_split.py's stratified bootstrap (within rider, seeds 48/49).
+for _k, _lbl, _ea, _eci, _es, _ecis in (
+        ("f3", "F3 (selected)", 3.24, (2.75, 3.50), 0.07, (-0.31, 0.70)),
+        ("f4", "F4 (totals)", 2.86, (2.58, 3.39), -0.40, (-0.73, 0.14)),
+        ("f2", "F2", 3.21, (2.57, 3.78), 0.14, (-0.29, 0.62)),
+        ("f1", "F1", 4.03, (3.58, 4.70), 1.46, (0.60, 2.09)),
+        ("fbase", "F_base", 3.19, (2.73, 3.74), -0.10, (-0.48, 0.42))):
+    _cells = ((f"{_k}_test_med_abs", _ea), (f"{_k}_test_med_abs_lo", _eci[0]),
+              (f"{_k}_test_med_abs_hi", _eci[1]), (f"{_k}_test_med_signed", _es),
+              (f"{_k}_test_med_signed_lo", _ecis[0]),
+              (f"{_k}_test_med_signed_hi", _ecis[1]))
+    _bad = [_m for _m in (_q(_c, _v, 2) for _c, _v in _cells) if _m]
+    _got = [to_fixed(parse_float(_e52.get(_c)), 2) for _c, _ in _cells]
+    print(f"  {_lbl:<14} {_got[0]:>5} [{_got[1]}, {_got[2]}] · "
+          f"{_got[3]:>5} [{_got[4]}, {_got[5]}]"
+          + (" GATE-OK" if not _bad else " GATE-FAIL: " + "; ".join(_bad)))
+    if _bad:
+        failed = True
+
+# the parity claim: the selected form against F_base, paired per ride
+_w, _l = parse_float(_e52.get("sign_win")), parse_float(_e52.get("sign_los"))
+_p = parse_float(_e52.get("sign_p"))
+_ok = (_w == 153 and _w + _l == 305
+       and is_finite(_p) and abs(_p - 1.00) <= 0.005 + 1e-9)
+print(f"  paired sign test: closed form closer on {to_fixed(_w, 0)}/"
+      f"{to_fixed(_w + _l, 0)}, p = {to_fixed(_p, 4)}  (printed 153 of 305, p = 1.00)"
+      + (" GATE-OK" if _ok else " GATE-FAIL"
+         + ("" if "sign_win" in _e52 else " — sign_win missing, re-run src/harness/e52_split.py")))
+if not _ok:
+    failed = True
+
+# the identifiability pair the paper prints ("0.294 against 0.282"), and the
+# repeat-route exposure printed with the headline ("82%")
+for _k, _want, _dp, _lbl in (("eps", 0.294, 3, "selected eps (train)"),
+                             ("eps_test_opt", 0.282, 3, "test half's own eps"),
+                             ("twin_pct", 82, 0, "twin exposure %")):
+    _m = _q(_k, _want, _dp)
+    print(f"  {_lbl:<24} {to_fixed(parse_float(_e52.get(_k)), 4):>9}"
+          f"  (printed {to_fixed(_want, _dp)})"
+          + (" GATE-OK" if not _m else f" GATE-FAIL: {_m}"))
+    if _m:
         failed = True
 
 # the selection itself is a claim: F3 must win, and tau must land on 6 m

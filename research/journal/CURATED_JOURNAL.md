@@ -994,8 +994,9 @@ climb-richness — precisely the covariate ε governs. The fix is partial
 pooling: each rider's own train-half median replaces the global prior, so
 every constant now originates in that rider's telemetry and all 2,039 rides
 stay. Held-out error improved 0.15 pp, ε moved by 0.0002 — and the paired
-test against the simulation reached **152/305, p = 1.00**: the closed form
-and the forward simulation, indistinguishable to the precision of the test.
+test against the simulation reached **153/305, p = 1.00** (152 as first
+recorded; the harness prints 153): the closed form and the forward
+simulation, indistinguishable to the precision of the test.
 [[package]](../packages/entry57/ro-crate-preview.html)
 
 ### Entry 58 — Error bars on the constants, and how wrong is affordable
