@@ -43,7 +43,8 @@ from rdflib.namespace import DCTERMS
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
-ARTICLES = ["paper1-closed-form.md", "paper2-dem-deployment.md", "paper3-edge-cost.md"]
+ARTICLES = ["paper1-closed-form.md", "paper2-dem-deployment.md", "paper3-edge-cost.md",
+            "wp1-route-energy.md"]
 GATES = os.path.join(REPO, "src", "harness", "bootstrap_ci.py")
 
 SCHEMA = Namespace("http://schema.org/")

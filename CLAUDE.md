@@ -250,7 +250,15 @@ home of the *derivation* and the side-by-side comparison.
   IMRAD paper — EN only, no pt-BR mirror planned), `paper2-dem-deployment.md` (scaffold: letter — the
   law on planner/DEM profiles; consumes paper 1 only),
   `paper3-edge-cost.md` (scaffold: the edge-cost discretization paper;
-  cites paper 2's scale prescription), the older monoliths `article-draft.md` +
+  cites paper 2's scale prescription), `wp1-route-energy.md` (working paper
+  WP-1, ≤ 10 pages, EN only: consolidates papers 1–3 after the external review —
+  anchors route-grain claims on paper 1's held-out-selected bundle B1 and reports
+  the deployed bundle BD and the hand recipe BR as labelled arms; labels every
+  number by protocol P0 per-ride / Pf frozen priors / P1 rider-level / P2 blind;
+  adds no measurement. Its sidecar registers the owed measurements of its §6 as
+  `planned` claims, so `check_paper_stats.py` keeps listing them. It restates
+  ~60 numbers from the three drafts — one more surface to update on a
+  re-baseline; `†` marks journal-only numbers), the older monoliths `article-draft.md` +
   `article-draft.pt-BR.md` (canonical citation target) and the piece series
   (`piece1-energy-demand{,.pt-BR}.md`; Pieces 2–3 pending). **A piece edit and
   its pt-BR mirror move in lockstep** — run a bilingual parity diff before
