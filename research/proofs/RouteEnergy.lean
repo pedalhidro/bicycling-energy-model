@@ -19,6 +19,20 @@ derivation:
 6. `refund_le_ceiling`      (A.6)     no rider collects more on a real descent, because legs
                                       cannot return energy.
 
+Then, beyond the appendix, what kinetic energy does to the elevation that has to be paid for:
+
+7. `Obeys.energyLine`,
+   `Obeys.free_lift`                  kinetic energy is height: the ledger sees speed only as
+                                      the head `v²/2g` added to the elevation;
+8. `leg_energy_ge_ascent`,
+   `leg_energy_eq_ascent`             leg energy is at least `β` times the ascent of the energy
+                                      line, and exactly that for a rider who never brakes and
+                                      pedals at once;
+9. `deadband_isLeast`                 the deadband filter of `engines.py` has the least ascent
+                                      of any profile within `τ` of the recording;
+10. `leg_energy_ge_deadband`          so a rider whose kinetic head stays within `τ` of a level
+                                      pays at least for the `τ`-filtered ascent.
+
 What is assumed, and where. The equation of motion is paper 1's eq. (3) with a brake force added;
 nothing else enters `ledger`. The closed form then needs three riding assumptions, each a named
 hypothesis of `closed_form_of_newton`: on flat stretches the air is paid at the reference speed
@@ -29,7 +43,9 @@ remainder is printed in the statement.
 What is not proved, because it is not a theorem. How much of the ceiling a real rider collects
 (the coasting deficit `ε₀`), the deadband threshold `τ` and the noise rate `c` are measurements.
 They correct for riding that departs from the three assumptions and for elevation data that is
-not the road. Nothing here says how large those departures are.
+not the road. Nothing here says how large those departures are. In particular 7–10 show that a
+kinetic-energy buffer acts as a deadband of half its width; they do not show that the deadband
+fitted to recorded rides is that buffer and nothing else.
 
 To check it: `lake exe cache get && lake build` in this directory. The Lean and Mathlib versions
 are pinned by `lean-toolchain` and `lake-manifest.json`.
@@ -339,5 +355,239 @@ theorem refund_le_ceiling {α β x d e : ℝ} (hβ : 0 < β) (hx : 0 < x) (hd : 
   rw [hgrade, min_eq_right ((div_le_one hpos).2 hsteep)]
   gcongr
   linarith
+
+/-! ## 6. Kinetic energy and the deadband -/
+
+/-- The hypotheses of `ledger`, bundled: on the stretch `[a, b]` the ride obeys the equation of
+motion, for some speed gradient, road geometry, pedal power, drag force and brake force. -/
+def Obeys (m g Crr k : ℝ) (v X h E Wa Wb : ℝ → ℝ) (a b : ℝ) : Prop :=
+  ∃ v' c σ P drag brake : ℝ → ℝ,
+    HasRateOn v v' a b ∧ HasRateOn X c a b ∧ HasRateOn h σ a b ∧
+    HasRateOn E (fun s => P s / v s) a b ∧ HasRateOn Wa drag a b ∧ HasRateOn Wb brake a b ∧
+    ∀ s ∈ Set.Ico a b, m * v s * v' s
+      = k * (P s / v s) - Crr * m * g * c s - drag s - m * g * σ s - brake s
+
+theorem Obeys.mono {m g Crr k : ℝ} {v X h E Wa Wb : ℝ → ℝ} {a b a' b' : ℝ}
+    (ride : Obeys m g Crr k v X h E Wa Wb a b) (ha : a ≤ a') (hb : b' ≤ b) :
+    Obeys m g Crr k v X h E Wa Wb a' b' := by
+  obtain ⟨v', c, σ, P, drag, brake, hv, hX, hh, hE, hWa, hWb, newton⟩ := ride
+  exact ⟨v', c, σ, P, drag, brake, hv.mono ha hb, hX.mono ha hb, hh.mono ha hb, hE.mono ha hb,
+    hWa.mono ha hb, hWb.mono ha hb, fun s hs => newton s (Set.Ico_subset_Ico ha hb hs)⟩
+
+/-- The **energy line**: elevation, plus the kinetic head `v²/2g`, plus the head already lost to
+rolling resistance (`C_rr` per horizontal metre) and to the air. On a steady ride it is the
+elevation profile tilted up by the flat-resistance grade `s⋆ = α/β`. -/
+noncomputable def energyLine (m g Crr : ℝ) (v X h Wa : ℝ → ℝ) (t : ℝ) : ℝ :=
+  h t + v t ^ 2 / (2 * g) + Crr * X t + Wa t / (m * g)
+
+/-- **Kinetic energy is height.** The ledger sees speed only through the kinetic head `v²/2g`,
+added to the elevation: leg energy raises the energy line, braking lowers it, and nothing else
+moves it. -/
+theorem Obeys.energyLine {m g Crr k : ℝ} {v X h E Wa Wb : ℝ → ℝ} {a b : ℝ}
+    (ride : Obeys m g Crr k v X h E Wa Wb a b) (hab : a ≤ b) (hm : m ≠ 0) (hg : g ≠ 0) :
+    k * (E b - E a)
+      = m * g * (energyLine m g Crr v X h Wa b - energyLine m g Crr v X h Wa a)
+        + (Wb b - Wb a) := by
+  obtain ⟨v', c, σ, P, drag, brake, hv, hX, hh, hE, hWa, hWb, newton⟩ := ride
+  rw [ledger hab hv hX hh hE hWa hWb newton]
+  unfold RouteEnergy.energyLine
+  field_simp
+  ring
+
+/-- **Free lift.** On a stretch ridden without braking, speed given up is height gained: a
+climb of `H` entered at `v a` and left at `v b` costs the legs what a climb of
+`H − (v a² − v b²)/2g` would at constant speed. -/
+theorem Obeys.free_lift {m g Crr k : ℝ} {v X h E Wa Wb : ℝ → ℝ} {a b : ℝ}
+    (ride : Obeys m g Crr k v X h E Wa Wb a b) (hab : a ≤ b) (hm : m ≠ 0) (hg : g ≠ 0)
+    (no_brake : Wb b = Wb a) :
+    k * (E b - E a)
+      = Crr * m * g * (X b - X a) + (Wa b - Wa a)
+        + m * g * ((h b - h a) - (v a ^ 2 - v b ^ 2) / (2 * g)) := by
+  rw [ride.energyLine hab hm hg, no_brake]
+  unfold RouteEnergy.energyLine
+  field_simp
+  ring
+
+/-- Total ascent of a sampled profile over its first `n` steps. -/
+noncomputable def ascent (n : ℕ) (f : ℕ → ℝ) : ℝ := ∑ i ∈ range n, max (f (i + 1) - f i) 0
+
+/-- **Leg energy is at least the ascent of the energy line.** Cut the ride at `s 0, …, s n`.
+Legs only ever add energy and brakes only ever remove it, so the legs pay for every metre the
+energy line rises between cuts. -/
+theorem leg_energy_ge_ascent {m g Crr k : ℝ} (hm : 0 < m) (hg : 0 < g) (hk : 0 ≤ k)
+    {v X h E Wa Wb : ℝ → ℝ} (s : ℕ → ℝ) (hs : Monotone s) (n : ℕ)
+    (ride : Obeys m g Crr k v X h E Wa Wb (s 0) (s n))
+    (legs : ∀ i < n, E (s i) ≤ E (s (i + 1)))
+    (brakes : ∀ i < n, Wb (s i) ≤ Wb (s (i + 1))) :
+    m * g * ascent n (fun i => energyLine m g Crr v X h Wa (s i)) ≤ k * (E (s n) - E (s 0)) := by
+  have hmg : 0 < m * g := mul_pos hm hg
+  rw [← sum_range_sub (fun i => E (s i)) n, ascent, mul_sum, mul_sum]
+  refine sum_le_sum fun i hi => ?_
+  have hi' := mem_range.1 hi
+  have bal := (ride.mono (hs (Nat.zero_le i)) (hs hi')).energyLine (hs (Nat.le_succ i))
+    hm.ne' hg.ne'
+  have hE := legs i hi'
+  have hB := brakes i hi'
+  rcases le_total (energyLine m g Crr v X h Wa (s (i + 1)) - energyLine m g Crr v X h Wa (s i)) 0
+    with hY | hY
+  · rw [max_eq_right hY, mul_zero]
+    exact mul_nonneg hk (by linarith)
+  · rw [max_eq_left hY]
+    linarith
+
+/-- **And exactly that ascent, for a rider who never brakes and pedals on the same stretch.** -/
+theorem leg_energy_eq_ascent {m g Crr k : ℝ} (hm : 0 < m) (hg : 0 < g) (hk : 0 ≤ k)
+    {v X h E Wa Wb : ℝ → ℝ} (s : ℕ → ℝ) (hs : Monotone s) (n : ℕ)
+    (ride : Obeys m g Crr k v X h E Wa Wb (s 0) (s n))
+    (legs : ∀ i < n, E (s i) ≤ E (s (i + 1)))
+    (brakes : ∀ i < n, Wb (s i) ≤ Wb (s (i + 1)))
+    (never_both : ∀ i < n, Wb (s (i + 1)) = Wb (s i) ∨ E (s (i + 1)) = E (s i)) :
+    k * (E (s n) - E (s 0)) = m * g * ascent n (fun i => energyLine m g Crr v X h Wa (s i)) := by
+  have hmg : 0 < m * g := mul_pos hm hg
+  rw [← sum_range_sub (fun i => E (s i)) n, ascent, mul_sum, mul_sum]
+  refine sum_congr rfl fun i hi => ?_
+  have hi' := mem_range.1 hi
+  have bal := (ride.mono (hs (Nat.zero_le i)) (hs hi')).energyLine (hs (Nat.le_succ i))
+    hm.ne' hg.ne'
+  have hE := legs i hi'
+  have hB := brakes i hi'
+  rcases never_both i hi' with hb | he
+  · -- no braking: the legs' energy is the rise of the line, which is therefore a rise
+    have hpos : 0 ≤ k * (E (s (i + 1)) - E (s i)) := mul_nonneg hk (by linarith)
+    have hY : 0 ≤ energyLine m g Crr v X h Wa (s (i + 1)) - energyLine m g Crr v X h Wa (s i) := by
+      by_contra hneg
+      have := mul_neg_of_pos_of_neg hmg (not_le.1 hneg)
+      linarith
+    rw [max_eq_left hY]
+    linarith
+  · -- no pedalling: the line can only fall
+    have hY : energyLine m g Crr v X h Wa (s (i + 1)) - energyLine m g Crr v X h Wa (s i) ≤ 0 := by
+      by_contra hpos
+      have := mul_pos hmg (not_le.1 hpos)
+      rw [he] at bal
+      linarith
+    rw [max_eq_right hY, he]
+    ring
+
+/-- The **deadband filter** of `engines.py` (`deadband`), a backlash: the output starts at the
+input, stays put while the input is within `τ` of it, and otherwise follows at a distance `τ`. -/
+noncomputable def deadband (τ : ℝ) (u : ℕ → ℝ) : ℕ → ℝ
+  | 0 => u 0
+  | i + 1 => max (u (i + 1) - τ) (min (u (i + 1) + τ) (deadband τ u i))
+
+/-- The definition above is the three-way branch the code runs. -/
+theorem deadband_succ {τ : ℝ} (hτ : 0 ≤ τ) (u : ℕ → ℝ) (i : ℕ) :
+    deadband τ u (i + 1) =
+      if deadband τ u i + τ < u (i + 1) then u (i + 1) - τ
+      else if u (i + 1) < deadband τ u i - τ then u (i + 1) + τ
+      else deadband τ u i := by
+  simp only [deadband, max_def, min_def]
+  split_ifs <;> linarith
+
+/-- The filtered profile never strays more than `τ` from the recorded one. -/
+theorem abs_deadband_sub_le {τ : ℝ} (hτ : 0 ≤ τ) (u : ℕ → ℝ) (i : ℕ) :
+    |deadband τ u i - u i| ≤ τ := by
+  cases i with
+  | zero => simpa [deadband] using hτ
+  | succ i =>
+    rw [abs_le]
+    simp only [deadband, max_def, min_def]
+    constructor <;> split_ifs <;> linarith
+
+/-- One step of the filter against one step of any profile `p → q` that ends inside the band
+`[L, U]` the filter is clamped to. -/
+theorem deadband_step {a p q L U : ℝ} (hL : L ≤ q) (hU : q ≤ U) :
+    max (max L (min U a) - a) 0 + max (q - max L (min U a)) 0
+      ≤ max (q - p) 0 + max (p - a) 0 := by
+  have h1 : q - p ≤ max (q - p) 0 := le_max_left _ _
+  have h2 : p - a ≤ max (p - a) 0 := le_max_left _ _
+  have h3 : 0 ≤ max (q - p) 0 := le_max_right _ _
+  have h4 : 0 ≤ max (p - a) 0 := le_max_right _ _
+  rcases le_total a L with haL | haL
+  · -- the filter is pushed up to `L`
+    have hb : max L (min U a) = L := by rw [min_eq_right (by linarith), max_eq_left haL]
+    rw [hb, max_eq_left (by linarith), max_eq_left (by linarith)]
+    linarith
+  · rcases le_total a U with haU | haU
+    · -- the filter stays where it is
+      have hb : max L (min U a) = a := by rw [min_eq_right haU, max_eq_right haL]
+      rw [hb, sub_self, max_self]
+      rcases le_total (q - a) 0 with h | h
+      · rw [max_eq_right h]; linarith
+      · rw [max_eq_left h]; linarith
+    · -- the filter is pushed down to `U`
+      have hb : max L (min U a) = U := by rw [min_eq_left haU, max_eq_right (by linarith)]
+      rw [hb, max_eq_right (by linarith), max_eq_right (by linarith)]
+      linarith
+
+/-- **No profile within `τ` of the recording climbs less than the filtered one.** For any `w`
+that stays within `τ` of `u`, the filter's ascent is at most `w`'s, plus whatever head start `w`
+has over the recording at the first sample. -/
+theorem ascent_deadband_le {τ : ℝ} (u w : ℕ → ℝ) (n : ℕ) (hw : ∀ i ≤ n, |w i - u i| ≤ τ) :
+    ascent n (deadband τ u) ≤ ascent n w + max (w 0 - u 0) 0 := by
+  have key : ∀ j ≤ n, ascent j (deadband τ u) + max (w j - deadband τ u j) 0
+      ≤ ascent j w + max (w 0 - u 0) 0 := by
+    intro j
+    induction j with
+    | zero => intro _; simp [ascent, deadband]
+    | succ j ih =>
+      intro hj
+      have ih := ih (Nat.le_of_succ_le hj)
+      have hb := abs_le.1 (hw (j + 1) hj)
+      have step := deadband_step (a := deadband τ u j) (p := w j) (q := w (j + 1))
+        (L := u (j + 1) - τ) (U := u (j + 1) + τ) (by linarith) (by linarith)
+      have unfold : deadband τ u (j + 1)
+          = max (u (j + 1) - τ) (min (u (j + 1) + τ) (deadband τ u j)) := by rw [deadband]
+      rw [← unfold] at step
+      simp only [ascent, sum_range_succ] at ih ⊢
+      linarith
+  have := key n le_rfl
+  have hpos : 0 ≤ max (w n - deadband τ u n) 0 := le_max_right _ _
+  linarith
+
+/-- **The deadband is the least ascent in its band.** Among all profiles that start where the
+recording starts and stay within `τ` of it, the filtered profile is one, and none climbs less. -/
+theorem deadband_isLeast {τ : ℝ} (hτ : 0 ≤ τ) (u : ℕ → ℝ) (n : ℕ) :
+    IsLeast {A | ∃ w : ℕ → ℝ, w 0 = u 0 ∧ (∀ i ≤ n, |w i - u i| ≤ τ) ∧ ascent n w = A}
+      (ascent n (deadband τ u)) := by
+  refine ⟨⟨deadband τ u, rfl, fun i _ => abs_deadband_sub_le hτ u i, rfl⟩, ?_⟩
+  rintro A ⟨w, h0, hw, rfl⟩
+  have := ascent_deadband_le u w n hw
+  rw [h0, sub_self, max_self] at this
+  linarith
+
+/-- **A kinetic-energy buffer is a deadband.** If, at the cuts, the rider's kinetic head
+`v²/2g` stays within `τ` of some level `κ`, the legs pay at least for the ascent of the
+`τ`-deadband-filtered road, where the road is the elevation plus the head lost to rolling and
+air. The correction term vanishes for a ride that starts at the middle of its band or slower. -/
+theorem leg_energy_ge_deadband {m g Crr k : ℝ} (hm : 0 < m) (hg : 0 < g) (hk : 0 ≤ k)
+    {v X h E Wa Wb : ℝ → ℝ} (s : ℕ → ℝ) (hs : Monotone s) (n : ℕ)
+    (ride : Obeys m g Crr k v X h E Wa Wb (s 0) (s n))
+    (legs : ∀ i < n, E (s i) ≤ E (s (i + 1)))
+    (brakes : ∀ i < n, Wb (s i) ≤ Wb (s (i + 1)))
+    {τ κ : ℝ} (band : ∀ i ≤ n, |v (s i) ^ 2 / (2 * g) - κ| ≤ τ) :
+    m * g * (ascent n (deadband τ fun i => h (s i) + Crr * X (s i) + Wa (s i) / (m * g))
+        - max (v (s 0) ^ 2 / (2 * g) - κ) 0)
+      ≤ k * (E (s n) - E (s 0)) := by
+  have hmg : 0 < m * g := mul_pos hm hg
+  have base := leg_energy_ge_ascent hm hg hk s hs n ride legs brakes
+  -- the energy line, lowered by `κ`, is a profile within `τ` of the road
+  have shift : ascent n (fun i => energyLine m g Crr v X h Wa (s i))
+      = ascent n (fun i => energyLine m g Crr v X h Wa (s i) - κ) := by
+    simp [ascent]
+  have tube := ascent_deadband_le (τ := τ)
+    (fun i => h (s i) + Crr * X (s i) + Wa (s i) / (m * g))
+    (fun i => energyLine m g Crr v X h Wa (s i) - κ) n
+    (fun i hi => by
+      have := band i hi
+      simp only [energyLine]
+      rwa [show h (s i) + v (s i) ^ 2 / (2 * g) + Crr * X (s i) + Wa (s i) / (m * g) - κ
+          - (h (s i) + Crr * X (s i) + Wa (s i) / (m * g)) = v (s i) ^ 2 / (2 * g) - κ by ring])
+  have h0 : energyLine m g Crr v X h Wa (s 0) - κ
+      - (h (s 0) + Crr * X (s 0) + Wa (s 0) / (m * g)) = v (s 0) ^ 2 / (2 * g) - κ := by
+    simp only [energyLine]; ring
+  simp only [h0] at tube
+  rw [← shift] at tube
+  nlinarith [mul_le_mul_of_nonneg_left tube hmg.le]
 
 end RouteEnergy

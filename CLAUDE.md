@@ -251,8 +251,14 @@ home of the *derivation* and the side-by-side comparison.
   **Lean 4 + Mathlib** (versions pinned by `lean-toolchain` and `lake-manifest.json`;
   `README.md` is the same derivation in plain mathematics). It proves the work–energy
   ledger from eq. (3), the three-term law as an identity under three named riding
-  assumptions, and the coasting ceiling `min(1, s*/s)`. It proves nothing about `ε₀`, `τ`
-  or `c`, which are measurements. The one directory with a build step and a dependency;
+  assumptions, and the coasting ceiling `min(1, s*/s)`. A second part proves that a
+  kinetic-energy buffer acts as a deadband: leg energy is `β` times the ascent of the
+  energy line `h + v²/2g + head lost to resistance`, and `engines.py`'s `deadband` has the
+  least ascent of any profile within `τ` of its input (the Lean definition is checked
+  against that code's three-way branch — a change to `deadband` lands there too). It
+  proves nothing about `ε₀`, the fitted `τ` or `c`, which are measurements, and the
+  kinetic result runs one way only: Entries 63–69 remain the evidence on how much of the
+  fitted filter is kinetic. The one directory with a build step and a dependency;
   nothing else imports it. Check with `lake exe cache get && lake build` (Mathlib's
   prebuilt files are ~7 GB), and re-check when Appendix A's derivation changes.
 - `research/packages/` — per-entry evidence RO-Crates; regenerate via
