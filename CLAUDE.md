@@ -247,6 +247,14 @@ home of the *derivation* and the side-by-side comparison.
   `pc:value` is genuinely asserted in the gate section `pc:gateSection` names,
   and that `dcterms:type` is a known scope — `planned` claims are reported, not
   failed. Exits non-zero.)
+- `research/proofs/` — `RouteEnergy.lean`: paper 1's Appendix A checked by machine in
+  **Lean 4 + Mathlib** (versions pinned by `lean-toolchain` and `lake-manifest.json`;
+  `README.md` is the same derivation in plain mathematics). It proves the work–energy
+  ledger from eq. (3), the three-term law as an identity under three named riding
+  assumptions, and the coasting ceiling `min(1, s*/s)`. It proves nothing about `ε₀`, `τ`
+  or `c`, which are measurements. The one directory with a build step and a dependency;
+  nothing else imports it. Check with `lake exe cache get && lake build` (Mathlib's
+  prebuilt files are ~7 GB), and re-check when Appendix A's derivation changes.
 - `research/packages/` — per-entry evidence RO-Crates; regenerate via
   `make_crates.py` (re-executes `bootstrap_ci.py` and aborts on gate failure).
   RO-Crate envelope at the repo root `ro-crate-metadata.json`.
