@@ -3,8 +3,10 @@
 `RouteEnergy.lean` is paper 1's Appendix A checked by machine, in Lean 4 with Mathlib. It shows
 that the closed form follows from the equation of motion, and names what has to be assumed on
 the way. A second part shows what kinetic energy does to the elevation that has to be paid for:
-a kinetic-energy buffer acts on the route exactly as a deadband. This page is the same argument
-in plain mathematics; the names in `code` are the theorems that check each step.
+a kinetic-energy buffer acts on the route exactly as a deadband. A third part takes the question
+of paper 3: what the equation of motion says about the cost of a single graph edge, and how the
+edge costs the paper deploys relate to it. This page is the same argument in plain mathematics;
+the names in `code` are the theorems that check each step.
 
 ## The derivation
 
@@ -123,6 +125,137 @@ allows, pedals only to hold the lowest speed and brakes only at the highest. (Th
 exists is physics, not one of the checked statements.) So with $2\tau$ of kinetic head to
 spend, the $\tau$-filtered ascent is the least the legs can pay for.
 
+## The edge cost (paper 3)
+
+Paper 3 needs a cost for one edge of a routing graph: a run $\Delta x$ and a rise $\Delta h$ read
+off a map. The steps below derive that cost from the equation of motion, and then place the two
+families the paper deploys against it.
+
+**10. The ledger of one edge** (`Obeys.edge`). Apply step 1 between two nodes, and write
+$H = h + v^2/2g$ for the total head:
+
+$$k\,e \;=\; R\,\Delta x \;+\; m g\,\Delta H \;+\; \Delta W_{\mathrm{air}} \;+\; \Delta W_{\mathrm{brake}} .$$
+
+Speed enters only through the head at the two nodes. A cost that reads $\Delta h$ off the map is
+therefore reading $\Delta H$ correctly only when the rider passes both nodes at the same speed.
+Otherwise it is off by $\beta$ times the change in kinetic head, which is the momentum term of
+paper 3 §3.4.
+
+**11. The ideal edge cost** (`edge_ge_ideal`, `edge_eq_ideal`, `edge_le_bill`). Suppose the air
+and the brakes together take at least the reference bill $A\,\Delta x$, which they do whenever the
+edge is ridden no slower than the reference speed. Legs cannot return energy. Then
+
+$$e \;\ge\; \max\big(0,\ \alpha\,\Delta x + \beta\,\Delta H\big),$$
+
+with equality for the rider of step 5, who on each edge either holds the reference bill without
+braking or does not pedal. Two companions bound a climb. With $A = 0$ the same statement is a
+floor for every rider, $e \ge \max(0,\ \alpha_r\,\Delta x + \beta\,\Delta H)$: rolling and gravity
+alone. And an edge on which the air and the brakes take no more than the reference bill costs at
+most $\alpha\,\Delta x + \beta\,\Delta H$.
+
+Read against paper 3's E1, with $\varepsilon_0 = 0$:
+
+| arm of E1 | what the equation of motion says about it |
+|---|---|
+| descent, $\alpha\,\Delta x - \min(1, s_*/s)\,\beta\,d$ | the ideal edge cost (step 5's ceiling) |
+| flat band, $\alpha\,\Delta x + \beta\,\Delta h$ | the ideal edge cost |
+| gated climb, $\alpha_r\,\Delta x + \beta\,\Delta h$ | the floor, exactly |
+| the same climb without the gate | the upper bound, if climbed no faster than the reference speed |
+
+So the climb gate is F2's choice made edge by edge, between the same two bounds as in step 4.
+
+**12. Summing over a path** (`edge_sum_le_energy`, `energy_eq_edge_sum`, `v2_eq_ideal`). For a
+ride that passes every node at the same speed, the sum of ideal edge costs is at most the energy
+the legs deliver, and equals it for the ideal coaster. This is the sense in which E1 follows from
+the equation of motion: at zero deficit and below the gate it is the energy of a definite rider.
+
+**13. The edge sum and the mesh** (`edge_sum_eq_ascent`, `ideal_sum_coarsen`,
+`edge_sum_ge_deadband`). The ideal edge cost is $\beta\,\max(0,\ \Delta h + s_*\,\Delta x)$: $\beta$
+times the rise of the road tilted by $s_*$. Summed along a path it is
+
+$$\sum_{\mathrm{edges}} \;=\; \beta \cdot \mathrm{ascent}\big(h + s_*\,x\big), \quad\text{sampled at the nodes.}$$
+
+Two things follow. Refining the mesh never lowers the sum: the same route costs at least as much
+on a finer mesh. And on every mesh the sum is at least
+$\beta \cdot \mathrm{ascent}(\mathrm{deadband}_\tau(h + s_*\,x))$, which by step 9 is the least a
+rider with a kinetic buffer pays. The difference between the two is the kinetic term. It is not
+a discretisation error that a finer mesh removes, because a finer mesh never lowers the edge sum.
+This is what paper 3's Appendix A plans to state as "what vanishes and what does not".
+
+**14. The deployed cost** (`v2Edge`, `v2Edge_descent`, `v2_descent_ge`, `v2_descent_eq`,
+`floor_le_v2`). `v2Edge` is defined branch for branch as `r1d_v2_edge` computes it, with the map
+scalar $k_s$ on the two gravity arms and not on $s_*$. Three results.
+
+- Its trailing $\max(0, \cdot)$ never acts. For any constants with $0 \le \varepsilon_0 \le 1$
+  and $k_s \le 1$ the descent arm is at least $\varepsilon_0\,\alpha\,\Delta x$. Paper 3 reports
+  this as measured at the deployed constants; it holds for all of them.
+- With $k_s = 1$ the descent arm is the ideal edge cost plus a deficit charge:
+
+  $$e \;=\; \max(0,\ \alpha\,\Delta x - \beta\,d) \;+\; \min(\varepsilon_0\,\beta\,d,\ \alpha\,\Delta x).$$
+
+  | grade of the descent | cost |
+  |---|---|
+  | up to $s_*$ | $\alpha\,\Delta x - (1 - \varepsilon_0)\,\beta\,d$ |
+  | from $s_*$ to $s_*/\varepsilon_0$ | $\varepsilon_0\,\beta\,d$ |
+  | beyond $s_*/\varepsilon_0$ | $\alpha\,\Delta x$, the flat bill |
+
+- It never bills less than the floor of step 11, and on a gated climb it bills exactly the floor.
+
+The deficit is then a definite claim about riders: on a descent they spend $\varepsilon_0$ of the
+drop's potential energy more than the ideal coaster would, up to the flat bill. That claim is a
+measurement. Nothing here derives it.
+
+**15. The flat-$\varepsilon$ family** (`law_sum_eq_route`, `eFEdge_eq_clamped_law`,
+`clamp_is_ceiling`, `clamp_mass`). The route law is already additive. Charging each edge
+$\alpha\,\Delta x + \beta\,(\Delta h_+ - \varepsilon\,\Delta h_-)$ and summing gives the route law on
+the path's own totals. The only thing that stops it being an edge cost is its sign: it is negative
+on a descent steeper than $s_*/\varepsilon$. `eF1` and `eF2` floor each edge at zero (`eFEdge` is
+defined as `edge_form` computes it), and
+
+$$\max(0,\ \alpha\,\Delta x - \varepsilon\,\beta\,d) \;=\; \alpha\,\Delta x - \min\!\Big(\varepsilon,\ \frac{s_*}{s}\Big)\,\beta\,d .$$
+
+So the floor refunds the flat $\varepsilon$ up to the grade $s_*/\varepsilon$ and the coasting
+ceiling beyond it. The clamp is step 5's statement that legs cannot return energy, applied to one
+edge. What it adds to a route's cost, `eF# − F#` in paper 3's tables, is the sum of what it
+refused.
+
+**16. Potential energy and the search** (`path_potential`, `lawEdge_reduced_ge`, `v2_reduced_ge`,
+`v2_path_ge`, `v2_path_ge_rate`, `rolling_bound_fails`). Take $\beta\,\Delta h$ off every edge.
+Every path between the same two nodes then changes by the same amount,
+$\beta\,(h_{\mathrm{end}} - h_{\mathrm{start}})$, so no shortest path changes. What is left of the
+unclamped law is
+
+$$\alpha\,\Delta x \;+\; (1 - \varepsilon)\,\beta\,d \;\ge\; 0 \qquad\text{for } \varepsilon \le 1,$$
+
+the flat bill plus the wasted share of the descent. So the unclamped route law can be searched
+with Dijkstra's algorithm after this reweighting. The clamp is a modelling choice, and the search
+does not require it. This is the potential that paper 3's Appendix A plans.
+
+For the deployed cost the potential is $k_s\,\beta\,h$, and what is left on each edge is at least
+the rolling bill $\alpha_r\,\Delta x$. Two lower bounds on the cost of any path follow:
+
+$$\text{cost} \;\ge\; \alpha_r\,x + k_s\,\beta\,(h_{\mathrm{end}} - h_{\mathrm{start}}), \qquad \text{cost} \;\ge\; \min(\varepsilon_0\,\alpha,\ \alpha_r)\,x .$$
+
+The rolling bill on its own, $\alpha_r\,x$, is not a lower bound. A descent at exactly the grade
+$s_*$ costs $\varepsilon_0\,\alpha$ per metre. For a 75 kg rider at 50 W and the shared constants
+that is 1.41 J/m against $\alpha_r$ = 5.99 J/m, and the gap stays up to at least 250 W. The
+heuristic $\alpha_r \cdot d$ that paper 3 plans for A* (its Appendix B) therefore overestimates and
+is not admissible on the deployed costs. The larger of the two bounds above is, with $x$ replaced
+by the straight-line distance to the goal. (That a path is no shorter than the straight line is
+geometry, and is not among the checked statements.)
+
+**17. The valley toll** (`valley_toll`). A descent of drop $D$ is coasted and a climb of rise $H$
+follows. By step 6 the legs pay for the climb less the kinetic head spent on it. That head is at
+most $D$, because a coasted descent cannot add more head than it drops, provided the rider leaves
+the valley no slower than it came. It is at most the buffer $(v_e^2 - v_c^2)/2g$, with $v_e$ the
+fastest the rider is at the bottom and $v_c$ the slowest at the top. And the saving cannot exceed
+the climb's own bill, because the legs' energy is not negative. These are the three arms of the
+toll $\min(D,\ H,\ \text{buffer})$ in `e63_f5_kebuffer.py`. They are derived as bounds on what a
+valley can save. The noise floor $2\tau_n$ that the harness takes off the buffer is a
+measurement. The harness then takes the toll off both elevation totals, which credits
+$(1 - \varepsilon)\,\beta$ per metre of toll; the bound here credits $\beta$ per metre against the
+climb.
+
 ## What this establishes, and what it does not
 
 - Under the two assumptions the law is an identity, with the change in kinetic energy and the
@@ -147,6 +280,14 @@ spend, the $\tau$-filtered ascent is the least the legs can pay for.
   $u$, the elevation tilted by the resistance, so only the part of a descent that would otherwise
   be wasted can be carried over. And its threshold is half the swing of $v^2/2g$: 3.7 m for a
   rider whose speed ranges between 12 and 45 km/h.
+- For paper 3, the equation of motion gives the ideal edge cost: a lower bound on every edge
+  ridden at or above the reference speed, and the exact cost for the ideal coaster. It gives that
+  only for a ride that passes the nodes at one speed. Step 13 bounds what that condition costs.
+- The deficit $\varepsilon_0$, the 2% climb gate, the map scalar $k_s$ and `eF4`'s noise rate
+  $c$ are not derived. They enter steps 14 to 16 as parameters, and those steps are algebra
+  about the deployed formulas. Whether the formulas match riders is what paper 3 measures.
+- Step 17 runs one way, like steps 6 to 9: it bounds what a valley can save, and does not show
+  that riders collect it.
 
 ## Checking it
 
