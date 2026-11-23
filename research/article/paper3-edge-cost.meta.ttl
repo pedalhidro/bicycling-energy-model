@@ -38,6 +38,14 @@
   prov:wasDerivedFrom claims:assert33 ;
   rdfs:comment "A3's core claim, first measured in Entry 72 on each ride's own profile (no DEM error); the scope decision of roadmap A3.1 resolved as: its own experiment, e72_edgegrain.py" .
 
+<#c-a3.f4.published> a schema:Claim ;
+  schema:text "Paper 1's published F4 -- flat eps = 0.409 with its jointly fitted c = 1.10 m/km -- reads 2.72 [2.58, 2.86] median |D%| at -0.35 [-0.51, -0.11] bias on all 2,039 rides, the strongest row of section 3.1's table" ;
+  dcterms:type "derived" ;
+  pc:value 2.72 ;
+  pc:gateSection "3k" ;
+  cito:citesAsEvidence dg:o_e72, dg:o_e52_split ;
+  rdfs:comment "A route-level benchmark, not a drop-in edge weight (section 3.1's locality caveat). The (eps, c) pair is read by e72_edgegrain.py from e52_split.csv, never a literal. Printed since Entry 72 and gated since 2026-11-07: section 3k holds both medians to the printed digits and the brackets through report(), like the v2Edge@30 and valley-patch rows beside it" .
+
 <#c-a3.quantisation.length> a schema:Claim ;
   schema:text "The 8-direction lattice inflates the ridden line by 5.4 percent (median len_ratio 1.0543; 1.2737 at n = 4), and on a smoothed chain that inflation is essentially the whole direction-count penalty" ;
   dcterms:type "derived" ;

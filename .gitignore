@@ -53,6 +53,10 @@ data/inputs/longoes.xlsx
 # Per-ride lon/lat coordinate CSVs written by src/harness/dem/extract_coords.py — GPS.
 src/harness/dem/coords/
 
+# Lean build output and fetched dependencies for research/proofs/ — Mathlib and its
+# prebuilt files, several GB. Regenerates with `lake exe cache get`.
+research/proofs/.lake/
+
 # OS / editor cruft
 .DS_Store
 .vscode/

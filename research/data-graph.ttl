@@ -644,8 +644,9 @@
     :selection "grain is the FORM (train CV + one test scoring each); 1,734 train / 305 test rides underneath" ;
     rdfs:comment "The canonical rows are the reg-aero + rider-fallback chain (Entries 55/57 re-based the defaults): F3 wins at CV 0.05406, ε = 0.2939, τ = 6 m, test 3.24 [2.75, 3.50]. The seg sensitivity arm lives in e52_split.seg.csv (4 rows). Downstream harnesses READ fitted constants from this CSV — never a literal (the e54/e61 held-parameter lesson)." .
 :o_e52_summary a :Output ; dcterms:identifier "e52_summary.csv" ;
-    prov:wasGeneratedBy :h_e52split ; :cardinality 18 ;
-    :selection "the gate-facing summary (what bootstrap_ci.py section 3q reads); seg arm suffixed .seg (10 rows)" .
+    prov:wasGeneratedBy :h_e52split ; :cardinality 42 ;
+    :selection "the gate-facing summary (what bootstrap_ci.py section 3q reads); seg arm suffixed .seg (10 rows)" ;
+    rdfs:comment "Key,value rows: the held-out medians, their stratified 95% CIs for F1–F4 and F_base (keys <stat>_lo / <stat>_hi), the paired sign test against F_base (sign_win, sign_los, sign_p) and the test half's own ε optimum (eps_test_opt) — every cell of paper 1's Table 3, which 3q holds to the printed digits. 42 rows since 2026-11-07, counted from the writer and from a synthetic run of it; 18 before, when the brackets, the sign test and the optimum were console-only or computed by hand." .
 
 :entry52 a :Statistic ; rdfs:label "Entry 52 — one protocol, one split: P_{a,g} retired, F3 selected held-out" ;
     prov:wasDerivedFrom :o_e52_split, :o_e52_summary ; :gatedBy :gate ;
@@ -687,7 +688,7 @@
 
 :entry57 a :Statistic ; rdfs:label "Entry 57 — rider-median fallbacks: no ride wears a global prior" ;
     prov:wasDerivedFrom :o_e52_rider_fallback, :o_e52_split ; :gatedBy :gate ;
-    rdfs:comment "Dropping non-inverted rides was measured and rejected first: it keeps 455/2,039 and selects on climb-richness — the covariate ε governs. With rider medians: held-out 3.39 → 3.24, ε moves 0.0002, and the paired test vs F_base reads 152/305, p = 1.00 — the closed form and the simulation indistinguishable to the precision of the test. Gate section 3q." .
+    rdfs:comment "Dropping non-inverted rides was measured and rejected first: it keeps 455/2,039 and selects on climb-richness — the covariate ε governs. With rider medians: held-out 3.39 → 3.24, ε moves 0.0002, and the paired test vs F_base reads 153/305 (152 as first recorded; the harness prints 153), p = 1.00 — the closed form and the simulation indistinguishable to the precision of the test. Gate section 3q." .
 
 :h_e58 a prov:Activity ; p-plan:correspondsToStep "src/harness/e58_intervals.py" ; prov:used :o_e52_aggregates .
 :o_e58 a :Output ; dcterms:identifier "e58_intervals.csv" ;

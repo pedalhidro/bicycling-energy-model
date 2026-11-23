@@ -62,7 +62,9 @@ home of the *derivation* and the side-by-side comparison.
   `E52_FALLBACK=prior|rider`, defaults `reg`/`rider`; ~12 min, the only expensive
   step) → `e52_split.py` (A.1–A.8: random 15% hold-out, repeated stratified
   k-fold with **every** parameter refitted in-fold, CV binding with AIC reported,
-  one test scoring; `e52_summary.csv` is what the gates read) ·
+  one test scoring; `e52_summary.csv` is what the gates read — the held-out
+  medians and their stratified CIs (every cell of paper 1's Table 3, F_base's
+  included), the sign test and the test half's own ε optimum) ·
   `e54_transfer.py` (leave-one-rider-out) · `e56_struct.py` (τ and c
   sensitivity) · `e57_rider_fallback.py` (per-rider medians replacing the global
   priors) · `e58_intervals.py` (bootstrap CIs on fitted parameters + the
@@ -165,7 +167,9 @@ home of the *derivation* and the side-by-side comparison.
   full run is 4.5 min instead of 15. Surviving sections are keyed to
   `pc:gateSection` in the article sidecars, and `check_paper_stats.py` asserts
   the correspondence both ways: `1` corpus populations · `3i` elevation
-  substitution (paper 2) · `3p` Sobol shares (E50) · `3q` the A-chain (E52/55/57)
+  substitution (paper 2) · `3p` Sobol shares (E50) · `3q` the A-chain (E52/55/57;
+  every Table 3 cell and the sign test held to HALF A UNIT OF THE PRINTED DIGIT —
+  its old flat ±0.5 pp slack let a stale Table 3 pass)
   · `3r` rider transfer (E54) · `3s` structural sensitivity (E56) · `3t` regional
   pools (E60). Sections for retired results were deleted with the prose they
   served — a gate on a number nobody publishes is a slow test that fails for
@@ -243,6 +247,33 @@ home of the *derivation* and the side-by-side comparison.
   `pc:value` is genuinely asserted in the gate section `pc:gateSection` names,
   and that `dcterms:type` is a known scope — `planned` claims are reported, not
   failed. Exits non-zero.)
+- `research/proofs/` — `RouteEnergy.lean`: paper 1's Appendix A checked by machine in
+  **Lean 4 + Mathlib** (versions pinned by `lean-toolchain` and `lake-manifest.json`;
+  `README.md` is the same derivation in plain mathematics). It proves the work–energy
+  ledger from eq. (3), the three-term law as an identity under two named riding
+  assumptions with the air on the climbs carried as a fourth term (F2 drops it, F1 bills
+  it at `v_f`, and the truth lies between F2 and the engine's `vc` mode), and the
+  coasting ceiling `min(1, s*/s)`. A second part proves that a
+  kinetic-energy buffer acts as a deadband: leg energy is `β` times the ascent of the
+  energy line `h + v²/2g + head lost to resistance`, and `engines.py`'s `deadband` has the
+  least ascent of any profile within `τ` of its input (the Lean definition is checked
+  against that code's three-way branch — a change to `deadband` lands there too). It
+  proves nothing about `ε₀`, the fitted `τ` or `c`, which are measurements, and the
+  kinetic result runs one way only: Entries 63–69 remain the evidence on how much of the
+  fitted filter is kinetic. A third part is paper 3's edge cost. From the ledger of one
+  edge it derives the ideal edge cost `max 0 (α·Δx + β·ΔH)`: a floor on every edge ridden
+  at or above `v_f`, exact for the ideal coaster, and valid only when the nodes are passed
+  at one speed. The rest is algebra about the deployed formulas, with `v2Edge` and
+  `eFEdge` defined branch for branch as `r1d_v2_edge` and `edge_form` compute them (**a
+  change to either lands there too**): E1's own clamp is dead for all constants, its
+  descent arm is the ideal edge plus `min(ε₀·β·d, α·Δx)`, the eF clamp is the coasting
+  ceiling, `β·h` is a feasible potential (so the unclamped law is searchable without the
+  clamp), and `α_r·d` is NOT an admissible A* heuristic on v2Edge — `min(ε₀·α, α_r)·d`
+  and `α_r·d + k_s·β·Δh` are. `ε₀`, the climb gate, `k_s` and eF4's `c` enter as
+  parameters; nothing derives them. The one directory with a build step and a dependency;
+  nothing else imports it. Check with `lake exe cache get && lake build` (Mathlib's
+  prebuilt files are ~7 GB), and re-check when Appendix A's derivation or either edge
+  function changes.
 - `research/packages/` — per-entry evidence RO-Crates; regenerate via
   `make_crates.py` (re-executes `bootstrap_ci.py` and aborts on gate failure).
   RO-Crate envelope at the repo root `ro-crate-metadata.json`.
@@ -250,7 +281,15 @@ home of the *derivation* and the side-by-side comparison.
   IMRAD paper — EN only, no pt-BR mirror planned), `paper2-dem-deployment.md` (scaffold: letter — the
   law on planner/DEM profiles; consumes paper 1 only),
   `paper3-edge-cost.md` (scaffold: the edge-cost discretization paper;
-  cites paper 2's scale prescription), the older monoliths `article-draft.md` +
+  cites paper 2's scale prescription), `wp1-route-energy.md` (working paper
+  WP-1, ≤ 10 pages, EN only: consolidates papers 1–3 after the external review —
+  anchors route-grain claims on paper 1's held-out-selected bundle B1 and reports
+  the deployed bundle BD and the hand recipe BR as labelled arms; labels every
+  number by protocol P0 per-ride / Pf frozen priors / P1 rider-level / P2 blind;
+  adds no measurement. Its sidecar registers the owed measurements of its §6 as
+  `planned` claims, so `check_paper_stats.py` keeps listing them. It restates
+  ~60 numbers from the three drafts — one more surface to update on a
+  re-baseline; `†` marks journal-only numbers), the older monoliths `article-draft.md` +
   `article-draft.pt-BR.md` (canonical citation target) and the piece series
   (`piece1-energy-demand{,.pt-BR}.md`; Pieces 2–3 pending). **A piece edit and
   its pt-BR mirror move in lockstep** — run a bilingual parity diff before

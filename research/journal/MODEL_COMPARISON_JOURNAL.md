@@ -2457,6 +2457,17 @@ The rider medians are genuinely rider-specific rather than a repackaged prior: $
 the precision of the test. Paper 1's central claim is parity, and this is as clean a
 demonstration of it as the data can give.
 
+*(Note 2026-11-07: the paired count above is one short of what the harness prints. The
+2026-09-25 re-run of `e52_split.py` on this chain reproduced `e52_split.csv` and
+`e52_summary.csv` byte for byte and gave the closed form **153 of 305** ($p = 1.00$ either way;
+commit 053b24c); every median in the table stands. Until that date paper 1 printed the
+"before" column — gate 3q's flat ±0.5 pp slack passed both columns — and its sign test, Table
+3's brackets (F_base's interval included) and the test half's own ε optimum were console-only
+or computed by hand: the 0.255 that paper 1 paired with 0.294 was Entry 52's
+segment-estimator value, 0.282 on this chain. `e52_split.py` now writes all of them to
+`e52_summary.csv`, and 3q holds every Table 3 cell, the sign test and both ε values to the
+printed digits.)*
+
 ## 2026-07-31 — Entry 56: how much do the STRUCTURAL parameters matter? — τ and c beside the physics
 
 **Lineage** — $I$: $(D_3..D_6, P_{f,r}^{\mathrm{reg}})$ · $T$: $F_3$ (τ) and $F_4$ (c) · $O$: `e56_struct.csv` · $S$: a companion to §3.2's physical-parameter table, on the same scale
@@ -2901,6 +2912,12 @@ is **inapplicable to pre-smoothed input**, not that it is wrong — which is exa
 recipe's own proviso, "skip this step if your source already smooths", already said. The
 double-correction reading stands; the "harmful at its published value" phrasing does not, since
 the published value was never meant for this input.)*
+
+*(Corrected again 2026-09-25: Entry 71 later measured the deadband's removal on D3–D5's own
+recorded streams at 3.01 m/km (τ = 2 m) — the D1 raw-barometric rate — so "already smoothed by
+the recording platforms" holds for D6 (1.26 m/km) but not for D3–D5. The low value F4's scalar
+fits to on D3–D6 is the (ε, c) pairing Entry 72 names — c fitted jointly with ε = 0.409 — not
+pre-smoothing. Paper 1's §2.5, Terminology, Contribution 4 and recipe now say so.)*
 
 **F4's damping and F3's deadband are the same correction from opposite ends, and only one
 survives.** $k_m = \max(0, 1 - c\,x_{km}/h_+)$ is a *route-level* proxy for what the
