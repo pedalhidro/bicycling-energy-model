@@ -1288,6 +1288,36 @@ than along-track sampling of the same survey. σ30 keeps the crown, and the
 first smoke's unconverged filter (caught by its own convergence gate) is
 the session's third reminder that the gates earn their keep.
 
+### Entry 76 — The air on the climbs (registered; the run is pending)
+**Data:** none yet. D3–D6 through a flagged rebuild of the Entry-52 cache,
+on the machine that holds the rides; registered and built in a session
+that held none.
+
+The Lean proof of the closed form (Appendix A, checked by machine) left one
+term standing that the paper's forms throw away: the work done against the
+air *on the climbs*. F1 bills it at the flat reference speed, F2–F4 at
+zero, and the truth is proved to lie between — below even the engine's old
+`vc` mode, which leaves the air out of the speed it bills the air at.
+Since ε is fitted after the term is dropped, ε must be absorbing it. The
+entry registers the obvious experiment: put the term back at the *exact*
+steady climbing speed, refit ε and the deadband inside every fold, and see
+what happens to the loss and to ε. Five predictions and a three-way verdict
+rule were fixed first — ε rises by about 0.05; charging costs nothing;
+the exact speed beats the bound; the absorbed air is the lesser part of
+ε's distance from the geometric refund; the deadband stays put.
+
+Then a positive control, on toy synthetic rides whose simulated rider pays
+the air by construction, did something the registration had not foreseen:
+the arm **lost**. The refund a ride earns and the share of climb air it
+pays are both governed by how gentle its terrain is, so they rise and fall
+together (rank correlation ≈ +0.8 on the toy), and dropping the air
+*narrows* the spread that one flat ε has to cover. Two omissions, partly
+cancelling. That is not evidence about real rides, and the registered
+predictions were left exactly as written — but it changed what the run
+must measure: the harness now reports that co-movement on the real
+training half, so a "charging hurts" verdict can be read as "a flat ε
+needs the omission" rather than "the air is not paid".
+
 ---
 
 ## Recurring terms, once

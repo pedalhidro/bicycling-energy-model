@@ -81,8 +81,12 @@ def mulberry32(seed: int):
     return rnd
 
 
-def load() -> list[dict]:
-    path = os.path.join(RESULTS, "e52_aggregates" + ("" if AERO == "reg" else "." + AERO) + ("" if FALLBACK == "rider" else "." + FALLBACK) + (".SMOKE" if SMOKE else "") + ".csv")
+def load(path: str | None = None) -> list[dict]:
+    """The aggregate cache as rows of floats. `path` defaults to the canonical
+    cache of the active aero/fallback arm; Entry 76 passes its `.cair` sibling,
+    so the suffixed cache is parsed by this code rather than by a copy of it."""
+    if path is None:
+        path = os.path.join(RESULTS, "e52_aggregates" + ("" if AERO == "reg" else "." + AERO) + ("" if FALLBACK == "rider" else "." + FALLBACK) + (".SMOKE" if SMOKE else "") + ".csv")
     rows = []
     with open(path, encoding="utf-8") as fh:
         for r in csv.DictReader(fh):
@@ -261,12 +265,13 @@ def folds(rows, k, rep):
         yield tr, va
 
 
-def cross_validate(train) -> dict:
+def cross_validate(train, forms=FORMS) -> dict:
     """A.4 — repeated stratified k-fold. Every free parameter, including F2's
     and F4's, is fitted INSIDE the fold: a parameter fitted once outside would
-    flatter the forms that carry one."""
+    flatter the forms that carry one. `forms` narrows the loop for a caller
+    that needs one form only (Entry 76); the folds do not depend on it."""
     out = {}
-    for form in FORMS:
+    for form in forms:
         scores = []
         for rep in range(N_REPEATS):
             for tr, va in folds(train, K_FOLDS, rep):
@@ -359,6 +364,24 @@ def score_test(test, form, eps, c, label, ti=TAU_PUB_I) -> dict:
     if _WINNER is None:
         raise RuntimeError("A.8 reached before A.5 selected a form — gate violation")
     return _scored(test, label, lambda rows: pct(rows, form, eps, c, ti))
+
+
+SPLIT_HEADER = ("form,npar,cv,cv_se,aic,eps,c,tau,"
+                "test_med_abs,test_med_signed,winner\n")
+
+
+def split_row(label: str, form: str, cvf: dict, resf: dict, winner: bool) -> str:
+    """One line of e52_split.csv. `form` is the algebra that was fitted, `label`
+    the name the row carries -- the same for F1-F4. Entry 76 writes its arm
+    rows through this too, so its F1-F4 rows can be compared with the canonical
+    file byte for byte."""
+    return (f"{label},{NPAR[form]},{cvf['cv']:.6f},{cvf['se']:.6f},"
+            f"{cvf['aic']:.3f},{to_fixed(cvf['eps'], 4)},"
+            f"{to_fixed(cvf['c'], 4) if form == 'F4' else ''},"
+            f"{cvf['tau'] if form == 'F3' else ''},"
+            f"{to_fixed(resf['med_abs'], 4)},"
+            f"{to_fixed(resf['med_signed'], 4)},"
+            f"{1 if winner else 0}\n")
 
 
 def base_pct(rows) -> list[float]:
@@ -471,15 +494,9 @@ def main() -> None:
 
     out = os.path.join(RESULTS, "e52_split" + ("" if AERO == "reg" else "." + AERO) + ("" if FALLBACK == "rider" else "." + FALLBACK) + (".SMOKE" if SMOKE else "") + ".csv")
     with open(out, "w", encoding="utf-8") as fh:
-        fh.write("form,npar,cv,cv_se,aic,eps,c,tau,test_med_abs,test_med_signed,winner\n")
+        fh.write(SPLIT_HEADER)
         for f in FORMS:
-            fh.write(f"{f},{NPAR[f]},{cv[f]['cv']:.6f},{cv[f]['se']:.6f},"
-                     f"{cv[f]['aic']:.3f},{to_fixed(cv[f]['eps'], 4)},"
-                     f"{to_fixed(cv[f]['c'], 4) if f == 'F4' else ''},"
-                     f"{cv[f]['tau'] if f == 'F3' else ''},"
-                     f"{to_fixed(res[f]['med_abs'], 4)},"
-                     f"{to_fixed(res[f]['med_signed'], 4)},"
-                     f"{1 if f == w['form'] else 0}\n")
+            fh.write(split_row(f, f, cv[f], res[f], f == w["form"]))
     # summary row set: the numbers the gate battery re-derives and the article
     # cites. Written here so a published claim traces to a file, not a console log.
     summ = os.path.join(RESULTS, "e52_summary" + ("" if AERO == "reg" else "." + AERO) + ("" if FALLBACK == "rider" else "." + FALLBACK) + (".SMOKE" if SMOKE else "") + ".csv")

@@ -192,6 +192,9 @@ changed. See Entry 11.)*
 - **Entry 75** (prominence-τ map treatment REFUTED: DEM noise is connected 2-D
   micro-structure, not closed extrema — σ30 keeps the crown;
   [`e75_prominence.py`](../../src/harness/e75_prominence.py)) — this commit
+- **Entry 76** (registration + harness, run pending: the air on the climbs charged instead
+  of dropped — the `E52_CLIMBAIR` flag in [`e52_build.py`](../../src/harness/e52_build.py) +
+  [`e76_climbair.py`](../../src/harness/e76_climbair.py)) — this commit
 
 ---
 
@@ -215,6 +218,7 @@ counted from its CSV rather than asserted, is [`research/data-graph.ttl`](../dat
 
 | entry | $I = (D, P)$ | $T$ | $O$ (rows) | $S$ |
 |--:|---|---|---|---|
+| 76 | $(D_3..D_6, P_{f,r})$ via a flagged rebuild of $O_{52}$ | F2/F3/F4 + the climb-air term at {ex, vc, off}, the A-chain | `e52_aggregates.cair.csv`, `e76_split.csv`, `e76_summary.csv` (**not yet generated** — registered, run pending) | does ε absorb the dropped air, and should F3 keep dropping it? |
 | 75 | 290-ride stratified subset × raster crops at the 30 m lattices | 2-D prominence-τ (capped geodesic reconstruction) vs σ30, × {v2, eF2, F3} | `e75_prominence.csv` (290) | REFUTED: prom6 7.43/22.80 vs σ30 4.23/4.96 at (v2, n=16) — DEM noise is connected 2-D micro-structure; σ30 keeps the crown |
 | 74 | Entry 73's cached paths, five ε policies | the eF2 skeleton × {ε₂, ε_SP, ε_geo, ε_GI, ε_VD, 0} | contest columns in `e73_gridpath.csv` (same 1,901) | ε_geo wins every treated cell (3.31 default); regional flat refuted; raw chains invert to flat; §3.2(d)'s default = deployed ε on σ30 at n = 16 (gate 3l) |
 | 73 | $(D_3..D_6, P_{f,r})$ + GPS lines + (IGC wide, FABDEM, E26 spans) | the E73 quantizer × {v2, eF1/eF2/eF4, F1–F4, F5f, patch} per config | `e73_gridpath.csv` (1,901; IGC pop 1,034, FAB pop 1,844) + `fig-p3-dirs.svg`, `fig-p3-chain.svg` | the dirs ladder is chain-shaped (distance vs noise error); eF4 at measured pins best deployable 6/6 chains; deadband's unique share survives at edge grain (gate 3l) |
@@ -293,6 +297,241 @@ Entries with no $O$ are reviews, registrations, imported notes or refactors — 
 what the other rows *mean* without producing a per-ride table of their own.
 
 ---
+
+---
+
+## 2026-11-23 — Entry 76: the air on the climbs — charged instead of dropped (registered; run pending)
+
+**Lineage** — $I$: $(D_3..D_6, P_{f,r})$ via a flagged rebuild of $O_{52}$
+(`e52_aggregates.cair.csv`, which must equal `e52_aggregates.csv` on every canonical cell)
+· $T$: F2, F3 and F4 with the climb-air term restored at three speeds, under Entry 52's
+A-chain, seed 48, fitted by `e52_split`'s own code · $O$: `e52_aggregates.cair.csv`,
+`e76_split.csv`, `e76_summary.csv` · $S$: the CV loss and the fitted ε with and without the
+term, and a verdict on whether F3 should keep dropping it.
+
+*Prompt (Danilo, the brief that followed `research/proofs/RouteEnergy.lean`): "Because ε is
+fitted after the air is dropped, ε absorbs the omission: less refund compensates for the
+missing charge. If that is a large part of why F3's ε is 0.294, charging the air should move
+ε up, toward the geometry-based values the deployed cost uses."*
+
+**Status.** This entry is the registration and the harness. It was written in a cloud session
+that holds none of the ride data, so nothing below has been run on a ride: the flagged build
+was exercised on toy synthetic rides for its gates only, and no arm had been fitted to
+anything, real or synthetic, when the predictions were written. The results section is
+empty on purpose and is to be filled from one command on the machine that holds D3–D6.
+
+### Why
+
+`RouteEnergy.lean` proves the closed form without assuming anything about the air on climbs:
+
+$$E \;=\; \alpha_r\,x \;+\; \alpha_a\,x_{\mathrm{flat}} \;+\; \frac{W_{\mathrm{air,\,climbs}}}{k}
+\;+\; \beta\,(h_+ - \varepsilon\,h_-) \;+\; \frac{\Delta KE}{k}.$$
+
+F2, F3 and F4 are this law with the third term set to zero; F1 charges it at the reference
+speed. The same file proves that the truth lies between the two (`law_bracket`) and that a
+steady climb is ridden no faster than $kP/(R + Ws)$ (`steady_climb_speed_le`), the speed the
+engine's `'vc'` mode bills the air at. So on steady climbs `zero ≤ truth ≤ vc ≤ off`.
+
+The term is not small near the climb gate: at the shared constants a 75 kg rider holding
+100 W up a 2% grade puts 15% of the resisting force in the air (3% at a 5% grade), and 24%
+and 5% at 150 W. The earlier runs of `'vc'` the brief cites are Entry 3 (`zero` 8.7 · +8.5
+against `vc` 12.5 · +12.5 on D1) and Entry 17 ("a near-constant ~+4.6 pp energy shift").
+Both held ε fixed, both predate per-ride physics and the fitted deadband, and Entry 3 says
+itself that `zero` "may also be absorbing part of the $v_f$ residual". The A-chain scores only `off` (F1)
+and `zero` (F2–F4), so the question has not been asked with ε refitted.
+
+### The term
+
+On the profile a form is evaluated on, a 5 m segment is a climb when its slope is at least
+2% — the classification `approximate` already uses to zero the air. The term is the air work
+on those segments at the pedals,
+
+$$K_v \;=\; \frac{1}{k}\sum_{i \,\in\, \mathrm{climbs}} \tfrac12\rho\,C_dA\,v_i^2\,\Delta x_i ,$$
+
+under three speeds, each solved at the ride's own climb-regime power $P_c$ (the time-weighted
+mean the chain already extracts for $F_\mathrm{base}$) and the ride's own inverted constants:
+
+- **`off`** — $v_i = v_f$. F1's charge; the ceiling.
+- **`vc`** — $v_i = \min\!\big(v_f,\ kP_c/(C_{rr}\,mg\cos\theta_i + mg\sin\theta_i)\big)$,
+  exactly what `approximate(..., climbAeroMode='vc')` does. By the proof this over-charges.
+- **`ex`** — the root of $v\,(C_{rr}\,mg\cos\theta_i + mg\sin\theta_i + \tfrac12\rho C_dA\,v^2) =
+  kP_c$, capped at $v_f$: the steady speed with the air kept in the balance. Solved by
+  bisection in the harness (60 halvings on $[0, v_f]$, stdlib only), not in `engines.py`,
+  because an engine change would have to land in the applet as well.
+
+**One departure from the brief, stated before the run.** The brief asks for one constant per
+ride, independent of τ, and also for "the same segment classification … the F2 and F3
+components already use". For F3 those two cannot both hold: F3 is F2 on the deadbanded
+profile, and the deadband flattens the first $2\tau$ of every reversal, so the segments F3
+zeroes the air on are a subset of the raw road's climbs. On the flattened ones F3 already
+bills the air at $v_f$; a constant computed on the raw classification would bill them twice.
+The term is therefore cached **per τ**, on the same profile as the F3 component it joins
+($K_v(\tau)$, 17 values per speed). Everything downstream is still arithmetic on the cache.
+The brief's literal reading — $K_v(0)$ added at every τ — runs as a labelled sensitivity row.
+
+### The arms
+
+| label | energy | fitted | role |
+|---|---|---|---|
+| **F3+ex** | $E_3(\varepsilon,\tau) + K_{ex}(\tau)$ | ε, τ | primary — the verdict is read here |
+| **F3+vc** | $E_3(\varepsilon,\tau) + K_{vc}(\tau)$ | ε, τ | primary |
+| F3+off | $E_3(\varepsilon,\tau) + K_{off}(\tau)$ | ε, τ | the bracket's ceiling in the F3 family |
+| F2+ex, F2+vc | $E_2(\varepsilon) + K_v(0)$ | ε | secondary — the term without the filter |
+| F4+ex, F4+vc | $E_4(\varepsilon, c) + K_v(0)$, the term outside $k_m$ | ε, c | secondary |
+| F3+ex.raw, F3+vc.raw | $E_3(\varepsilon,\tau) + K_v(0)$ | ε, τ | sensitivity — the brief's single constant |
+
+The term carries no fitted parameter, so each arm has its base form's count. It does carry a
+new **input**: the climb power, which the `zero` forms never read.
+
+### Protocol
+
+Entry 52's A-chain, unchanged: the seed-48 85/15 split, repeated stratified 5-fold × 4 with
+every parameter refitted inside every fold, loss $\overline{\lvert\log(\hat E/E)\rvert}$.
+An arm is the base form evaluated on rows whose aero component carries the term, so it runs
+through `e52_split`'s own `fit`, `cv_loss`, `aic` and `score_test` — there is no second copy
+of the algebra. The F3 family alone uses a precomputed search, because Entry 52's would take
+about two hours over five arms; it performs the same floating-point operations in the same
+order and is held to reproducing Entry 52's F3 cross-validation score, its standard error
+and its full-train (ε, τ) exactly, and on the two primary arms to matching `e52_split.fit`
+on the same rows. Two diagnostics are reported and bind nothing: ε with τ pinned at F3's
+(the absorption with the filter held still), and the 20 fold scores paired, arm minus F3.
+
+Gates, all of which abort the run:
+
+1. **Cache drift.** `e52_aggregates.cair.csv` holds the same rides as
+   `e52_aggregates.csv`, in the same order, and every canonical cell equals it as text. A
+   cell that differs only in its last bits (below $10^{-9}$ relative — what an interpreter
+   change alone does, since `sum()` is compensated from Python 3.12) is counted and
+   reported rather than fatal; the binding check is gate 5.
+2. **The loop against the engine**, on every ride and every τ: the harness's `vc` sum equals
+   `approximate('vc')` minus the cached `zero` aero, and its `off` sum on the raw profile
+   equals F1's aero minus F2's, both to $10^{-9}$. Every exact speed is put back into its
+   equation (residual below $10^{-9}$ of $kP_c$).
+3. **The bracket**, on every ride and every τ: $0 \le K_{ex} \le K_{vc} \le K_{off}$ —
+   the Lean statement, checked numerically.
+4. **F2+off ≡ F1** on every ride.
+5. **Chain drift.** The F1–F4 rows of `e76_split.csv` are byte-identical to `e52_split.csv`.
+   The fit columns are compared before the test half is touched; a drifted chain does not
+   get to score it.
+
+**The decision is made on cross-validation.** The held-out half has been scored before — by
+Entries 52, 55 and 57 (paper 1 §3.1.4) and again by the F5 family (Entries 63–65). It is
+scored here once, after the verdict has been computed and printed, for reporting only.
+
+No new random seed: the split and folds are Entry 52's (48), the test-half intervals
+`e52_split`'s (48/49).
+
+### Predictions (registered before any run)
+
+The scale comes from Table 2 of paper 1: charging the climbs at $v_f$ is the whole difference
+between F2 and F1, and it moves the fitted ε by +0.22 (0.462 → 0.683). At climbing speed the
+charge is $(v/v_f)^2$ of that, which over a plausible mix of grades is 0.3–0.4 of it. On the
+filtered profile both the term and $h_-$ shrink, the term somewhat faster, since the climbs
+that survive a 6 m deadband are the sustained, slower ones.
+
+- **(P1₇₆) ε rises.** In every arm against its base form, with τ refitted and with τ pinned
+  at F3's, and in bracket order: ε(F3) < ε(F3+ex) < ε(F3+vc) < ε(F3+off). Registered
+  magnitudes with τ refitted: **F3+ex +0.05** (range +0.02 to +0.10), **F3+vc +0.07** (+0.03
+  to +0.13); F2+ex +0.07 (+0.04 to +0.11), F2+vc +0.09 (+0.06 to +0.14). A value outside its
+  range refutes the magnitude even where the direction holds.
+- **(P2₇₆) Charging the exact term costs nothing.** CV(F3+ex) ≤ CV(F3) + SE(F3).
+- **(P3₇₆) The exact speed beats the bound.** CV(F3+ex) < CV(F3+vc), and likewise
+  CV(F2+ex) < CV(F2+vc), because `vc` over-charges exactly where the term is largest. The gap
+  is expected to be under one SE, so the sign is the test.
+- **(P4₇₆) The absorbed air is a minority of the gap.** F3+ex closes **less than half** of
+  the distance between F3's ε and the training half's median $\varepsilon_\mathrm{geom}$
+  (the ride-level aggregate of the deployed grade-local refund, cached by the same build).
+  Most of what separates 0.294 from the geometric values is the deadband — F2's ε is already
+  0.462 without it — not the missing air. (Void if that median is not above F3's ε: there
+  is then no gap to close.)
+- **(P5₇₆) The deadband does not move.** F3+ex refits τ within one grid step of F3's
+  (5.4, 6.0 or 6.6 m).
+
+**The verdict rule**, read on F3+ex against F3 with F3's own SE, both from this run:
+
+- CV(F3+ex) < CV(F3) − SE → **F3 should charge the air.**
+- within ± SE → **F3 keeps dropping it**: the simpler form, with one input fewer, at no
+  measurable cost — and ε is reported both ways, since its value then depends on the choice.
+- CV(F3+ex) > CV(F3) + SE → **F3 keeps dropping it, and charging hurts**: the fitted ε is
+  doing something a per-ride term built on inverted $C_dA$ and measured $P_c$ does not.
+
+AIC is reported beside it and does not bind (Entry 49's precedent). The expectation
+registered here is the middle branch. Whatever the verdict, this entry moves no published
+number; a re-baseline of paper 1's form is a separate decision.
+
+### Addendum, before any ride was read — a positive control, and what it changed
+
+After the registration above was fixed, the harness was run end to end on **synthetic**
+rides: 210 toy rides (seven riders × 30; terrain a sum of five sinusoids; a one-second
+time-stepping rider on regime powers who pays rolling, air and gravity at every step),
+once with altimeter jitter and 0.2 m quantisation and once noise-free. This was for the
+gates, and they held: with the flag off the modified `e52_build.py` and `e52_split.py`
+reproduce the pre-change code's cache, `e52_split.csv`, `e52_summary.csv` and console log
+byte for byte; the climb-air loop matches the engine to $3\times10^{-13}$ and every exact
+speed its equation to $8\times10^{-16}$; the bracket holds on every ride and τ; F2+off
+recovers F1; the precomputed search is identical to Entry 52's; the F1–F4 rows of
+`e76_split.csv` are byte-identical to `e52_split.csv`; and a full run, rebuild included,
+leaves the three canonical files' checksums unchanged. (One defect was caught on the way:
+the precomputed search first used a running total where Entry 52 uses `sum()`, which
+Python compensates since 3.12 — a last-bit difference, and the identity check refused it.)
+
+The noise-free run was meant as a **positive control** — a world where the rider pays the
+climb air by construction, so the term is real and the arm should be able to show it. The
+arm **lost**:
+
+| toy corpus | F3+ex vs F3 | F2+ex vs F2 | ε, τ pinned | ε, τ refitted | ρ(refund, $K/\beta h_-$) | implied-ε IQR, air dropped → charged |
+|---|--:|--:|--:|--:|--:|--:|
+| noise-free | +15.5 SE | +10.0 SE | +0.027 | −0.045 (τ 4.5 → 7.5 m) | +0.76 raw · +0.86 filtered | 0.115 → 0.147 |
+| jitter + 0.2 m steps | +4.9 SE | +6.5 SE | +0.025 | +0.013 (τ 5.4 → 6.0 m) | +0.69 raw · +0.84 filtered | 0.121 → 0.141 |
+
+(ΔCV in units of the base form's SE, positive = the arm is worse; $K_{ex}$ was 3.9–4.1% of
+measured energy on the raw profile and 1.7–2.0% on the filtered one.)
+
+**The mechanism is in the last two columns.** Per ride, the ε that would zero its residual
+is $(S - E)/\beta h_-$ with the air dropped and $(S + K_{ex} - E)/\beta h_-$ with it charged;
+they differ by $K_{ex}/\beta h_-$, the term in refund units. Both the refund a ride earns
+and that term are governed by how gentle its terrain is — the coasting ceiling
+$\min(1, s_*/s)$ of the proof's step 5 falls with grade, and so does the share of a climb's
+resistance that is air — so across rides they rise and fall together. Charging the term
+therefore *widens* the spread that one flat ε has to cover, and dropping it narrows it.
+Two omissions, a flat refund and a missing charge, partly cancelling.
+
+**This is not evidence about D3–D6.** The toy's terrain is five sinusoids, its rider never
+pedals a fast descent, and its F4 fits $c$ = 6.9 and 12.0 m/km where the real corpora fit
+1.10. What it establishes is narrower and still matters: *this experiment can return
+"charging hurts" in a world where the air is fully paid.* So:
+
+1. **P1₇₆–P5₇₆ and the verdict rule are left exactly as written.** The control makes P2's
+   refutation likelier than its registration assumed, and showed the deadband moving and ε
+   falling under a refitted τ, against P5 and P1. They stand as the record of what was
+   expected before it.
+2. **The run now measures the co-movement on the real training half** (`cancellation` in
+   `e76_climbair.py`, at τ = 0 and at F3's fitted τ, rank statistics because a ride with
+   almost no descent has a wild implied ε). Registered now, after the control and before
+   any ride: **(P6₇₆)** Spearman ρ between the per-ride refund with the air charged and
+   $K_{ex}/\beta h_-$ is positive at both τ, and the inter-quartile range of the per-ride
+   implied ε is wider with the air charged than dropped.
+3. **A reading rule.** "Charging hurts" with P6 held is to be read as *a flat ε needs the
+   omission*, not as *the air is not paid*: the verdict is then about F3 as a
+   one-constant form, and says nothing against the term in a cost whose refund already
+   varies with grade. That pairing — the term with the grade-local refund, the route-level
+   twin of the deployed edge cost (Entry 72's F2·$\varepsilon_\mathrm{geom}$; the
+   `eps_geom` column is already in the `.cair` cache) — is the arm this points to next. It
+   is not run here and would need its own registration.
+
+### Results
+
+**Not yet run.** To be filled from the output of
+
+    python3 src/harness/e76_climbair.py
+
+which builds `e52_aggregates.cair.csv` if it is missing, runs the chain and writes
+`e76_split.csv` and `e76_summary.csv` (`E76_SMOKE=1` for a 15-rides-per-rider subset with
+`.SMOKE` outputs, `E76_REBUILD=1` to force the walk). Extrapolating from synthetic rides,
+the walk is about a quarter longer than a plain `e52_build.py` and the chain about twice an
+`e52_split.py` — an hour or so in all. It writes no canonical file. For each of
+P1₇₆–P6₇₆ the summary records the value and whether the prediction held; state plainly
+here which were refuted.
 
 ---
 

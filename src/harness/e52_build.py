@@ -27,11 +27,18 @@ independent corpora (Entry 52's registration).
 
 Output: data/results/e52_aggregates.csv
 Run:    python3 src/harness/e52_build.py            (E52_SMOKE=1 for a subset)
+
+E52_CLIMBAIR=1 (Entry 76) also caches the air work on climb segments -- the
+term F2-F4 set to zero -- under three speeds and per tau, and writes
+e52_aggregates.cair.csv, never the canonical cache. Every canonical column is
+computed by the same code on the same path, so the suffixed cache must carry
+the canonical rides and numbers; e76_climbair.py checks that before it fits.
 """
 
 from __future__ import annotations
 
 import csv
+import math
 import os
 import sys
 
@@ -44,7 +51,7 @@ from bicycling_energy_model import (approximate, build_profile, canonical,
                                     deadband, empirical_kj,
                                     extract_regime_powers, is_finite,
                                     overall_mean_power, resample_profile)
-from bicycling_energy_model.engines import G, flat_eq_speed
+from bicycling_energy_model.engines import G, eps_geom, flat_eq_speed
 from bicycling_energy_model.regime import measured_flat_speed
 from bicycling_energy_model.jsfmt import to_fixed
 
@@ -67,6 +74,20 @@ AERO = os.environ.get("E52_AERO", "reg")
 # originates in the rider's own telemetry and no ride has to be dropped.
 # "prior" restores the old behaviour as the sensitivity arm.
 FALLBACK = os.environ.get("E52_FALLBACK", "rider")
+# Entry 76: also cache the air work on climbs, the term F2-F4 set to zero. An
+# experimental arm, so it is a flag and a suffixed cache: with the flag unset
+# nothing below changes and the canonical file is written exactly as before.
+CLIMBAIR = bool(os.environ.get("E52_CLIMBAIR"))
+# the sensitivity-arm suffix every e52 output carries (aero, then fallback)
+ARM = (("" if AERO == "reg" else "." + AERO)
+       + ("" if FALLBACK == "rider" else "." + FALLBACK))
+
+
+def cache_path(climbair: bool = CLIMBAIR) -> str:
+    """Where this build writes: the canonical cache, or its `.cair` sibling."""
+    return os.path.join(RESULTS, "e52_aggregates" + ARM
+                        + (".cair" if climbair else "")
+                        + (".SMOKE" if SMOKE else "") + ".csv")
 
 
 def _rider_fallbacks() -> dict:
@@ -85,6 +106,8 @@ RIDER_FB = _rider_fallbacks()
 CDA_RANGE = (0.10, 1.00)
 CHECK: list[float] = []   # build-time cache-vs-engine deviations
 CANON_FAIL: list[str] = []   # F_base failures, counted rather than swallowed
+CAIR_CHECK: list[float] = []  # Entry 76: climb-air loop vs engine, one per ride
+CAIR_RESID: list[float] = []  # Entry 76: worst root residual of the exact speed
 C_PUB = 3.0                      # F4's published climb-fraction constant
 # tau grid for F3's deadband. Entry 52's findings showed tau was frozen at the
 # historical 2 m -- selected in Entry 5 on data overlapping D3-D6, so fitted
@@ -107,6 +130,101 @@ COLS = (["group", "ride", "date", "emp",
         + [f"f3t{i}_{k}" for i in range(len(TAU_GRID))
            for k in ("roll", "aero", "climb", "recov1")]
         + ["x_m", "hplus", "hminus", "vf_kmh", "canon_kj"])
+# Entry 76's extra columns, appended AFTER the canonical ones so the leading
+# fields of a .cair row are the canonical row. Per tau index: the air work on
+# that profile's climb segments (J at the pedals, like every other component)
+# charged at v_f (`cao`), at the engine's 'vc' speed (`cav`) and at the exact
+# steady climbing speed (`cax`). Then the climb-regime power the two speeds
+# were solved at, and the geometry-only eps the deployed cost aggregates to.
+CAIR_COLS = ([f"f3t{i}_{k}" for i in range(len(TAU_GRID))
+              for k in ("cao", "cav", "cax")]
+             + ["p_climb", "eps_geom"])
+
+
+# ------------------------------------------------- Entry 76: the air on climbs
+
+def steady_climb_speed(target: float, fres: float, b: float, w: float,
+                       vf: float) -> float:
+    """The EXACT steady speed on a climb, capped at v_f: the root of
+
+        v * (fres + b * rel * |rel|) = target,        rel = v + w
+
+    where target = keff * P_climb, fres = Crr*mg*cos + mg*sin and
+    b = rho*CdA/2 -- the equation of motion with dv/ds = 0. `approximate`'s
+    'vc' mode leaves the air out of the bracket, so it over-states the speed
+    (research/proofs/RouteEnergy.lean, `steady_climb_speed_le`); this keeps it.
+
+    Bisection, stdlib only, 60 halvings like engines.flat_eq_speed, on [0, v_f]:
+    the closed form never bills a climb above the flat reference speed, so v_f
+    is both the cap and the bracket. The root is unique for w >= 0, and wind is
+    identically zero on this chain (see one_ride). It lives in the harness on
+    purpose: an engine change would have to land in the applet as well."""
+    rel = vf + w
+    if (fres + b * rel * abs(rel)) * vf <= target:
+        return vf                      # the cap binds: power to spare at v_f
+    lo, hi = 0.0, vf
+    for _ in range(60):
+        v = 0.5 * (lo + hi)
+        rel = v + w
+        if (fres + b * rel * abs(rel)) * v < target:
+            lo = v
+        else:
+            hi = v
+    return 0.5 * (lo + hi)
+
+
+def climb_air(pr, p: dict, vf: float, p_climb: float,
+              memo: dict) -> tuple[float, float, float, float]:
+    """Air work on the climb segments of `pr`, in J at the pedals, under three
+    speeds: (off, vc, exact, worst root residual).
+
+    A segment is a climb exactly when `approximate` says so -- slope >=
+    CLIMB_THR on the profile it is handed -- so on a deadbanded profile these
+    are the segments F3 itself zeroes the air on, not the raw road's. `off`
+    bills them at v_f (F1's charge), `vc` at min(v_f, keff*P/(R + W*s)) as the
+    engine's 'vc' mode does, `exact` at steady_climb_speed. The first two are
+    re-derived here only so the engine can check this loop (one_ride does);
+    the third is the one the engine does not have.
+
+    `memo` maps a slope to its two per-metre charges. It is per RIDE (the
+    constants are), created by the caller and keyed on the slope itself --
+    never on an id(). A deadband moves a tracked stretch by a constant, so
+    its slopes recur bit for bit across the tau grid and are solved once
+    (about nine lookups in ten are reuses on a synthetic ride)."""
+    mg = p["m"] * G
+    w = p["wind"]
+    b = 0.5 * p["rho"] * p["CdA"]
+    keff = p["keff"]
+    target = keff * p_climb
+    a_off = b * (vf + w) * abs(vf + w) / keff
+    xs, hs = pr["x"], pr["h"]
+    off = vc_sum = ex_sum = resid = 0.0
+    for i in range(1, len(xs)):
+        dx = xs[i] - xs[i - 1]
+        slope = (hs[i] - hs[i - 1]) / dx
+        if slope < CLIMB_THR:
+            continue
+        off += a_off * dx
+        got = memo.get(slope)
+        if got is None:
+            if p_climb > 0:
+                sec = math.sqrt(1 + slope * slope)
+                fres = p["Crr"] * mg * (1 / sec) + mg * (slope / sec)
+                vc = min(vf, target / fres)
+                vx = steady_climb_speed(target, fres, b, w, vf)
+                rel = vx + w
+                r = (abs((fres + b * rel * abs(rel)) * vx - target) / target
+                     if vx < vf else 0.0)
+            else:                      # the engine's convention: no power, v = 0
+                vc = vx = r = 0.0
+            got = (b * (vc + w) * abs(vc + w) / keff,
+                   b * (vx + w) * abs(vx + w) / keff, r)
+            memo[slope] = got
+        vc_sum += got[0] * dx
+        ex_sum += got[1] * dx
+        if got[2] > resid:
+            resid = got[2]
+    return off, vc_sum, ex_sum, resid
 
 
 def one_ride(pts, label, group, m_logged) -> dict | None:
@@ -201,6 +319,36 @@ def one_ride(pts, label, group, m_logged) -> dict | None:
             row["hplus"], row["hminus"] = a0["hplus"], a0["hminus"]
     row["x_m"] = prof["x"][-1] - prof["x"][0]
 
+    # --- Entry 76: the air on the climbs, the term the `zero` forms drop.
+    # Per tau, because the deadband moves which segments count as climbs. The
+    # loop is checked against the engine on EVERY ride and every tau: its 'vc'
+    # sum against approximate('vc') minus the cached 'zero' aero, and its v_f
+    # sum on the raw profile against F1's aero minus F2's.
+    if CLIMBAIR:
+        try:
+            memo: dict = {}
+            worst = resid = 0.0
+            for tag, pr, _mode in forms[2:]:        # the f3t{i} profiles
+                off, vc, ex, res_i = climb_air(pr, p, vf, p_climb, memo)
+                row[tag + "_cao"], row[tag + "_cav"], row[tag + "_cax"] = off, vc, ex
+                a_vc = approximate(pr, p, vf, 0.0, opt("vc"))["aero"]
+                worst = max(worst, abs(vc - (a_vc - row[tag + "_aero"]))
+                            / max(abs(a_vc), 1.0))
+                resid = max(resid, res_i)
+            worst = max(worst,
+                        abs(row["f3t0_cao"] - (row["f1_aero"] - row["f2_aero"]))
+                        / max(abs(row["f1_aero"]), 1.0))
+            CAIR_CHECK.append(worst)
+            CAIR_RESID.append(resid)
+            row["p_climb"] = p_climb
+            eg = eps_geom(prof, p, vf)
+            row["eps_geom"] = eg if is_finite(eg) else float("nan")
+        except Exception as exc:
+            # main() swallows a ride's Exception and drops the ride. A failure
+            # HERE must not do that: it would shrink the arm's population below
+            # the canonical one without a word. SystemExit passes through.
+            raise SystemExit(f"climb-air block failed on {label}: {exc!r}")
+
     # --- non-circular check: the cached two-point interpolation against a FRESH
     # engine call at an eps neither endpoint used, plus F4 against the exact
     # expression perride_invert.py publishes. Compares to the engine, not to
@@ -274,8 +422,28 @@ def verify() -> bool:
     return ok
 
 
+def verify_climb_air() -> bool:
+    """Entry 76's build-time gates. The loop that produced the climb-air
+    columns is compared with the engine on every ride (its 'vc' and v_f sums
+    are quantities `approximate` computes independently), and every exact
+    speed it solved is put back into the equation it is the root of."""
+    if not CAIR_CHECK:
+        print("\n  climb-air: NO RIDES CHECKED — gate cannot pass")
+        return False
+    worst, resid = max(CAIR_CHECK), max(CAIR_RESID)
+    ok1, ok2 = worst < 1e-9, resid < 1e-9
+    print(f"\n  climb-air loop vs engine on {len(CAIR_CHECK)} rides x "
+          f"{len(TAU_GRID)} tau ('vc' sum vs approximate('vc'); v_f sum vs F1 - F2)")
+    print(f"    worst relative deviation: {worst:.3e}   "
+          f"{'GATE-OK' if ok1 else 'GATE-FAIL'}")
+    print(f"    exact steady speed, worst root residual |v(R + Ws + bv^2) - kP|/kP: "
+          f"{resid:.3e}   {'GATE-OK' if ok2 else 'GATE-FAIL'}")
+    return ok1 and ok2
+
+
 def main() -> None:
-    print("Entry 52 stage 1 — building the aggregate cache for D3-D6")
+    print("Entry 52 stage 1 — building the aggregate cache for D3-D6"
+          + ("   [E52_CLIMBAIR: + the air on climbs, Entry 76]" if CLIMBAIR else ""))
     rows: list[dict] = []
     seen: dict[str, int] = {}
     for group, pts, mass in corpus_rides():
@@ -303,9 +471,13 @@ def main() -> None:
         for msg, n in Counter(CANON_FAIL).most_common(3):
             print(f"    {n:>5}x  {msg[:96]}")
 
-    out = os.path.join(RESULTS, "e52_aggregates" + ("" if AERO == "reg" else "." + AERO) + ("" if FALLBACK == "rider" else "." + FALLBACK) + (".SMOKE" if SMOKE else "") + ".csv")
+    if CLIMBAIR:
+        ok = verify_climb_air() and ok
+
+    out = cache_path()
     with open(out, "w", encoding="utf-8", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=COLS, extrasaction="ignore")
+        w = csv.DictWriter(fh, fieldnames=COLS + (CAIR_COLS if CLIMBAIR else []),
+                           extrasaction="ignore")
         w.writeheader()
         for r in rows:
             w.writerow(r)

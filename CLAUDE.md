@@ -162,6 +162,29 @@ home of the *derivation* and the side-by-side comparison.
   −3.8 — the bundle rule extends to (ε, c). Emits `fig-p3-scale.svg`
   hand-drawn; gate section 3k; `a3.divergence` stays honestly planned
   (needs real network routing). `E72_SMOKE=1`),
+  `e76_climbair.py` (Entry 76 — **registered, run pending**: the air on the
+  climbs charged instead of dropped. `research/proofs/RouteEnergy.lean` proves
+  the law with that term standing; F2–F4 set it to zero and ε absorbs it. The
+  term is cached by `E52_CLIMBAIR=1` in `e52_build.py`, which writes
+  `e52_aggregates.cair.csv` and never the canonical cache — per τ, because the
+  deadband moves which segments are climbs, at three speeds: `cao` (v_f),
+  `cav` (the engine's `'vc'`), `cax` (the exact steady speed, bisection in
+  the harness — NOT in `engines.py`, which would oblige the applet). An arm is
+  its base form on rows whose aero component carries the term, so fit, loss,
+  AIC and test scoring are `e52_split`'s own functions; the F3 family's
+  precomputed search must reproduce `e52_split`'s F3 fold scores exactly —
+  it uses the built-in `sum()` over a list like the original, because a
+  running `+=` differs in the last bits (Python ≥ 3.12 compensates `sum`) and
+  that is enough to fail the identity. Gates abort on: cache drift vs the
+  canonical cache, the loop vs the engine, the proof's bracket
+  0 ≤ K_ex ≤ K_vc ≤ K_off, F2+off ≡ F1, and F1–F4 rows not byte-identical to
+  `e52_split.csv`. **Import `e76_climbair` before `e52_build`** — the flag is
+  read at import and the module refuses to load otherwise, since a rebuild
+  from there would write the canonical cache. `E76_SMOKE=1`, `E76_REBUILD=1`.
+  A synthetic positive control had the arm LOSE even where the simulated rider
+  pays the air: refund and climb-air share co-move across rides, so the
+  omission narrows the spread one flat ε must cover — read a "charging hurts"
+  verdict through the harness's `cancellation` diagnostic),
   `bootstrap_ci.py` (**the gate script**; exits non-zero on failure). **Narrowed
   2026-07-31 to only what the papers still claim** — 22 sections became 7, and a
   full run is 4.5 min instead of 15. Surviving sections are keyed to

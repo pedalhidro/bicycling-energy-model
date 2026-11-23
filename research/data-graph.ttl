@@ -879,3 +879,33 @@
 :entry74 a :Statistic ; rdfs:label "Entry 74 — the descent-eps contest: the incumbent grade-local policy holds" ;
     prov:wasDerivedFrom :o_e73 ; :gatedBy :gate ;
     rdfs:comment "Five descent policies in the identical eF2 skeleton (new columns exSP/exGI/exVD/ex0 beside the existing ef2/v2), constants frozen from producing CSVs (e52_split, e60_regional, e44_scurve_fits, e45_ridelevel), primary cell Sao Paulo x sigma-30 x n in {8,16}. eps_geo wins every treated-map cell (3.31 at the default cell vs flat eps-2 5.11 and regional eps_SP 10.24 — P2 confirmed against the maintainer's own conjecture); grade-inverse trails ~3 pp; the occupancy curve does not transfer to edges; raw chains invert the ordering (flat wins). Decision: paper 3's default = deployed eps_geo on sigma-30 at n = 16, portals on. Gate section 3l." .
+
+# --- Entry 76: the air on the climbs (REGISTERED — run pending) -------------
+# No :cardinality on the cache below: it has not been generated, and a count
+# here is counted from the CSV or not written. The two table outputs have a
+# fixed row set by construction; theirs are counted from the writer and from a
+# synthetic run of it, as o_e52_summary's was.
+
+:F3ca a :Model ; rdfs:label "F3+K — F3 with the air work on its climb segments charged (K_ex at the exact steady climbing speed, K_vc at the engine's 'vc' bound, K_off at v_f), per τ" ;
+    rdfs:comment "The term carries no fitted parameter and one new input, the ride's climb-regime power. F2+K and F4+K are the same term on the raw profile. research/proofs/RouteEnergy.lean proves 0 <= K_ex <= K_vc <= K_off on steady climbs; the harness checks it on every ride." .
+
+:o_e52_aggregates_cair a :Output ; dcterms:identifier "e52_aggregates.cair.csv" ;
+    prov:wasGeneratedBy :h_e52build ; :input :i_d36_fr_rider ;
+    :transformer :F1, :F2, :F3, :F4, :F_base, :F_invert, :F3ca ;
+    :selection "NOT YET GENERATED. The E52_CLIMBAIR=1 arm of e52_build.py: the canonical cache plus 53 columns (K_off, K_vc, K_ex per τ grid point; the climb-regime power; ε_geom). Must equal e52_aggregates.csv on every canonical cell — e76_climbair.py's gate 1" ;
+    rdfs:comment "Build-time gates on every ride and every τ: the climb-air loop against the engine ('vc' sum vs approximate('vc') minus the cached 'zero' aero; v_f sum vs F1 − F2) and the exact speed's root residual, both to 1e-9. A failure inside the climb-air block aborts the build instead of dropping the ride, so the arm's population cannot silently fall below the canonical one." .
+
+:h_e76 a prov:Activity ; p-plan:correspondsToStep "src/harness/e76_climbair.py" ;
+    prov:used :o_e52_aggregates_cair, :o_e52_aggregates, :o_e52_split ;
+    rdfs:comment "Entry 52's A-chain on rows whose aero component carries the term — fit, loss, AIC and test scoring are e52_split's own functions; the F3 family alone uses a precomputed search held to reproducing e52_split's F3 fold scores, SE and full-train (ε, τ) exactly. Reads the canonical cache and e52_split.csv only to check drift against them and writes neither. The verdict is computed on cross-validation and serialised before the held-out half is scored." .
+:o_e76_split a :Output ; dcterms:identifier "e76_split.csv" ;
+    prov:wasGeneratedBy :h_e76 ; :input :i_d36_fr_rider ; :transformer :F1, :F2, :F3, :F4, :F3ca ;
+    :cardinality 13 ;
+    :selection "NOT YET GENERATED on the corpora. Grain is the FORM, e52_split.csv's columns: F1–F4 (which must be byte-identical to e52_split.csv — the drift check) + F3+ex, F3+vc, F3+off, F2+ex, F2+vc, F4+ex, F4+vc and the raw-constant sensitivity rows F3+ex.raw, F3+vc.raw" .
+:o_e76_summary a :Output ; dcterms:identifier "e76_summary.csv" ;
+    prov:wasGeneratedBy :h_e76 ; :cardinality 171 ;
+    :selection "NOT YET GENERATED on the corpora. Key,value: the gates' status, CV/ε/τ per form and arm, ε with τ pinned at F3's, the paired fold differences, the term as a share of measured energy, the refund/climb-air co-movement diagnostic, each registered prediction as HELD/REFUTED, and the verdict" .
+
+:entry76 a :Statistic ; rdfs:label "Entry 76 — the air on the climbs, charged instead of dropped (registered; run pending)" ;
+    prov:wasDerivedFrom :o_e76_split, :o_e76_summary, :o_e52_split ;
+    rdfs:comment "Registration and harness only: written in a session that held no ride data, so no result exists yet and nothing is gated. Registered: ε rises (+0.05 for F3+ex); charging the exact term costs nothing within 1 SE; the exact speed beats the 'vc' bound; the absorbed air closes less than half the gap to ε_geom; τ stays within a grid step. A synthetic positive control run AFTER registration had the arm lose even where the simulated rider pays the air — refund and climb-air share co-move (ρ ≈ +0.8 on toy rides), so the omission narrows the spread one flat ε must cover; the predictions were left as written and the co-movement became a measured diagnostic (P6, added before any ride was read)." .
