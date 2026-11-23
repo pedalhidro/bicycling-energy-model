@@ -24,12 +24,11 @@ $$k\,E \;=\; \Delta KE \;+\; C_{rr}\,m g\,x \;+\; W_{\mathrm{air}} \;+\; m g\,\D
 This is (A1). The air force is left arbitrary, so wind and any drag law are covered, and rolling
 resistance comes out exact in the horizontal distance $x$ on any grade.
 
-**2. Three riding assumptions.** Cut the route into flat stretches, climbs and descents. Write
+**2. Two riding assumptions.** Cut the route into flat stretches, climbs and descents. Write
 $R = C_{rr}\,m g$ for the rolling force, $W = m g$ for the weight and $A$ for the air force at
 the reference speed. Assume:
 
 - on a flat stretch the air costs $A$ per metre;
-- on a climb the air costs nothing;
 - nobody brakes off the descents.
 
 The ledger of a segment with run $x_i$, rise $u_i$ or drop $d_i$, is then
@@ -37,10 +36,11 @@ The ledger of a segment with run $x_i$, rise $u_i$ or drop $d_i$, is then
 | segment | ledger |
 |---|---|
 | flat | $k\,e_i = (R + A)\,x_i + W u_i$ |
-| climb | $k\,e_i = R\,x_i + W u_i$ |
+| climb | $k\,e_i = R\,x_i + \mathrm{air}_i + W u_i$ |
 | descent | $k\,e_i = (R + A)\,x_i - W d_i + \mathrm{waste}_i$ |
 
-where $\mathrm{waste}_i$ is what the descent loses to air drag above the reference bill and to the
+where $\mathrm{air}_i$ is the work the air takes on that climb, about which nothing is assumed,
+and $\mathrm{waste}_i$ is what the descent loses to air drag above the reference bill and to the
 brakes. Each segment may also carry a change in kinetic energy; those changes add up to the
 ride's $\Delta KE$.
 
@@ -54,13 +54,25 @@ which is (A5): the flat bill less a refund, in terms a power meter can measure.
 
 **4. The law** (`three_term_law`, `closed_form_of_newton`). Add the segments up:
 
-$$E \;=\; \alpha_r\,x \;+\; \alpha_a\,x_{\mathrm{flat}} \;+\; \beta\,\big(h_+ - \varepsilon\,h_-\big) \;+\; \frac{\Delta KE}{k}, \qquad \varepsilon \;=\; \frac{\sum_i \varepsilon_i\,d_i}{\sum_i d_i},$$
+$$E \;=\; \alpha_r\,x \;+\; \alpha_a\,x_{\mathrm{flat}} \;+\; \frac{W_{\mathrm{air,\,climbs}}}{k} \;+\; \beta\,\big(h_+ - \varepsilon\,h_-\big) \;+\; \frac{\Delta KE}{k}, \qquad \varepsilon \;=\; \frac{\sum_i \varepsilon_i\,d_i}{\sum_i d_i},$$
 
-with $\alpha_r = R/k$, $\alpha_a = A/k$ and $x_{\mathrm{flat}}$ the distance off the climbs. The
-weight is the drop because that is what makes the total credit come out right
-(`meanRefund_mul_drop`). With no
-segment classed as a climb this is F1; otherwise it is F2, and F3 once the elevation totals are
-filtered.
+with $\alpha_r = R/k$, $\alpha_a = A/k$, $x_{\mathrm{flat}}$ the distance off the climbs and
+$W_{\mathrm{air,\,climbs}} = \sum_i \mathrm{air}_i$ the work done against the air on the climbs.
+The weight in $\varepsilon$ is the drop because that is what makes the total credit come out
+right (`meanRefund_mul_drop`).
+
+Paper 1's forms are the two ways of closing the air term. **F2** sets it to zero: "on a climb the
+air costs nothing". **F1** charges it at the reference speed, $\alpha_a\,x_{\mathrm{climb}}$. If
+climbs are ridden no faster than the reference speed the truth lies between the two
+(`law_bracket`). The ceiling can be lowered: holding a speed $v$ up a grade $s$ at power $P$
+means $k P / v = R + a v^2 + W s$, so $v \le k P/(R + W s)$ (`steady_climb_speed_le`). That is
+the speed the engine's `vc` mode charges the air at, capped at the reference speed. So on steady
+climbs ridden no faster than the reference speed
+
+$$\text{F2 (zero)} \;\le\; E \;\le\; \text{vc} \;\le\; \text{F1 (off)},$$
+
+where `zero`, `vc` and `off` are the engine's three climb-air modes. F3 is F2 once the elevation
+totals are filtered.
 
 **5. The ceiling** (`coast_ceiling`, `refund_of_coaster`, `refund_le_ceiling`). A rider who pedals
 only as much as is needed to hold the reference speed, and not at all once gravity suffices,
@@ -113,8 +125,14 @@ spend, the $\tau$-filtered ascent is the least the legs can pay for.
 
 ## What this establishes, and what it does not
 
-- Under the three assumptions the law is an identity, with the change in kinetic energy as its
-  only remainder. Its error on a real ride is how far that ride departs from the assumptions.
+- Under the two assumptions the law is an identity, with the change in kinetic energy and the
+  air on the climbs as explicit terms. Its error on a real ride is how far that ride departs
+  from the assumptions, plus whatever is done to the air term.
+- That air term is not small near the climb gate. For a 75 kg rider at the shared constants,
+  holding 100 W up a 2% grade puts 15% of the resisting force in the air, and 3% at a 5% grade;
+  climbing at 150 W it is 24% and 5%. F2 drops it, and the fitted $\varepsilon$ makes up the
+  difference, which is one more reason $\varepsilon$ is a closure term. The lab journal's runs
+  of the `vc` mode put its ceiling at about 4 to 4.6% of a ride's energy (Entries 3 and 17).
 - $\varepsilon$ is the number that closes the descent ledger. The derivation fixes its ceiling,
   not its value.
 - The coasting deficit $\varepsilon_0$, the deadband threshold $\tau$ and the noise rate $c$ are

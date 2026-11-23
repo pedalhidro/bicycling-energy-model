@@ -250,8 +250,10 @@ home of the *derivation* and the side-by-side comparison.
 - `research/proofs/` — `RouteEnergy.lean`: paper 1's Appendix A checked by machine in
   **Lean 4 + Mathlib** (versions pinned by `lean-toolchain` and `lake-manifest.json`;
   `README.md` is the same derivation in plain mathematics). It proves the work–energy
-  ledger from eq. (3), the three-term law as an identity under three named riding
-  assumptions, and the coasting ceiling `min(1, s*/s)`. A second part proves that a
+  ledger from eq. (3), the three-term law as an identity under two named riding
+  assumptions with the air on the climbs carried as a fourth term (F2 drops it, F1 bills
+  it at `v_f`, and the truth lies between F2 and the engine's `vc` mode), and the
+  coasting ceiling `min(1, s*/s)`. A second part proves that a
   kinetic-energy buffer acts as a deadband: leg energy is `β` times the ascent of the
   energy line `h + v²/2g + head lost to resistance`, and `engines.py`'s `deadband` has the
   least ascent of any profile within `τ` of its input (the Lean definition is checked

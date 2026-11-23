@@ -10,8 +10,13 @@ derivation:
 2. `refund_eq_balance`      (A3–A5)   the refund fraction of a descent, defined from what the
                                       descent wastes, equals the balance a power meter measures;
 3. `three_term_law`         (A6–A8)   summing the segment ledgers gives
-                                      `E = α_r·x + α_a·x_flat + β·(h₊ − ε·h₋)`, exactly, with `ε`
-                                      the drop-weighted mean refund;
+                                      `E = α_r·x + α_a·x_flat + β·(h₊ − ε·h₋)` plus the work
+                                      against the air on the climbs, exactly, with `ε` the
+                                      drop-weighted mean refund;
+   `law_bracket`,
+   `steady_climb_air_le`    (A.3)     that work lies between nothing, which is F2, and the
+                                      reference-speed bill, which is F1; on a steady climb it
+                                      is at most what the engine's `vc` mode charges;
 4. `closed_form_of_newton`            1 and 3 joined: equation of motion in, closed form out;
 5. `coast_ceiling`,
    `refund_of_coaster`      (A9)      a rider who pedals only when gravity cannot hold the
@@ -34,11 +39,12 @@ Then, beyond the appendix, what kinetic energy does to the elevation that has to
                                       pays at least for the `τ`-filtered ascent.
 
 What is assumed, and where. The equation of motion is paper 1's eq. (3) with a brake force added;
-nothing else enters `ledger`. The closed form then needs three riding assumptions, each a named
+nothing else enters `ledger`. The closed form then needs two riding assumptions, each a named
 hypothesis of `closed_form_of_newton`: on flat stretches the air is paid at the reference speed
-(`flat_aero`), on climbs it is neglected (`climb_aero`), and off the descents nobody brakes
-(`no_brake`). Under those the law is an identity, not an approximation, and its kinetic-energy
-remainder is printed in the statement.
+(`flat_aero`), and off the descents nobody brakes (`no_brake`). Under those the law is an
+identity, not an approximation: its kinetic-energy remainder and the work against the air on
+the climbs are printed in the statement. F2's third assumption, that the air costs nothing on a
+climb, is the choice to drop that last term.
 
 What is not proved, because it is not a theorem. How much of the ceiling a real rider collects
 (the coasting deficit `ε₀`), the deadband threshold `τ` and the noise rate `c` are measurements.
@@ -188,34 +194,39 @@ theorem meanRefund_mul_drop (D : Finset ι) {W : ℝ} (hW : W ≠ 0) {dn waste :
   · simp
   · exact div_mul_cancel₀ _ (sum_pos hdn hne).ne'
 
-/-- **The three-term law.** Cut the route into flat segments `F`, climbs `C` and descents `D`.
-Segment `i` has run `x i`, rise `up i` or drop `dn i`, leg energy `e i` and kinetic-energy
-change `q i`. Suppose its ledger entry is
+/-- Paper 1's F2 for a route cut into flat segments `F`, climbs `C` and descents `D`:
+`α_r·x + α_a·x_flat + β·(h₊ − ε·h₋)` plus the net change in kinetic energy, with `α_r = R/k`,
+`α_a = A/k`, `β = W/k`, `x_flat` the distance off the climbs and `ε` the drop-weighted mean
+refund. -/
+noncomputable def lawF2 (F C D : Finset ι) (R A W k : ℝ) (x up dn waste q : ι → ℝ) : ℝ :=
+  R / k * (∑ i ∈ F, x i + ∑ i ∈ C, x i + ∑ i ∈ D, x i)
+    + A / k * (∑ i ∈ F, x i + ∑ i ∈ D, x i)
+    + W / k * ((∑ i ∈ F, up i + ∑ i ∈ C, up i) - meanRefund D W dn waste * ∑ i ∈ D, dn i)
+    + (∑ i ∈ F, q i + ∑ i ∈ C, q i + ∑ i ∈ D, q i) / k
+
+/-- **The three-term law, and its fourth term.** Segment `i` has run `x i`, rise `up i` or drop
+`dn i`, leg energy `e i` and kinetic-energy change `q i`. Suppose its ledger entry is
 
 * on a flat: rolling, air at the reference speed, and the rise;
-* on a climb: rolling and the rise, the air neglected;
+* on a climb: rolling, the rise, and whatever work `air i` the air took;
 * on a descent: rolling and air at the reference speed, less the drop, plus what is wasted.
 
-Then the leg energy of the route is `α_r·x + α_a·x_flat + β·(h₊ − ε·h₋)` plus the net change in
-kinetic energy, with `α_r = R/k`, `α_a = A/k`, `β = W/k` and `ε` the drop-weighted mean refund.
-With no segment classed as a climb this is paper 1's F1, `(α_r + α_a)·x + β·(h₊ − ε·h₋)`;
-otherwise it is F2, and F3 once the elevation totals are filtered. -/
+Then the leg energy of the route is F2 plus the work done against the air on the climbs. Nothing
+is assumed about that work: paper 1's forms are the two ways of closing it. F2 sets it to zero,
+and F1 charges it at the reference speed, `α_a·x_climb`. -/
 theorem three_term_law (F C D : Finset ι) {R A W k : ℝ} (hk : k ≠ 0) (hW : W ≠ 0)
-    {x up dn e waste q : ι → ℝ} (hdn : ∀ i ∈ D, 0 < dn i)
+    {x up dn e waste q air : ι → ℝ} (hdn : ∀ i ∈ D, 0 < dn i)
     (flat : ∀ i ∈ F, k * e i = R * x i + A * x i + W * up i + q i)
-    (climb : ∀ i ∈ C, k * e i = R * x i + W * up i + q i)
+    (climb : ∀ i ∈ C, k * e i = R * x i + air i + W * up i + q i)
     (desc : ∀ i ∈ D, k * e i = R * x i + A * x i - W * dn i + waste i + q i) :
     ∑ i ∈ F, e i + ∑ i ∈ C, e i + ∑ i ∈ D, e i
-      = R / k * (∑ i ∈ F, x i + ∑ i ∈ C, x i + ∑ i ∈ D, x i)
-        + A / k * (∑ i ∈ F, x i + ∑ i ∈ D, x i)
-        + W / k * ((∑ i ∈ F, up i + ∑ i ∈ C, up i)
-            - meanRefund D W dn waste * ∑ i ∈ D, dn i)
-        + (∑ i ∈ F, q i + ∑ i ∈ C, q i + ∑ i ∈ D, q i) / k := by
+      = lawF2 F C D R A W k x up dn waste q + (∑ i ∈ C, air i) / k := by
   have eF : k * ∑ i ∈ F, e i
       = R * ∑ i ∈ F, x i + A * ∑ i ∈ F, x i + W * ∑ i ∈ F, up i + ∑ i ∈ F, q i := by
     rw [mul_sum, sum_congr rfl flat]
     simp only [sum_add_distrib, mul_sum]
-  have eC : k * ∑ i ∈ C, e i = R * ∑ i ∈ C, x i + W * ∑ i ∈ C, up i + ∑ i ∈ C, q i := by
+  have eC : k * ∑ i ∈ C, e i
+      = R * ∑ i ∈ C, x i + ∑ i ∈ C, air i + W * ∑ i ∈ C, up i + ∑ i ∈ C, q i := by
     rw [mul_sum, sum_congr rfl climb]
     simp only [sum_add_distrib, mul_sum]
   have eD : k * ∑ i ∈ D, e i
@@ -223,10 +234,53 @@ theorem three_term_law (F C D : Finset ι) {R A W k : ℝ} (hk : k ≠ 0) (hW : 
         + ∑ i ∈ D, q i := by
     rw [mul_sum, sum_congr rfl desc]
     simp only [sum_add_distrib, sum_sub_distrib, mul_sum]
+  unfold lawF2
   rw [meanRefund_mul_drop D hW hdn]
   apply mul_left_cancel₀ hk
   field_simp
   linear_combination eF + eC + eD
+
+/-- **F2 and F1 bracket the truth.** If the air takes some work on every climb, and at most
+`cap i`, the route's leg energy lies between F2 and F2 plus the caps. With `cap i = A·x i`,
+which holds when climbs are ridden no faster than the reference speed, the upper end is F1.
+With the cap of `steady_climb_air_le` it is the `vc` mode of `engines.py`. -/
+theorem law_bracket (F C D : Finset ι) {R A W k : ℝ} (hk : 0 < k) (hW : W ≠ 0)
+    {x up dn e waste q air cap : ι → ℝ} (hdn : ∀ i ∈ D, 0 < dn i)
+    (flat : ∀ i ∈ F, k * e i = R * x i + A * x i + W * up i + q i)
+    (climb : ∀ i ∈ C, k * e i = R * x i + air i + W * up i + q i)
+    (desc : ∀ i ∈ D, k * e i = R * x i + A * x i - W * dn i + waste i + q i)
+    (hair : ∀ i ∈ C, 0 ≤ air i ∧ air i ≤ cap i) :
+    lawF2 F C D R A W k x up dn waste q ≤ ∑ i ∈ F, e i + ∑ i ∈ C, e i + ∑ i ∈ D, e i
+      ∧ ∑ i ∈ F, e i + ∑ i ∈ C, e i + ∑ i ∈ D, e i
+          ≤ lawF2 F C D R A W k x up dn waste q + (∑ i ∈ C, cap i) / k := by
+  rw [three_term_law F C D hk.ne' hW hdn flat climb desc]
+  have lo : 0 ≤ (∑ i ∈ C, air i) / k :=
+    div_nonneg (sum_nonneg fun i hi => (hair i hi).1) hk.le
+  have hi : (∑ i ∈ C, air i) / k ≤ (∑ i ∈ C, cap i) / k := by
+    gcongr with i hi
+    exact (hair i hi).2
+  constructor <;> linarith
+
+/-- **A steady climb is slower than its power suggests.** Holding speed `v` up a grade `s`
+against rolling `R`, weight `W` and drag `a·v²`, the equation of motion reads
+`k·P/v = R + a·v² + W·s`. So `v ≤ k·P/(R + W·s)`: the speed computed without the air, which is
+what the `vc` mode of `engines.py` uses, is never too low. -/
+theorem steady_climb_speed_le {R W a k P s v : ℝ} (hv : 0 < v) (ha : 0 ≤ a)
+    (hRW : 0 < R + W * s) (bal : k * P / v = R + a * v ^ 2 + W * s) :
+    v ≤ k * P / (R + W * s) := by
+  rw [le_div_iff₀ hRW]
+  have hP : k * P = v * (R + a * v ^ 2 + W * s) := by
+    field_simp at bal
+    linarith
+  have h3 : 0 ≤ a * v ^ 3 := mul_nonneg ha (pow_pos hv 3).le
+  nlinarith [h3]
+
+/-- Hence the air's force on a steady climb is at most what the `vc` mode charges. -/
+theorem steady_climb_air_le {R W a k P s v : ℝ} (hv : 0 < v) (ha : 0 ≤ a)
+    (hRW : 0 < R + W * s) (bal : k * P / v = R + a * v ^ 2 + W * s) :
+    a * v ^ 2 ≤ a * (k * P / (R + W * s)) ^ 2 :=
+  mul_le_mul_of_nonneg_left
+    (pow_le_pow_left₀ hv.le (steady_climb_speed_le hv ha hRW bal) 2) ha
 
 /-! ## 4. Equation of motion in, closed form out -/
 
@@ -239,12 +293,13 @@ Assume only that
 
 * `flat_aero`: on flat stretches the air costs what it would at the reference speed, `A` per
   horizontal metre (`A = ½·ρ·C_dA·v_f²` in still air);
-* `climb_aero`: on climbs the air costs nothing;
 * `no_brake`: there is no braking off the descents.
 
-Then the leg energy is `α_r·x + α_a·x_flat + β·(h₊ − ε·h₋) + ΔKE/k`, where `α_r = C_rr·m·g/k`,
-`α_a = A/k`, `β = m·g/k`, and `ε` is the drop-weighted mean refund of the descents. A ride that
-ends at the speed it started loses the last term. -/
+Then the leg energy is `α_r·x + α_a·x_flat + W_air,climbs/k + β·(h₊ − ε·h₋) + ΔKE/k`, where
+`α_r = C_rr·m·g/k`, `α_a = A/k`, `β = m·g/k`, `ε` is the drop-weighted mean refund of the
+descents, and `W_air,climbs` is the work actually done against the air on the climbs. F2 is the
+case where that work is neglected. A ride that ends at the speed it started loses the last
+term. -/
 theorem closed_form_of_newton {m g Crr k : ℝ} (hk : k ≠ 0) (hmg : m * g ≠ 0)
     {v v' X c h σ E P Wa Wb drag brake : ℝ → ℝ}
     (s : ℕ → ℝ) (hs : Monotone s) (n : ℕ)
@@ -259,11 +314,11 @@ theorem closed_form_of_newton {m g Crr k : ℝ} (hk : k ≠ 0) (hmg : m * g ≠ 
     (hdrop : ∀ i ∈ D, h (s (i + 1)) < h (s i))
     (A : ℝ)
     (flat_aero : ∀ i ∈ F, seg Wa s i = A * seg X s i)
-    (climb_aero : ∀ i ∈ C, seg Wa s i = 0)
     (no_brake : ∀ i ∈ F ∪ C, seg Wb s i = 0) :
     E (s n) - E (s 0)
       = Crr * m * g / k * (X (s n) - X (s 0))
         + A / k * ∑ i ∈ F ∪ D, seg X s i
+        + (∑ i ∈ C, seg Wa s i) / k
         + m * g / k * (∑ i ∈ F ∪ C, seg h s i
             - meanRefund D (m * g) (fun i => -seg h s i)
                 (fun i => seg Wa s i - A * seg X s i + seg Wb s i)
@@ -294,7 +349,7 @@ theorem closed_form_of_newton {m g Crr k : ℝ} (hk : k ≠ 0) (hmg : m * g ≠ 
   have law := three_term_law F C D (R := Crr * m * g) (A := A) (W := m * g) hk hmg
     (x := seg X s) (up := seg h s) (dn := fun i => -seg h s i) (e := seg E s)
     (waste := fun i => seg Wa s i - A * seg X s i + seg Wb s i)
-    (q := seg (fun t => m * v t ^ 2 / 2) s)
+    (q := seg (fun t => m * v t ^ 2 / 2) s) (air := seg Wa s)
     (fun i hi => by have := hdrop i hi; unfold seg; linarith)
     (fun i hi => by
       have := bal i (memF i hi)
@@ -302,12 +357,13 @@ theorem closed_form_of_newton {m g Crr k : ℝ} (hk : k ≠ 0) (hmg : m * g ≠ 
       linarith)
     (fun i hi => by
       have := bal i (memC i hi)
-      rw [climb_aero i hi, no_brake i (mem_union_right _ hi)] at this
+      rw [no_brake i (mem_union_right _ hi)] at this
       linarith)
     (fun i hi => by linarith [bal i (memD i hi)])
+  unfold lawF2 at law
   rw [← split, ← split, ← split, tele, tele, tele] at law
   rw [sum_union hFD, sum_union hFC]
-  exact law
+  linarith
 
 /-! ## 5. How large can the refund be? (A9, A.6) -/
 
