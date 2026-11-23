@@ -260,9 +260,20 @@ home of the *derivation* and the side-by-side comparison.
   against that code's three-way branch — a change to `deadband` lands there too). It
   proves nothing about `ε₀`, the fitted `τ` or `c`, which are measurements, and the
   kinetic result runs one way only: Entries 63–69 remain the evidence on how much of the
-  fitted filter is kinetic. The one directory with a build step and a dependency;
+  fitted filter is kinetic. A third part is paper 3's edge cost. From the ledger of one
+  edge it derives the ideal edge cost `max 0 (α·Δx + β·ΔH)`: a floor on every edge ridden
+  at or above `v_f`, exact for the ideal coaster, and valid only when the nodes are passed
+  at one speed. The rest is algebra about the deployed formulas, with `v2Edge` and
+  `eFEdge` defined branch for branch as `r1d_v2_edge` and `edge_form` compute them (**a
+  change to either lands there too**): E1's own clamp is dead for all constants, its
+  descent arm is the ideal edge plus `min(ε₀·β·d, α·Δx)`, the eF clamp is the coasting
+  ceiling, `β·h` is a feasible potential (so the unclamped law is searchable without the
+  clamp), and `α_r·d` is NOT an admissible A* heuristic on v2Edge — `min(ε₀·α, α_r)·d`
+  and `α_r·d + k_s·β·Δh` are. `ε₀`, the climb gate, `k_s` and eF4's `c` enter as
+  parameters; nothing derives them. The one directory with a build step and a dependency;
   nothing else imports it. Check with `lake exe cache get && lake build` (Mathlib's
-  prebuilt files are ~7 GB), and re-check when Appendix A's derivation changes.
+  prebuilt files are ~7 GB), and re-check when Appendix A's derivation or either edge
+  function changes.
 - `research/packages/` — per-entry evidence RO-Crates; regenerate via
   `make_crates.py` (re-executes `bootstrap_ci.py` and aborts on gate failure).
   RO-Crate envelope at the repo root `ro-crate-metadata.json`.

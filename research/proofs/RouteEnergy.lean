@@ -38,6 +38,40 @@ Then, beyond the appendix, what kinetic energy does to the elevation that has to
 10. `leg_energy_ge_deadband`          so a rider whose kinetic head stays within `τ` of a level
                                       pays at least for the `τ`-filtered ascent.
 
+Then paper 3's question, the cost of one graph edge (`research/article/paper3-edge-cost.md`):
+
+11. `Obeys.edge`, `edge_ge_ideal`,
+    `edge_eq_ideal`, `edge_le_bill`   the ledger of one edge: it costs at least
+                                      `max 0 (α·Δx + β·ΔH)`, exactly that for the ideal coaster,
+                                      and at most the flat bill plus the climb when ridden no
+                                      faster than the reference speed;
+12. `edge_sum_le_energy`,
+    `energy_eq_edge_sum`              summed over a path whose nodes are passed at one speed:
+                                      paper 3's E1 at zero deficit and without the climb gate;
+13. `edge_sum_eq_ascent`,
+    `ideal_sum_coarsen`,
+    `edge_sum_ge_deadband`            the ideal edge sum is `β` times the ascent of the tilted
+                                      road, never falls when the mesh is refined, and is never
+                                      below the deadband-filtered ascent of 9 and 10;
+14. `v2Edge_descent`, `v2_descent_eq`,
+    `v2_eq_ideal`, `floor_le_v2`      the deployed cost: its own clamp is dead code for all
+                                      constants, its descent arm is the ideal edge plus a
+                                      deficit charge `min(ε₀·β·d, α·Δx)`, and it never bills
+                                      less than rolling and gravity;
+15. `law_sum_eq_route`,
+    `eFEdge_eq_clamped_law`,
+    `clamp_is_ceiling`, `clamp_mass`  the flat-`ε` family: the route law is an edge sum, `eF1`
+                                      and `eF2` are that sum clamped edge by edge, and the
+                                      clamp is the coasting ceiling of 5;
+16. `lawEdge_reduced_ge`,
+    `v2_reduced_ge`, `v2_path_ge`,
+    `v2_path_ge_rate`,
+    `rolling_bound_fails`             potential energy is a feasible potential, for the
+                                      unclamped law too; the lower bounds a search may use;
+                                      and `α_r·d` is not one of them;
+17. `valley_toll`                     two arms of the valley toll `min(D, H, buffer)`, as
+                                      bounds on the kinetic head a valley carries into its climb.
+
 What is assumed, and where. The equation of motion is paper 1's eq. (3) with a brake force added;
 nothing else enters `ledger`. The closed form then needs two riding assumptions, each a named
 hypothesis of `closed_form_of_newton`: on flat stretches the air is paid at the reference speed
@@ -52,6 +86,12 @@ They correct for riding that departs from the three assumptions and for elevatio
 not the road. Nothing here says how large those departures are. In particular 7–10 show that a
 kinetic-energy buffer acts as a deadband of half its width; they do not show that the deadband
 fitted to recorded rides is that buffer and nothing else.
+
+The same holds for 11–17. The equation of motion gives the ideal edge cost. The deficit `ε₀`,
+the climb gate, the map scalar `k_s` and `eF4`'s noise rate enter as parameters, and the
+statements about `v2Edge` and `eFEdge` are algebra about those formulas, which are defined here
+branch for branch as `r1d_v2_edge` and `edge_form` compute them. Whether the formulas match
+riders is paper 3's measurement.
 
 To check it: `lake exe cache get && lake build` in this directory. The Lean and Mathlib versions
 are pinned by `lean-toolchain` and `lake-manifest.json`.
@@ -645,5 +685,570 @@ theorem leg_energy_ge_deadband {m g Crr k : ℝ} (hm : 0 < m) (hg : 0 < g) (hk :
   simp only [h0] at tube
   rw [← shift] at tube
   nlinarith [mul_le_mul_of_nonneg_left tube hmg.le]
+
+/-! ## 7. From the route to the edge (paper 3)
+
+Paper 3 turns the law into a cost per graph edge. This section derives from the equation of
+motion what such a cost must look like, and then proves the algebra of the two families the
+paper deploys: `v2Edge` (its E1 and E2) and the flat-`ε` family `eF1`, `eF2`, `eF4`. -/
+
+/-- Total head: elevation plus the kinetic head `v²/2g`. -/
+noncomputable def totalHead (g : ℝ) (v h : ℝ → ℝ) (t : ℝ) : ℝ := h t + v t ^ 2 / (2 * g)
+
+/-- The **ideal edge cost**: the flat bill plus the climb, or nothing once gravity pays for
+both. `α` is the flat bill per horizontal metre and `β` the cost of a metre of climb. -/
+noncomputable def idealEdge (α β Δx Δh : ℝ) : ℝ := max 0 (α * Δx + β * Δh)
+
+/-- **The ledger of one edge.** Between two nodes the legs pay for rolling, for the rise in
+total head, and for whatever the air and the brakes take. Speed enters only through the head
+at the two nodes. -/
+theorem Obeys.edge {m g Crr k : ℝ} {v X h E Wa Wb : ℝ → ℝ} {a b : ℝ}
+    (ride : Obeys m g Crr k v X h E Wa Wb a b) (hab : a ≤ b) (hm : m ≠ 0) (hg : g ≠ 0) :
+    k * (E b - E a)
+      = Crr * m * g * (X b - X a) + m * g * (totalHead g v h b - totalHead g v h a)
+        + (Wa b - Wa a) + (Wb b - Wb a) := by
+  rw [ride.energyLine hab hm hg]
+  unfold RouteEnergy.energyLine totalHead
+  field_simp
+  ring
+
+/-- **An edge costs at least the ideal edge cost.** If the air and the brakes together take at
+least the reference air bill `A` per metre, which they do whenever the edge is ridden no slower
+than the reference speed, and the legs only add energy, then the edge costs at least
+`max 0 (α·Δx + β·ΔH)`, with `ΔH` the rise in total head. With `A = 0` this is the floor that
+holds for every rider: rolling and gravity alone. -/
+theorem edge_ge_ideal {m g Crr k A : ℝ} (hm : 0 < m) (hg : 0 < g) (hk : 0 < k)
+    {v X h E Wa Wb : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
+    (ride : Obeys m g Crr k v X h E Wa Wb a b)
+    (legs : E a ≤ E b)
+    (waste : A * (X b - X a) ≤ (Wa b - Wa a) + (Wb b - Wb a)) :
+    idealEdge ((Crr * m * g + A) / k) (m * g / k) (X b - X a)
+        (totalHead g v h b - totalHead g v h a) ≤ E b - E a := by
+  have bal := ride.edge hab hm.ne' hg.ne'
+  unfold idealEdge
+  refine max_le (by linarith) ?_
+  rw [div_mul_eq_mul_div, div_mul_eq_mul_div, ← add_div, div_le_iff₀ hk]
+  linarith
+
+/-- **And exactly the ideal edge cost, for the ideal coaster**: on each edge either the air
+takes the reference bill and nothing is braked, or the legs do nothing. -/
+theorem edge_eq_ideal {m g Crr k A : ℝ} (hm : 0 < m) (hg : 0 < g) (hk : 0 < k)
+    {v X h E Wa Wb : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
+    (ride : Obeys m g Crr k v X h E Wa Wb a b)
+    (legs : E a ≤ E b)
+    (waste : A * (X b - X a) ≤ (Wa b - Wa a) + (Wb b - Wb a))
+    (ideal : (Wa b - Wa a) + (Wb b - Wb a) = A * (X b - X a) ∨ E b = E a) :
+    E b - E a = idealEdge ((Crr * m * g + A) / k) (m * g / k) (X b - X a)
+        (totalHead g v h b - totalHead g v h a) := by
+  refine le_antisymm ?_ (edge_ge_ideal hm hg hk hab ride legs waste)
+  have bal := ride.edge hab hm.ne' hg.ne'
+  unfold idealEdge
+  rcases ideal with hw | he
+  · refine le_trans (le_of_eq ?_) (le_max_right _ _)
+    rw [div_mul_eq_mul_div, div_mul_eq_mul_div, ← add_div, eq_div_iff hk.ne']
+    linarith
+  · rw [he, sub_self]
+    exact le_max_left _ _
+
+/-- **And at most the flat bill plus the climb**, on an edge where the air and the brakes
+together take no more than the reference air bill: a climb ridden no faster than the reference
+speed. Paper 3's gated climb arm is the floor above with `A = 0`; its ungated arm is this. -/
+theorem edge_le_bill {m g Crr k A : ℝ} (hm : 0 < m) (hg : 0 < g) (hk : 0 < k)
+    {v X h E Wa Wb : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
+    (ride : Obeys m g Crr k v X h E Wa Wb a b)
+    (waste : (Wa b - Wa a) + (Wb b - Wb a) ≤ A * (X b - X a)) :
+    E b - E a ≤ (Crr * m * g + A) / k * (X b - X a)
+        + m * g / k * (totalHead g v h b - totalHead g v h a) := by
+  have bal := ride.edge hab hm.ne' hg.ne'
+  rw [div_mul_eq_mul_div, div_mul_eq_mul_div, ← add_div, le_div_iff₀ hk]
+  linarith
+
+/-- **The edge sum is a lower bound on the ride.** Cut the ride at the graph's nodes and
+suppose the rider passes every node at the same speed. Then the sum of ideal edge costs, read
+off the map's own `Δx` and `Δh`, is at most what the legs deliver. -/
+theorem edge_sum_le_energy {m g Crr k A : ℝ} (hm : 0 < m) (hg : 0 < g) (hk : 0 < k)
+    {v X h E Wa Wb : ℝ → ℝ} (s : ℕ → ℝ) (hs : Monotone s) (n : ℕ)
+    (ride : Obeys m g Crr k v X h E Wa Wb (s 0) (s n))
+    (steady : ∀ i < n, v (s (i + 1)) = v (s i))
+    (legs : ∀ i < n, E (s i) ≤ E (s (i + 1)))
+    (waste : ∀ i < n, A * seg X s i ≤ seg Wa s i + seg Wb s i) :
+    ∑ i ∈ range n, idealEdge ((Crr * m * g + A) / k) (m * g / k) (seg X s i) (seg h s i)
+      ≤ E (s n) - E (s 0) := by
+  rw [← sum_range_sub (fun i => E (s i)) n]
+  refine sum_le_sum fun i hi => ?_
+  have hi' := mem_range.1 hi
+  have key := edge_ge_ideal hm hg hk (hs (Nat.le_succ i))
+    (ride.mono (hs (Nat.zero_le i)) (hs hi')) (legs i hi') (waste i hi')
+  have hH : totalHead g v h (s (i + 1)) - totalHead g v h (s i) = seg h s i := by
+    unfold totalHead seg
+    rw [steady i hi']
+    ring
+  rw [hH] at key
+  exact key
+
+/-- **The edge sum is the ride, for the ideal coaster.** Under the same node condition, a rider
+who on every edge either holds the reference air bill without braking or does not pedal spends
+exactly the sum of ideal edge costs. This is the derivation of paper 3's E1 at zero deficit
+and without the climb gate. -/
+theorem energy_eq_edge_sum {m g Crr k A : ℝ} (hm : 0 < m) (hg : 0 < g) (hk : 0 < k)
+    {v X h E Wa Wb : ℝ → ℝ} (s : ℕ → ℝ) (hs : Monotone s) (n : ℕ)
+    (ride : Obeys m g Crr k v X h E Wa Wb (s 0) (s n))
+    (steady : ∀ i < n, v (s (i + 1)) = v (s i))
+    (legs : ∀ i < n, E (s i) ≤ E (s (i + 1)))
+    (waste : ∀ i < n, A * seg X s i ≤ seg Wa s i + seg Wb s i)
+    (ideal : ∀ i < n, seg Wa s i + seg Wb s i = A * seg X s i ∨ E (s (i + 1)) = E (s i)) :
+    E (s n) - E (s 0)
+      = ∑ i ∈ range n, idealEdge ((Crr * m * g + A) / k) (m * g / k) (seg X s i) (seg h s i) := by
+  rw [← sum_range_sub (fun i => E (s i)) n]
+  refine sum_congr rfl fun i hi => ?_
+  have hi' := mem_range.1 hi
+  have key := edge_eq_ideal hm hg hk (hs (Nat.le_succ i))
+    (ride.mono (hs (Nat.zero_le i)) (hs hi')) (legs i hi') (waste i hi') (ideal i hi')
+  have hH : totalHead g v h (s (i + 1)) - totalHead g v h (s i) = seg h s i := by
+    unfold totalHead seg
+    rw [steady i hi']
+    ring
+  rw [hH] at key
+  exact key
+
+/-! ### The edge sum and the mesh -/
+
+/-- The ideal edge cost is `β` times the rise of the road tilted by the flat-resistance grade
+`s⋆ = α/β`. -/
+theorem idealEdge_eq_rise {α β : ℝ} (hβ : 0 < β) (Δx Δh : ℝ) :
+    idealEdge α β Δx Δh = β * max (Δh + α / β * Δx) 0 := by
+  have e : β * (Δh + α / β * Δx) = α * Δx + β * Δh := by
+    field_simp
+    ring
+  rw [idealEdge, mul_max_of_nonneg _ _ hβ.le, mul_zero, e, max_comm]
+
+/-- **The ideal edge sum is the ascent of the tilted road**, sampled at the nodes. -/
+theorem edge_sum_eq_ascent {α β : ℝ} (hβ : 0 < β) (x h : ℕ → ℝ) (n : ℕ) :
+    ∑ i ∈ range n, idealEdge α β (x (i + 1) - x i) (h (i + 1) - h i)
+      = β * ascent n (fun i => h i + α / β * x i) := by
+  simp only [ascent, mul_sum]
+  refine sum_congr rfl fun i _ => ?_
+  rw [idealEdge_eq_rise hβ]
+  congr 2
+  ring
+
+/-- A rise between two samples is at most the ascent of the samples between them. -/
+theorem rise_le_ascent_Ico (f : ℕ → ℝ) {a b : ℕ} (hab : a ≤ b) :
+    max (f b - f a) 0 ≤ ∑ i ∈ Ico a b, max (f (i + 1) - f i) 0 := by
+  induction b, hab using Nat.le_induction with
+  | base => simp
+  | succ b hab ih =>
+    rw [sum_Ico_succ_top hab]
+    have h1 : f (b + 1) - f b ≤ max (f (b + 1) - f b) 0 := le_max_left _ _
+    have h2 : 0 ≤ max (f (b + 1) - f b) 0 := le_max_right _ _
+    have h3 : f b - f a ≤ max (f b - f a) 0 := le_max_left _ _
+    have h4 : 0 ≤ max (f b - f a) 0 := le_max_right _ _
+    refine max_le ?_ ?_ <;> linarith
+
+/-- **A coarser mesh never finds more ascent.** Keep only the samples `φ 0 ≤ φ 1 ≤ …` of a
+profile: the ascent of what is kept is at most the ascent of the whole. -/
+theorem ascent_coarsen (f : ℕ → ℝ) {φ : ℕ → ℕ} (hφ : Monotone φ) (m : ℕ) :
+    ascent m (fun j => f (φ j)) ≤ ascent (φ m) f := by
+  induction m with
+  | zero =>
+    have h0 : ascent 0 (fun j => f (φ j)) = 0 := by simp [ascent]
+    rw [h0]
+    exact sum_nonneg fun i _ => le_max_right _ _
+  | succ m ih =>
+    have step := rise_le_ascent_Ico f (hφ (Nat.le_succ m))
+    have split := sum_range_add_sum_Ico (fun i => max (f (i + 1) - f i) 0) (hφ (Nat.le_succ m))
+    simp only [ascent, sum_range_succ] at ih ⊢
+    linarith
+
+/-- **Refining the mesh never lowers the ideal edge sum.** The same route costed on a finer
+mesh costs at least as much: the edge sum does not converge downwards as `Δx → 0`. -/
+theorem ideal_sum_coarsen {α β : ℝ} (hβ : 0 < β) (x h : ℕ → ℝ) {φ : ℕ → ℕ} (hφ : Monotone φ)
+    (m : ℕ) :
+    ∑ j ∈ range m, idealEdge α β (x (φ (j + 1)) - x (φ j)) (h (φ (j + 1)) - h (φ j))
+      ≤ ∑ i ∈ range (φ m), idealEdge α β (x (i + 1) - x i) (h (i + 1) - h i) := by
+  rw [edge_sum_eq_ascent hβ (fun j => x (φ j)) (fun j => h (φ j)) m,
+    edge_sum_eq_ascent hβ x h (φ m)]
+  exact mul_le_mul_of_nonneg_left (ascent_coarsen (fun i => h i + α / β * x i) hφ m) hβ.le
+
+/-- The filtered profile climbs no more than the recorded one. -/
+theorem ascent_deadband_le_self {τ : ℝ} (hτ : 0 ≤ τ) (u : ℕ → ℝ) (n : ℕ) :
+    ascent n (deadband τ u) ≤ ascent n u := by
+  have h := ascent_deadband_le (τ := τ) u u n (fun i _ => by simpa using hτ)
+  simpa using h
+
+/-- **What the edge sum cannot see.** On any mesh the ideal edge sum is at least `β` times the
+deadband-filtered ascent of the tilted road: the least a rider with a kinetic buffer can pay
+(section 6). The difference is the kinetic term, and by `ideal_sum_coarsen` a finer mesh does
+not bring the edge sum down towards it. -/
+theorem edge_sum_ge_deadband {α β τ : ℝ} (hβ : 0 < β) (hτ : 0 ≤ τ) (x h : ℕ → ℝ) (n : ℕ) :
+    β * ascent n (deadband τ fun i => h i + α / β * x i)
+      ≤ ∑ i ∈ range n, idealEdge α β (x (i + 1) - x i) (h (i + 1) - h i) := by
+  rw [edge_sum_eq_ascent hβ x h n]
+  exact mul_le_mul_of_nonneg_left (ascent_deadband_le_self hτ _ n) hβ.le
+
+/-! ### The deployed cost, `v2Edge` (E1, E2) -/
+
+/-- The grade-local refund of the deployed cost (E2): the coasting ceiling less the deficit
+`ε₀`, floored at zero. -/
+noncomputable def epsEdge (ε₀ sstar s : ℝ) : ℝ := max 0 (epsCoast sstar s - ε₀)
+
+theorem epsEdge_nonneg (ε₀ sstar s : ℝ) : 0 ≤ epsEdge ε₀ sstar s := le_max_left _ _
+
+theorem epsEdge_le_one {ε₀ : ℝ} (hε₀ : 0 ≤ ε₀) (sstar s : ℝ) : epsEdge ε₀ sstar s ≤ 1 := by
+  unfold epsEdge epsCoast
+  exact max_le zero_le_one (by linarith [min_le_left (1 : ℝ) (sstar / s)])
+
+/-- Paper 3 writes E2 with a clamp to `[0, 1]`. Its upper half never acts. -/
+theorem epsEdge_eq_clamp {ε₀ : ℝ} (hε₀ : 0 ≤ ε₀) (sstar s : ℝ) :
+    max 0 (min 1 (epsCoast sstar s - ε₀)) = epsEdge ε₀ sstar s := by
+  unfold epsEdge epsCoast
+  rw [min_eq_right (by linarith [min_le_left (1 : ℝ) (sstar / s)])]
+
+/-- The **deployed edge cost** (E1), branch for branch as `r1d_v2_edge` computes it. `αr` and
+`αa` are the rolling and air parts of the flat bill, `θ` the climb gate, `ε₀` the coasting
+deficit, and `γ` is `β` scaled by the map scalar `k_s`, which the deployed router applies to
+the two gravity arms but not to the grade `s⋆ = α/β` inside the refund. -/
+noncomputable def v2Edge (αr αa β γ θ ε₀ Δx Δh : ℝ) : ℝ :=
+  if 0 ≤ Δh then αr * Δx + (if Δh < θ * Δx then αa * Δx else 0) + γ * Δh
+  else max 0 ((αr + αa) * Δx - epsEdge ε₀ ((αr + αa) / β) (-Δh / Δx) * γ * (-Δh))
+
+/-- The credit at the coasting ceiling never exceeds the flat bill. -/
+theorem ceiling_credit_le {α β Δx d : ℝ} (hβ : 0 < β) (hΔx : 0 < Δx) (hd : 0 < d) :
+    epsCoast (α / β) (d / Δx) * β * d ≤ α * Δx := by
+  have h := coast_ceiling (α := α) hβ hΔx hd
+  have := le_max_left 0 (α * Δx - β * d)
+  linarith
+
+/-- **A descent edge never costs less than `ε₀` of the flat bill**, whatever the constants. -/
+theorem v2_descent_ge {α β γ ε₀ Δx d : ℝ} (hα : 0 ≤ α) (hβ : 0 < β) (hγβ : γ ≤ β)
+    (hε₀ : 0 ≤ ε₀) (hε₁ : ε₀ ≤ 1) (hΔx : 0 < Δx) (hd : 0 < d) :
+    ε₀ * (α * Δx) ≤ α * Δx - epsEdge ε₀ (α / β) (d / Δx) * γ * d := by
+  have hc0 : 0 ≤ epsCoast (α / β) (d / Δx) :=
+    le_min zero_le_one (div_nonneg (div_nonneg hα hβ.le) (div_nonneg hd.le hΔx.le))
+  have hc1 : epsCoast (α / β) (d / Δx) ≤ 1 := min_le_left _ _
+  have he0 := epsEdge_nonneg ε₀ (α / β) (d / Δx)
+  -- the refund is at most `(1 − ε₀)` of the ceiling
+  have he : epsEdge ε₀ (α / β) (d / Δx) ≤ (1 - ε₀) * epsCoast (α / β) (d / Δx) := by
+    unfold epsEdge
+    refine max_le (mul_nonneg (by linarith) hc0) ?_
+    nlinarith
+  have h1 : epsEdge ε₀ (α / β) (d / Δx) * γ * d ≤ epsEdge ε₀ (α / β) (d / Δx) * β * d :=
+    mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hγβ he0) hd.le
+  have h2 : epsEdge ε₀ (α / β) (d / Δx) * (β * d)
+      ≤ (1 - ε₀) * epsCoast (α / β) (d / Δx) * (β * d) :=
+    mul_le_mul_of_nonneg_right he (mul_pos hβ hd).le
+  have h3 : (1 - ε₀) * (epsCoast (α / β) (d / Δx) * β * d) ≤ (1 - ε₀) * (α * Δx) :=
+    mul_le_mul_of_nonneg_left (ceiling_credit_le hβ hΔx hd) (by linarith)
+  linarith
+
+/-- **E1's own clamp is dead code**, for every choice of constants with `0 ≤ ε₀ ≤ 1` and
+`k_s ≤ 1`: the descent arm is already non-negative. -/
+theorem v2Edge_descent {αr αa β γ θ ε₀ Δx Δh : ℝ} (hα : 0 ≤ αr + αa) (hβ : 0 < β)
+    (hγβ : γ ≤ β) (hε₀ : 0 ≤ ε₀) (hε₁ : ε₀ ≤ 1) (hΔx : 0 < Δx) (hΔh : Δh < 0) :
+    v2Edge αr αa β γ θ ε₀ Δx Δh
+      = (αr + αa) * Δx - epsEdge ε₀ ((αr + αa) / β) (-Δh / Δx) * γ * (-Δh) := by
+  unfold v2Edge
+  rw [ite_eq_right (not_le.2 hΔh)]
+  exact max_eq_right (le_trans (mul_nonneg hε₀ (mul_nonneg hα hΔx.le))
+    (v2_descent_ge hα hβ hγβ hε₀ hε₁ hΔx (by linarith)))
+
+/-- **The deployed descent is the ideal coaster plus a deficit charge.** With `k_s = 1`, a
+descent of run `Δx` and drop `d` costs the ideal edge cost plus `min(ε₀·β·d, α·Δx)`. So the
+cost is `α·Δx − (1 − ε₀)·β·d` on a gentle descent, `ε₀·β·d` between the grades `s⋆` and
+`s⋆/ε₀`, and the flat bill `α·Δx` beyond. -/
+theorem v2_descent_eq {α β ε₀ Δx d : ℝ} (hβ : 0 < β) (hε₁ : ε₀ ≤ 1)
+    (hΔx : 0 < Δx) (hd : 0 < d) :
+    α * Δx - epsEdge ε₀ (α / β) (d / Δx) * β * d
+      = idealEdge α β Δx (-d) + min (ε₀ * β * d) (α * Δx) := by
+  have hβd : 0 < β * d := mul_pos hβ hd
+  have hr : α / β / (d / Δx) * (β * d) = α * Δx := by field_simp
+  unfold epsEdge epsCoast idealEdge
+  set r := α / β / (d / Δx)
+  rcases le_total 1 r with h1 | h1
+  · -- gentle: the ceiling is 1
+    have hle := mul_le_mul_of_nonneg_right h1 hβd.le
+    have hε := mul_le_mul_of_nonneg_right hε₁ hβd.le
+    rw [min_eq_left h1, max_eq_right (by linarith), max_eq_right (by linarith),
+      min_eq_left (by linarith)]
+    ring
+  · have hle := mul_le_mul_of_nonneg_right h1 hβd.le
+    rw [min_eq_right h1]
+    rcases le_total ε₀ r with h2 | h2
+    · -- between `s⋆` and `s⋆/ε₀`
+      have hε := mul_le_mul_of_nonneg_right h2 hβd.le
+      rw [max_eq_right (by linarith), max_eq_left (by linarith), min_eq_left (by linarith)]
+      linarith
+    · -- beyond `s⋆/ε₀`: the refund is floored at zero
+      have hε := mul_le_mul_of_nonneg_right h2 hβd.le
+      rw [max_eq_left (by linarith), max_eq_left (by linarith), min_eq_right (by linarith)]
+      ring
+
+/-- **At zero deficit the deployed cost is the ideal edge cost** on every edge below the climb
+gate. The deficit `ε₀` and the gate are what E1 adds to the derivation. -/
+theorem v2_eq_ideal {αr αa β θ Δx Δh : ℝ} (hα : 0 ≤ αr + αa) (hβ : 0 < β) (hΔx : 0 < Δx)
+    (below : Δh < θ * Δx) :
+    v2Edge αr αa β β θ 0 Δx Δh = idealEdge (αr + αa) β Δx Δh := by
+  rcases lt_or_ge Δh 0 with h | h
+  · rw [v2Edge_descent hα hβ le_rfl le_rfl zero_le_one hΔx h,
+      v2_descent_eq hβ zero_le_one hΔx (by linarith), neg_neg, zero_mul, zero_mul,
+      min_eq_left (mul_nonneg hα hΔx.le), add_zero]
+  · unfold v2Edge idealEdge
+    rw [ite_eq_left h, ite_eq_left below, max_eq_right (by nlinarith [mul_nonneg hα hΔx.le, mul_nonneg hβ.le h])]
+    ring
+
+/-- **The deployed cost never bills less than rolling and gravity.** With `k_s = 1`, every edge
+costs at least the floor of `edge_ge_ideal`. On a gated climb it is exactly that floor. -/
+theorem floor_le_v2 {αr αa β θ ε₀ Δx Δh : ℝ} (hαr : 0 ≤ αr) (hαa : 0 ≤ αa) (hβ : 0 < β)
+    (hε₀ : 0 ≤ ε₀) (hε₁ : ε₀ ≤ 1) (hΔx : 0 < Δx) :
+    idealEdge αr β Δx Δh ≤ v2Edge αr αa β β θ ε₀ Δx Δh := by
+  have hx := mul_nonneg hαa hΔx.le
+  rcases lt_or_ge Δh 0 with h | h
+  · rw [v2Edge_descent (by linarith) hβ le_rfl hε₀ hε₁ hΔx h,
+      v2_descent_eq hβ hε₁ hΔx (by linarith), neg_neg]
+    have hmin : 0 ≤ min (ε₀ * β * -Δh) ((αr + αa) * Δx) :=
+      le_min (mul_nonneg (mul_nonneg hε₀ hβ.le) (by linarith))
+        (mul_nonneg (by linarith) hΔx.le)
+    have hmono : idealEdge αr β Δx Δh ≤ idealEdge (αr + αa) β Δx Δh := by
+      unfold idealEdge
+      exact max_le_max le_rfl (by linarith)
+    linarith
+  · unfold v2Edge idealEdge
+    rw [ite_eq_left h]
+    refine max_le ?_ ?_
+    · have := mul_nonneg hαr hΔx.le
+      have := mul_nonneg hβ.le h
+      split_ifs <;> linarith
+    · split_ifs <;> linarith
+
+/-! ### The flat-`ε` family, `eF1`, `eF2`, `eF4` -/
+
+/-- **The route law charged edge by edge**, with one flat `ε` and no clamp. On a steep descent
+it is negative. -/
+noncomputable def lawEdge (α β ε Δx Δh : ℝ) : ℝ := α * Δx + β * (max Δh 0 - ε * max (-Δh) 0)
+
+/-- **The route law is an edge sum.** Summed along a path, the unclamped edge law is the
+route-level law on the path's own totals: `α·x + β·(h₊ − ε·h₋)`. -/
+theorem law_sum_eq_route (α β ε : ℝ) (x h : ℕ → ℝ) (n : ℕ) :
+    ∑ i ∈ range n, lawEdge α β ε (x (i + 1) - x i) (h (i + 1) - h i)
+      = α * (x n - x 0) + β * (ascent n h - ε * ascent n (fun i => -h i)) := by
+  have term : ∀ i ∈ range n, lawEdge α β ε (x (i + 1) - x i) (h (i + 1) - h i)
+      = α * (x (i + 1) - x i) + β * max (h (i + 1) - h i) 0
+        - β * ε * max (-h (i + 1) - -h i) 0 := by
+    intro i _
+    unfold lawEdge
+    rw [show -(h (i + 1) - h i) = -h (i + 1) - -h i by ring]
+    ring
+  rw [sum_congr rfl term, sum_sub_distrib, sum_add_distrib, ← mul_sum, ← mul_sum, ← mul_sum,
+    sum_range_sub]
+  simp only [ascent]
+  ring
+
+/-- Paper 3's **flat-`ε` edge family**, as `edge_form` in `e73_gridpath.py` computes it. `eF1`
+is `gated = false`, `eF2` is `gated = true`, and `eF4` is `eF2` with `c` metres of climb per
+metre of road taken off both gravity arms. -/
+noncomputable def eFEdge (gated : Bool) (αr αa β θ ε c Δx Δh : ℝ) : ℝ :=
+  if 0 ≤ Δh then
+    αr * Δx + (if gated = true ∧ θ * Δx ≤ Δh then 0 else αa * Δx) + β * max 0 (Δh - c * Δx)
+  else max 0 ((αr + αa) * Δx - ε * β * max 0 (-Δh - c * Δx))
+
+/-- **`eF1` and `eF2` are the route law, clamped at zero edge by edge.** The air part of the
+flat bill is dropped on the gated climbs of `eF2`, as in the route form F2. -/
+theorem eFEdge_eq_clamped_law {αr αa β ε Δx Δh : ℝ} (gated : Bool) (θ : ℝ) (hαr : 0 ≤ αr)
+    (hαa : 0 ≤ αa) (hβ : 0 ≤ β) (hΔx : 0 ≤ Δx) :
+    eFEdge gated αr αa β θ ε 0 Δx Δh
+      = max 0 (lawEdge (αr + if gated = true ∧ 0 ≤ Δh ∧ θ * Δx ≤ Δh then 0 else αa)
+          β ε Δx Δh) := by
+  have hr := mul_nonneg hαr hΔx
+  have ha := mul_nonneg hαa hΔx
+  unfold eFEdge lawEdge
+  simp only [zero_mul, sub_zero]
+  rcases lt_or_ge Δh 0 with h | h
+  · have h' : ¬ (0 ≤ Δh) := not_le.2 h
+    rw [ite_eq_right h', ite_eq_right (fun hc => h' hc.2.1), max_eq_right (show (0 : ℝ) ≤ -Δh by linarith),
+      max_eq_right (show Δh ≤ 0 from h.le), max_eq_left (show (0 : ℝ) ≤ -Δh by linarith)]
+    congr 1
+    ring
+  · have hb := mul_nonneg hβ h
+    rw [ite_eq_left h, max_eq_right h, max_eq_left h, max_eq_right (show -Δh ≤ 0 by linarith)]
+    by_cases hg : gated = true ∧ θ * Δx ≤ Δh
+    · rw [ite_eq_left hg, ite_eq_left ⟨hg.1, h, hg.2⟩, max_eq_right (by nlinarith)]
+      ring
+    · rw [ite_eq_right hg, ite_eq_right (fun hc => hg ⟨hc.1, hc.2.2⟩), max_eq_right (by nlinarith)]
+      ring
+
+/-- **The clamp is the coasting ceiling.** Flooring a flat-`ε` descent at zero is the same as
+refunding `min(ε, s⋆/s)`: the flat `ε` up to the grade `s⋆/ε`, the ceiling of section 5 beyond
+it. The floor is the statement that legs cannot return energy. -/
+theorem clamp_is_ceiling {α β ε Δx d : ℝ} (hβ : 0 < β) (hΔx : 0 < Δx) (hd : 0 < d) :
+    max 0 (α * Δx - ε * β * d) = α * Δx - min ε (α / β / (d / Δx)) * β * d := by
+  have hβd : 0 < β * d := mul_pos hβ hd
+  have hr : α / β / (d / Δx) * (β * d) = α * Δx := by field_simp
+  set r := α / β / (d / Δx)
+  rcases le_total ε r with h | h
+  · have := mul_le_mul_of_nonneg_right h hβd.le
+    rw [min_eq_left h, max_eq_right (by linarith)]
+  · have := mul_le_mul_of_nonneg_right h hβd.le
+    rw [min_eq_right h, max_eq_left (by linarith)]
+    linarith
+
+/-- **What the clamp costs.** A clamped sum is the unclamped sum plus the mass the clamp
+refused: `eF# − F#` in paper 3's tables. -/
+theorem clamp_mass (a : ℕ → ℝ) (n : ℕ) :
+    ∑ i ∈ range n, max 0 (a i) = ∑ i ∈ range n, a i + ∑ i ∈ range n, max 0 (-a i) := by
+  rw [← sum_add_distrib]
+  refine sum_congr rfl fun i _ => ?_
+  rcases le_total 0 (a i) with h | h
+  · rw [max_eq_right h, max_eq_left (by linarith)]
+    ring
+  · rw [max_eq_left h, max_eq_right (by linarith)]
+    ring
+
+/-! ### Potential energy, and what a search may assume -/
+
+/-- Taking a multiple of the elevation off every edge changes a path's cost by a constant
+that depends only on its two ends, so it changes no shortest path. -/
+theorem path_potential (c h : ℕ → ℝ) (γ : ℝ) (n : ℕ) :
+    ∑ i ∈ range n, c i
+      = ∑ i ∈ range n, (c i - γ * (h (i + 1) - h i)) + γ * (h n - h 0) := by
+  rw [sum_sub_distrib, ← mul_sum, sum_range_sub]
+  ring
+
+/-- With potential energy taken off, what is left of the unclamped law is the flat bill plus
+the wasted share of the descent. -/
+theorem lawEdge_reduced (α β ε Δx Δh : ℝ) :
+    lawEdge α β ε Δx Δh - β * Δh = α * Δx + (1 - ε) * β * max (-Δh) 0 := by
+  unfold lawEdge
+  rcases le_total 0 Δh with h | h
+  · rw [max_eq_left h, max_eq_right (show -Δh ≤ 0 by linarith)]
+    ring
+  · rw [max_eq_right h, max_eq_left (show (0 : ℝ) ≤ -Δh by linarith)]
+    ring
+
+/-- **The unclamped law needs no clamp to be searched.** For `ε ≤ 1`, potential energy `β·h`
+is a feasible potential: every reduced edge cost is at least the flat bill, so non-negative. -/
+theorem lawEdge_reduced_ge {α β ε Δx Δh : ℝ} (hβ : 0 ≤ β) (hε : ε ≤ 1) :
+    α * Δx ≤ lawEdge α β ε Δx Δh - β * Δh := by
+  rw [lawEdge_reduced]
+  have : 0 ≤ (1 - ε) * β * max (-Δh) 0 :=
+    mul_nonneg (mul_nonneg (by linarith) hβ) (le_max_right _ _)
+  linarith
+
+/-- **The same potential serves the deployed cost**, scaled by `k_s` like its gravity arms:
+every reduced edge cost is at least the rolling bill. -/
+theorem v2_reduced_ge {αr αa β γ θ ε₀ Δx Δh : ℝ} (hαa : 0 ≤ αa) (hγ : 0 ≤ γ) (hε₀ : 0 ≤ ε₀)
+    (hΔx : 0 ≤ Δx) :
+    αr * Δx ≤ v2Edge αr αa β γ θ ε₀ Δx Δh - γ * Δh := by
+  have hx := mul_nonneg hαa hΔx
+  unfold v2Edge
+  split_ifs with h1 h2
+  · linarith
+  · linarith
+  · have hε := epsEdge_le_one hε₀ ((αr + αa) / β) (-Δh / Δx)
+    have hpre := le_max_right 0
+      ((αr + αa) * Δx - epsEdge ε₀ ((αr + αa) / β) (-Δh / Δx) * γ * (-Δh))
+    have : 0 ≤ (1 - epsEdge ε₀ ((αr + αa) / β) (-Δh / Δx)) * (γ * (-Δh)) :=
+      mul_nonneg (by linarith) (mul_nonneg hγ (by linarith))
+    linarith
+
+/-- **A lower bound a search may use.** Any path costs at least the rolling bill on its length
+plus `k_s·β` times its net climb. -/
+theorem v2_path_ge {αr αa β γ θ ε₀ : ℝ} (hαa : 0 ≤ αa) (hγ : 0 ≤ γ) (hε₀ : 0 ≤ ε₀)
+    (x h : ℕ → ℝ) (hx : Monotone x) (n : ℕ) :
+    αr * (x n - x 0) + γ * (h n - h 0)
+      ≤ ∑ i ∈ range n, v2Edge αr αa β γ θ ε₀ (x (i + 1) - x i) (h (i + 1) - h i) := by
+  have key := sum_le_sum fun i (_ : i ∈ range n) =>
+    v2_reduced_ge (αr := αr) (β := β) (θ := θ) (Δh := h (i + 1) - h i) hαa hγ hε₀
+      (sub_nonneg.2 (hx (Nat.le_succ i)))
+  rw [sum_sub_distrib, ← mul_sum, ← mul_sum, sum_range_sub, sum_range_sub] at key
+  linarith
+
+/-- **Every edge costs at least `min(ε₀·α, α_r)` per metre.** -/
+theorem v2_ge_rate {αr αa β γ θ ε₀ Δx Δh : ℝ} (hαr : 0 ≤ αr) (hαa : 0 ≤ αa) (hβ : 0 < β)
+    (hγ : 0 ≤ γ) (hγβ : γ ≤ β) (hε₀ : 0 ≤ ε₀) (hε₁ : ε₀ ≤ 1) (hΔx : 0 < Δx) :
+    min (ε₀ * (αr + αa)) αr * Δx ≤ v2Edge αr αa β γ θ ε₀ Δx Δh := by
+  rcases lt_or_ge Δh 0 with h | h
+  · rw [v2Edge_descent (by linarith) hβ hγβ hε₀ hε₁ hΔx h]
+    have h1 := v2_descent_ge (α := αr + αa) (by linarith) hβ hγβ hε₀ hε₁ hΔx
+      (by linarith : 0 < -Δh)
+    have h2 : min (ε₀ * (αr + αa)) αr * Δx ≤ ε₀ * (αr + αa) * Δx :=
+      mul_le_mul_of_nonneg_right (min_le_left _ _) hΔx.le
+    linarith
+  · have hred := v2_reduced_ge (αr := αr) (β := β) (γ := γ) (θ := θ) (Δh := Δh) hαa hγ hε₀
+      hΔx.le
+    have h2 : min (ε₀ * (αr + αa)) αr * Δx ≤ αr * Δx :=
+      mul_le_mul_of_nonneg_right (min_le_right _ _) hΔx.le
+    have := mul_nonneg hγ h
+    linarith
+
+/-- The same, along a path: the distance-only bound a search may use. -/
+theorem v2_path_ge_rate {αr αa β γ θ ε₀ : ℝ} (hαr : 0 ≤ αr) (hαa : 0 ≤ αa) (hβ : 0 < β)
+    (hγ : 0 ≤ γ) (hγβ : γ ≤ β) (hε₀ : 0 ≤ ε₀) (hε₁ : ε₀ ≤ 1)
+    (x h : ℕ → ℝ) (hx : StrictMono x) (n : ℕ) :
+    min (ε₀ * (αr + αa)) αr * (x n - x 0)
+      ≤ ∑ i ∈ range n, v2Edge αr αa β γ θ ε₀ (x (i + 1) - x i) (h (i + 1) - h i) := by
+  have key := sum_le_sum fun i (_ : i ∈ range n) =>
+    v2_ge_rate (θ := θ) (Δh := h (i + 1) - h i) hαr hαa hβ hγ hγβ hε₀ hε₁
+      (sub_pos.2 (hx (Nat.lt_succ_self i)))
+  rw [← mul_sum, sum_range_sub] at key
+  exact key
+
+/-- **The rolling bill alone is not a lower bound.** A descent at exactly the grade `s⋆`
+costs `ε₀·α` per metre, so whenever `ε₀·α < α_r` there is an edge cheaper than rolling
+resistance over its own length. Paper 3's planned heuristic `α_r·d` is not admissible on the
+deployed costs; `v2_path_ge` and `v2_path_ge_rate` are the bounds that are. -/
+theorem rolling_bound_fails {αr αa β θ ε₀ Δx : ℝ} (hβ : 0 < β) (hα : 0 < αr + αa)
+    (hε₀ : 0 ≤ ε₀) (hε₁ : ε₀ ≤ 1) (hΔx : 0 < Δx) (h : ε₀ * (αr + αa) < αr) :
+    v2Edge αr αa β β θ ε₀ Δx (-((αr + αa) / β * Δx)) < αr * Δx := by
+  have hd : 0 < (αr + αa) / β * Δx := mul_pos (div_pos hα hβ) hΔx
+  have hβd : β * ((αr + αa) / β * Δx) = (αr + αa) * Δx := by field_simp
+  set d := (αr + αa) / β * Δx
+  have hε := mul_le_mul_of_nonneg_right hε₁ (mul_pos hβ hd).le
+  rw [v2Edge_descent hα.le hβ le_rfl hε₀ hε₁ hΔx (by linarith), neg_neg,
+    v2_descent_eq hβ hε₁ hΔx hd]
+  unfold idealEdge
+  rw [show (αr + αa) * Δx + β * -d = 0 by linarith, max_self, min_eq_left (by linarith),
+    zero_add]
+  have e : ε₀ * β * d = ε₀ * (αr + αa) * Δx := by rw [mul_assoc, hβd, mul_assoc]
+  rw [e]
+  exact mul_lt_mul_of_pos_right h hΔx
+
+/-! ### The valley toll -/
+
+/-- **What a valley can save.** A descent `a → b` is coasted and the climb `b → c` follows.
+The legs pay for the climb less the kinetic head spent on it, and that head is at most the
+drop of the descent and at most the buffer `κe − κc`: the head at the fastest the rider is at
+the bottom, less the head at the slowest the rider is at the top. These are two of the three
+arms of paper 3's valley toll `min(D, H, buffer)`. The third, the rise `H`, is the statement
+that the legs' energy on the climb is not negative. -/
+theorem valley_toll {m g Crr k : ℝ} (hm : 0 < m) (hg : 0 < g) (hCrr : 0 ≤ Crr)
+    {v X h E Wa Wb : ℝ → ℝ} {a b c : ℝ} (hab : a ≤ b) (hbc : b ≤ c)
+    (ride : Obeys m g Crr k v X h E Wa Wb a c)
+    (coast : E b = E a)
+    (hX : X a ≤ X b) (hWa : Wa a ≤ Wa b)
+    (hWb₁ : Wb a ≤ Wb b) (hWb₂ : Wb b ≤ Wb c)
+    {κe κc : ℝ}
+    (bottom : v b ^ 2 / (2 * g) ≤ κe)
+    (top : κc ≤ v c ^ 2 / (2 * g))
+    (exit : v a ^ 2 / (2 * g) ≤ v c ^ 2 / (2 * g)) :
+    m * g * ((h c - h b) - min (h a - h b) (κe - κc))
+        + Crr * m * g * (X c - X b) + (Wa c - Wa b)
+      ≤ k * (E c - E b) := by
+  have hmg : 0 < m * g := mul_pos hm hg
+  have down := (ride.mono le_rfl hbc).edge hab hm.ne' hg.ne'
+  have up := (ride.mono hab le_rfl).edge hbc hm.ne' hg.ne'
+  unfold totalHead at down up
+  rw [coast, sub_self, mul_zero] at down
+  -- kinetic head gained on the coasted descent is at most the drop
+  have hroll : 0 ≤ Crr * m * g * (X b - X a) :=
+    mul_nonneg (mul_nonneg (mul_nonneg hCrr hm.le) hg.le) (by linarith)
+  have gain : m * g * (v b ^ 2 / (2 * g) - v a ^ 2 / (2 * g)) ≤ m * g * (h a - h b) := by
+    nlinarith
+  have gain' : v b ^ 2 / (2 * g) - v a ^ 2 / (2 * g) ≤ h a - h b :=
+    le_of_mul_le_mul_left gain hmg
+  -- so the head spent on the climb is at most the toll
+  have spent : v b ^ 2 / (2 * g) - v c ^ 2 / (2 * g) ≤ min (h a - h b) (κe - κc) :=
+    le_min (by linarith) (by linarith)
+  have := mul_le_mul_of_nonneg_left spent hmg.le
+  nlinarith
 
 end RouteEnergy
