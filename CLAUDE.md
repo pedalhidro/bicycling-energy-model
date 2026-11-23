@@ -334,7 +334,7 @@ home of the *derivation* and the side-by-side comparison.
   descent recovery; `v_f` is the flat reference speed. Geometry-only estimator
   `ε ≈ clamp₀₁(ε_coast − ε₀)` with the **coasting deficit** `ε₀ = 0.13`.
 - **Canonical** (forward dynamics): distance-marching force balance
-  `m·dv/ds = k_eff·P/v − C_rr·mg·cosθ − ½ρCdA·(v+wind)² − mg·sinθ`, per-regime
+  `m·v·dv/ds = k_eff·P/v − C_rr·mg·cosθ − ½ρCdA·(v+wind)² − mg·sinθ`, per-regime
   pedal power, safe-speed (`v_max`) brake cap on descents. Returns leg energy
   `∫P·dt`, time, the wheel-work breakdown, and the speed profile.
 
