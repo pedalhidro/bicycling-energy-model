@@ -1290,6 +1290,63 @@ the session's third reminder that the gates earn their keep.
 
 ---
 
+## Act XVIII — Three questions asked before the data could answer (Entry 76)
+
+*One day (2026-11-23). Three arms written and registered in a session that
+had no ride data, then run on the machine that has it, with the registered
+rules applied as written.*
+
+### Entry 76 — The planning row, the air on the climbs, and who pays the toll
+**Data:** the Entry-52 population (2,039 rides, the same 1,734 / 305 split),
+re-walked four times: twice with the rider's own history standing in for
+the ride's telemetry, twice with the climbs charged for their air. Plus the
+F5 family under a second bookkeeping of the valley toll.
+
+**What does the law predict *before* the ride?** Every headline so far
+scored a ride with constants inverted from that ride's own power record —
+the account closing once the ride is known, not a forecast. The planning
+arm takes the ride's telemetry away in two steps, for a rider with a
+history. Replace the ride's mass, rolling and drag constants with the
+rider's medians from their training rides, and the published form goes from
+3.24% to 4.56% median error on the same 305 held-out rides. Replace the
+ride's pace as well — so the model reads nothing of the scored ride but its
+geometry — and it reads **7.51% [6.41, 8.69]**. The expectation written
+down beforehand was 7 to 9%, and it held. Two things travel with that
+number. The simulation loses just as much on the same inputs (3.19 → 4.04
+→ 7.72): the cost is in not knowing how hard the rider will push that day,
+not in the closed form. And on the 56 held-out rides with no look-alike in
+training the planning figure is worse (8.54), while the telemetry-informed
+one is not (3.22) — repeat routes flatter the forecast, not the account.
+This arm had no decision rule; it is a measurement, and it is the number
+the working paper lists as owed. It does not cover a rider with no history,
+the day's wind and air density, or a split by route.
+
+**Should the climbs pay for their air?** F2 charges nothing for air
+resistance on a climb, and the selected form is built on it; the proofs
+say the dropped term is real and bounded. The arm charged it, at the exact
+steady climb speed and at the engine's ceiling — a median 3.0% and 3.9% of
+a ride's energy. The registered check held: the descent constant rose
+(0.46 → 0.55 → 0.57), so it had indeed been lowered to cover the missing
+term. The registered decision went against the arm: the selected form's
+cross-validated loss did not fall by a standard error, it *rose* by one and
+a half. The published form stays. ε absorbs the mean of the dropped term,
+and adding the term back only adds its ride-to-ride scatter.
+
+**Does the valley toll come off the descent's refund too?** F5 takes the
+toll off both elevation totals; the checked bound only says it comes off
+the climb. The arm tried the other end. The two bookkeepings differ by an
+eighth of a standard error — **no verdict**, by the rule written before the
+run, and F5 stays as published. Neither end is exact: the true weight is
+one minus the descent's own marginal refund, somewhere between the two,
+and these corpora cannot place it.
+
+One measurement that landed where it was expected, one decision against
+the new term, one honest null — and the gates, re-run first, all green
+with no published number moved.
+[[package]](../packages/entry76/ro-crate-preview.html)
+
+---
+
 ## Recurring terms, once
 
 - **The champion / F3** — the corrected closed form (the paper's F1–F4

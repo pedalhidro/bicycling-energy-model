@@ -76,8 +76,8 @@ Two diagnostic modes (both read the toll CSV, fit nothing on the test half):
                  tau_noise + h_KE/(2(1-eps)) with h_KE from the group's
                  MEASURED v_b and v_f. Diagnostic table, no gate.
 
-THE CREDIT ARM — registered 2026-11-23, before any run; it takes its entry
-number when it lands in the journal. F5 moves the toll off BOTH elevation
+THE CREDIT ARM — registered 2026-11-23, before any run; it landed as
+Entry 76 of the journal, where the result is. F5 moves the toll off BOTH elevation
 totals, so a metre of toll saves (1 - eps)*beta: the valley is filled, and the
 filled part of the descent stops earning its refund. research/proofs proves a
 different statement (`valley_toll`): on the climb the legs pay for the rise

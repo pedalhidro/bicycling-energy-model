@@ -67,6 +67,10 @@ home of the *derivation* and the side-by-side comparison.
   air(zero) ≤ air(ss) ≤ air(vc) ≤ air(off) per ride, and **only `e52_build.py`
   and `e52_split.py` accept the flag** — every other harness refuses to import
   under it, because it would write the arm's numbers under a canonical name.
+  Entry 76: the check holds (F2's ε rises 0.462 → 0.545 → 0.570) and the
+  decision goes AGAINST the arm — F3's fold CV rises by 1.53 SE under `ss` and
+  2.18 under `vc`, F3 and τ = 6 m are selected under every arm, so the
+  published form stays: ε absorbs the dropped term.
   `E52_P1=const|pace` is the registered **planning arm**, the before-the-ride
   measurement (protocol P1 of the working paper): `const` replaces each ride's
   inverted mass, C_rr and CdA with the rider's medians from the training half
@@ -77,7 +81,12 @@ home of the *derivation* and the side-by-side comparison.
   constants (read from the published `e52_split.csv`), on the same held-out
   rides, paired per ride with P0 (seed 56), plus the rides with no near-twin
   in training; it refuses to run if the arm's rides are not exactly the
-  published chain's) → `e52_split.py` (A.1–A.8: random 15% hold-out, repeated stratified
+  published chain's. Entry 76, a measurement with no decision rule: the
+  published F3 reads 4.56% under `const` and **7.51% [6.41, 8.69] under `pace`**
+  on the 305 held-out rides, against 3.24% at P0 (the registered 7–9%
+  expectation held), 7.06 / 8.54 on the 56 rides with no near-twin, and the
+  simulation loses as much (4.04 / 7.72). Not covered: a rider with no history,
+  the day's wind and air density, a split by route. Not yet in any paper) → `e52_split.py` (A.1–A.8: random 15% hold-out, repeated stratified
   k-fold with **every** parameter refitted in-fold, CV binding with AIC reported,
   one test scoring; `e52_summary.csv` is what the gates read — the held-out
   medians and their stratified CIs (every cell of paper 1's Table 3, F_base's
@@ -107,7 +116,10 @@ home of the *derivation* and the side-by-side comparison.
   climb charge only (β per metre, the reading `research/proofs`' `valley_toll`
   supports) instead of off both totals ((1 − ε)·β); fitted outputs take the
   flag's suffix, the toll table is shared, and the flag is refused when any
-  other harness imports the module.
+  other harness imports the module. Entry 76: NO VERDICT — full credit lowers
+  F5f's fold CV by 0.13 SE (0.05567 → 0.05544), F5 stays as published, and
+  neither bookkeeping is exact (the true weight is one minus the descent's own
+  marginal refund).
   Verdict: F5(τ_n=2) enters F3's 1-SE band; both arms rail v_b at ∞ — the cap
   doesn't bind at these corpora's grades. Entry 64 (same file): **F5f** (v_b
   frozen at never-brake, 1 parameter) WINS the A.5 selection under the 1-SE

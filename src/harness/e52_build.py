@@ -25,8 +25,8 @@ D1/D2 are absent on purpose: matching on measured kJ puts 87% of D2 and 43%
 of D1 inside D5, so they are re-processings of the same rider's rides, not
 independent corpora (Entry 52's registration).
 
-THE CLIMB-AIR ARM — registered 2026-11-23, before any run; it takes its entry
-number when it lands in the journal. F2 charges nothing for the air on a
+THE CLIMB-AIR ARM — registered 2026-11-23, before any run; it landed as
+Entry 76 of the journal, where the result is. F2 charges nothing for the air on a
 climb, and F3 and F4 are built on F2. research/proofs shows what that drops:
 the work against the air on the climbs is a fourth term of the law, and on a
 steady climb ridden no faster than v_f it lies between zero and what the
@@ -61,8 +61,8 @@ its own canonical CSV and would publish the arm under the canonical name.
   EXPECTATION  for the record: the check holds, and the CV difference is
                small enough that it may sit inside one SE.
 
-THE PLANNING ARM — registered 2026-11-23, before any run; it takes its entry
-number when it lands in the journal. Everything above scores a ride with
+THE PLANNING ARM — registered 2026-11-23, before any run; it landed as
+Entry 76 of the journal, where the result is. Everything above scores a ride with
 constants inverted from that ride's own power record (protocol P0 of the
 working paper). The error it reports is the account closing once the ride is
 known; it is not a forecast. The arm takes the scored ride's telemetry away in
