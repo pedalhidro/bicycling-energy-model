@@ -66,7 +66,18 @@ home of the *derivation* and the side-by-side comparison.
   takes the arm's suffix through the shared `ARM_SUFFIX`, the build gates
   air(zero) ≤ air(ss) ≤ air(vc) ≤ air(off) per ride, and **only `e52_build.py`
   and `e52_split.py` accept the flag** — every other harness refuses to import
-  under it, because it would write the arm's numbers under a canonical name) → `e52_split.py` (A.1–A.8: random 15% hold-out, repeated stratified
+  under it, because it would write the arm's numbers under a canonical name.
+  `E52_P1=const|pace` is the registered **planning arm**, the before-the-ride
+  measurement (protocol P1 of the working paper): `const` replaces each ride's
+  inverted mass, C_rr and CdA with the rider's medians from the training half
+  (`e52_rider_fallback.csv`), and `pace` also replaces its regime powers with
+  the rider's training medians, so the model reads nothing of the scored ride
+  but its geometry. Same guard, same suffix rule, one arm at a time. Under it
+  `e52_split.py` adds the **planning row**: the published form at its published
+  constants (read from the published `e52_split.csv`), on the same held-out
+  rides, paired per ride with P0 (seed 56), plus the rides with no near-twin
+  in training; it refuses to run if the arm's rides are not exactly the
+  published chain's) → `e52_split.py` (A.1–A.8: random 15% hold-out, repeated stratified
   k-fold with **every** parameter refitted in-fold, CV binding with AIC reported,
   one test scoring; `e52_summary.csv` is what the gates read — the held-out
   medians and their stratified CIs (every cell of paper 1's Table 3, F_base's

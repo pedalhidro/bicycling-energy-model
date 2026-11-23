@@ -61,6 +61,40 @@ its own canonical CSV and would publish the arm under the canonical name.
   EXPECTATION  for the record: the check holds, and the CV difference is
                small enough that it may sit inside one SE.
 
+THE PLANNING ARM — registered 2026-11-23, before any run; it takes its entry
+number when it lands in the journal. Everything above scores a ride with
+constants inverted from that ride's own power record (protocol P0 of the
+working paper). The error it reports is the account closing once the ride is
+known; it is not a forecast. The arm takes the scored ride's telemetry away in
+two steps.
+
+  E52_P1=const   mass, Crr and CdA are the RIDER's medians over the training
+                 half's genuinely inverted values (e52_rider_fallback.csv,
+                 Entry 57). The ride still supplies its own regime powers.
+                 Measures what not knowing the day's constants costs.
+  E52_P1=pace    as `const`, and the regime powers are the rider's medians
+                 over the training half too. The model then reads nothing of
+                 the scored ride but its geometry: what a planner holds for a
+                 rider with a history.
+
+The simulation is rebuilt on the same inputs under both, so its row stays a
+like-for-like comparator. e52_split.py runs the chain on the arm's cache and
+adds the PLANNING ROW: the published form at its published constants (read
+from the published e52_split.csv, never a literal), scored on the same
+held-out rides, paired per ride with P0, and repeated on the held-out rides
+that have no near-twin in training.
+
+  HEADLINE     F3 at the published eps and tau, held-out half, under `pace`.
+               It is printed whatever it turns out to be: this arm is a
+               measurement, not a contest, and has no decision rule.
+  EXPECTATION  for the record: 7 to 9% median error under `pace` (from the 15%
+               within-rider spread of the flat resistance in paper 1's error
+               budget), with `const` between that and P0's 3.2%.
+  NOT COVERED  a rider with no history (the frozen-priors protocol), the wind
+               and air density of the day, and a split by route. The split is
+               the published one so that every figure is paired with P0 on the
+               same rides; the no-twin subset is the check on route leakage.
+
 Output: data/results/e52_aggregates.csv
 Run:    python3 src/harness/e52_build.py            (E52_SMOKE=1 for a subset)
 """
@@ -85,9 +119,9 @@ from bicycling_energy_model.engines import G, flat_eq_speed
 from bicycling_energy_model.regime import measured_flat_speed
 from bicycling_energy_model.jsfmt import to_fixed
 
-from perride_invert import (CLIMB_THR, DESC_THR, ENGINE_DX, KEFF, RESULTS, RHO,
-                            TAU_SMOOTH, VMAX, VSTART, find_segments,
-                            invert_physics, seg_integrals)
+from perride_invert import (ANCHOR_M, CDA0, CLIMB_THR, CRR0, DESC_THR, ENGINE_DX,
+                            KEFF, RESULTS, RHO, TAU_SMOOTH, VMAX, VSTART,
+                            find_segments, invert_physics, seg_integrals)
 from e44_scurve import corpus_rides
 
 SMOKE = bool(os.environ.get("E52_SMOKE"))
@@ -122,23 +156,38 @@ def _rider_fallbacks() -> dict:
 CLIMBAIR = os.environ.get("E52_CLIMBAIR", "zero")
 if CLIMBAIR not in ("zero", "vc", "ss"):
     raise SystemExit(f"E52_CLIMBAIR={CLIMBAIR!r}: expected zero, vc or ss")
-if CLIMBAIR != "zero":
+# The planning arm (docstring): what the model may read of the scored ride.
+P1 = os.environ.get("E52_P1", "")
+if P1 not in ("", "const", "pace"):
+    raise SystemExit(f"E52_P1={P1!r}: expected const or pace")
+if CLIMBAIR != "zero" or P1:
     _main = os.path.basename(getattr(sys.modules.get("__main__"), "__file__", "") or "")
     if _main not in ("e52_build.py", "e52_split.py"):
-        raise SystemExit("E52_CLIMBAIR is an arm of e52_build.py and e52_split.py "
-                         f"alone — unset it before running {_main or 'this harness'}")
+        raise SystemExit("E52_CLIMBAIR and E52_P1 are arms of e52_build.py and "
+                         "e52_split.py alone — unset them before running "
+                         f"{_main or 'this harness'}")
+    if CLIMBAIR != "zero" and P1:
+        raise SystemExit("one arm at a time: unset E52_CLIMBAIR or E52_P1")
+    if P1 and FALLBACK != "rider":
+        raise SystemExit("E52_P1 takes its constants from the rider medians: "
+                         "leave E52_FALLBACK at its default")
 # One suffix for every file of the chain, so the builder and the splitter
 # cannot disagree about which arm a file belongs to. Empty for the published
-# chain.
+# chain. CANON_SUFFIX names the published chain an arm is measured against.
+CANON_SUFFIX = (("" if AERO == "reg" else "." + AERO)
+                + ("" if FALLBACK == "rider" else "." + FALLBACK)
+                + (".SMOKE" if SMOKE else ""))
 ARM_SUFFIX = (("" if AERO == "reg" else "." + AERO)
               + ("" if FALLBACK == "rider" else "." + FALLBACK)
               + ("" if CLIMBAIR == "zero" else "." + CLIMBAIR)
+              + ("" if not P1 else ".p1" + P1)
               + (".SMOKE" if SMOKE else ""))
 
 RIDER_FB = _rider_fallbacks()
 CDA_RANGE = (0.10, 1.00)
 CHECK: list[float] = []   # build-time cache-vs-engine deviations
 BRACKET: list[float] = []  # ss arm: worst violation of zero <= ss <= vc <= off
+P1_MED: dict = {}          # planning arm: rider -> what a planner holds (p1_setup)
 SS_RESID = [0.0]           # ss arm: worst relative force-balance residual
 CANON_FAIL: list[str] = []   # F_base failures, counted rather than swallowed
 C_PUB = 3.0                      # F4's published climb-fraction constant
@@ -229,6 +278,74 @@ def climb_air_ss(prof: dict, p: dict, vf: float, p_climb: float,
     return tot
 
 
+def _regime_powers(pts) -> tuple[float, float, float] | None:
+    """(flat, climb, descent) mean powers of one ride, with the fallbacks every
+    harness uses: no flat regime -> the ride's overall mean; no climb regime ->
+    the flat figure; no descent regime -> zero."""
+    rp = extract_regime_powers(pts, CLIMB_THR, DESC_THR)
+    flat = rp["flat"]["mean"] if rp["flat"]["mean"] is not None else overall_mean_power(pts)
+    if not (is_finite(flat) and flat > 0):
+        return None
+    return (flat,
+            rp["climb"]["mean"] if rp["climb"]["mean"] is not None else flat,
+            rp["descent"]["mean"] if rp["descent"]["mean"] is not None else 0)
+
+
+def p1_setup() -> None:
+    """Fill P1_MED: per rider, the numbers a planner would hold before the ride.
+
+    Constants come from e52_rider_fallback.csv — the medians of what was
+    genuinely inverted on the published chain's TRAINING rides. Where a rider
+    has too few inversions for a median the prior stands in, and the table
+    printed here says so. Under `pace` one light walk over the same training
+    rides adds the rider's median regime powers. Nothing here reads a held-out
+    ride."""
+    if not RIDER_FB:
+        raise SystemExit("E52_P1 needs e52_rider_fallback.csv — run "
+                         "e57_rider_fallback.py on the published chain first")
+    for g in GROUPS:
+        fb = RIDER_FB.get(g, {})
+        P1_MED[g] = {"m_hat": fb.get("m_hat"), "crr_hat": fb.get("crr_hat", CRR0),
+                     "cda_hat": fb.get("cda_hat", CDA0),
+                     "src": "/".join("rider" if k in fb else "prior"
+                                     for k in ("m_hat", "crr_hat", "cda_hat"))}
+    if P1 == "pace":
+        import e52_split as S          # lazy: e52_split imports this module
+        from skc_compare import med_of
+        train, _ = S.split(S.load(CANON_SUFFIX))
+        labels = {r["ride"] for r in train}
+        pw: dict = {g: ([], [], []) for g in GROUPS}
+        seen: dict[str, int] = {}
+        for group, pts, _mass in corpus_rides():
+            if group not in GROUPS:
+                continue
+            i = seen.get(group, 0)
+            seen[group] = i + 1
+            if f"{group}#{i}" not in labels:
+                continue
+            rp = _regime_powers(pts)
+            if rp:
+                for acc, v in zip(pw[group], rp):
+                    acc.append(v)
+        for g in GROUPS:
+            if not pw[g][0]:
+                raise SystemExit(f"no training ride of {g} gave a flat power — "
+                                 "the pace arm cannot plan for that rider")
+            P1_MED[g].update(p_flat=med_of(pw[g][0]), p_climb=med_of(pw[g][1]),
+                             p_desc=med_of(pw[g][2]), n_pace=len(pw[g][0]))
+    print(f"  what the planner holds per rider (m/Crr/CdA source in brackets"
+          + (", median regime powers W" if P1 == "pace" else "") + "):")
+    for g in GROUPS:
+        m = P1_MED[g]
+        line = (f"    {g:<12} m {'logged' if m['m_hat'] is None else to_fixed(m['m_hat'], 1):>6}"
+                f"  Crr {to_fixed(m['crr_hat'], 4)}  CdA {to_fixed(m['cda_hat'], 3)}"
+                f"  [{m['src']}]")
+        if P1 == "pace":
+            line += (f"  flat {to_fixed(m['p_flat'], 0)} climb {to_fixed(m['p_climb'], 0)}"
+                     f" descent {to_fixed(m['p_desc'], 0)} (n={m['n_pace']})")
+        print(line)
+
+
 def one_ride(pts, label, group, m_logged) -> dict | None:
     """Everything Entry 52 needs from one ride. Mirrors e47's one_ride setup so
     the two entries share a population by construction.
@@ -248,11 +365,10 @@ def one_ride(pts, label, group, m_logged) -> dict | None:
     if prof["x"][-1] - prof["x"][0] < 3000:
         return None
 
-    rp = extract_regime_powers(pts, CLIMB_THR, DESC_THR)
-    flat = rp["flat"]["mean"] if rp["flat"]["mean"] is not None else overall_mean_power(pts)
-    if not (is_finite(flat) and flat > 0):
+    rp = _regime_powers(pts)
+    if rp is None:
         return None
-    p_climb = rp["climb"]["mean"] if rp["climb"]["mean"] is not None else flat
+    flat, p_climb, p_desc = rp
 
     wind = 0.0                      # see the docstring: a property of the iterator
 
@@ -271,8 +387,25 @@ def one_ride(pts, label, group, m_logged) -> dict | None:
         if inv.get(_s) == "fallback" and _v in _fb:
             inv[_v], inv[_s] = _fb[_v], "rider"
 
+    if P1:
+        # The planning arm. The inversion above still ran, so a ride the
+        # published chain could not use is dropped here too and the two
+        # populations stay the same; its results are then set aside.
+        med = P1_MED.get(group)
+        if med is None:
+            raise RuntimeError("planning arm without p1_setup()")
+        m_plan = med["m_hat"]
+        if m_plan is None:          # no rider median: the logged or anchor mass
+            m_plan = m_logged if m_logged is not None else ANCHOR_M.get(ANCHOR_KEY.get(group))
+        if m_plan is None:
+            return None
+        inv = {"m_hat": m_plan, "m_src": "p1", "crr_hat": med["crr_hat"],
+               "crr_src": "p1", "cda_hat": med["cda_hat"], "cda_src": "p1"}
+        if P1 == "pace":
+            flat, p_climb, p_desc = med["p_flat"], med["p_climb"], med["p_desc"]
+
     cda, cda_src = inv["cda_hat"], inv.get("cda_src", "")
-    if AERO == "reg":
+    if AERO == "reg" and not P1:
         # CdA_reg = (keff*P_flat/v_meas - Crr*m*g) / (rho/2 * v_rel^2), the
         # e35_residual arm-B estimator. Falls back to the segment value rather
         # than to the prior, so this arm is never WORSE informed than "seg".
@@ -286,8 +419,7 @@ def one_ride(pts, label, group, m_logged) -> dict | None:
                     cda, cda_src = c, "regime"
     p = {"m": inv["m_hat"], "Crr": inv["crr_hat"], "CdA": cda,
          "rho": RHO, "keff": KEFF, "wind": wind, "vmax": VMAX, "vstart": VSTART}
-    pw = {"climb": p_climb, "flat": flat,
-          "descent": rp["descent"]["mean"] if rp["descent"]["mean"] is not None else 0,
+    pw = {"climb": p_climb, "flat": flat, "descent": p_desc,
           "climbThr": CLIMB_THR, "descThr": DESC_THR}
     vf = flat_eq_speed(flat, p)
     if not (is_finite(vf) and vf > 0):
@@ -431,6 +563,12 @@ def main() -> None:
     if CLIMBAIR != "zero":
         print(f"  CLIMB-AIR ARM: F2/F3/F4 charge climb air ({CLIMBAIR}) — files "
               f"are suffixed, nothing canonical is written")
+    if P1:
+        print(f"  PLANNING ARM ({P1}): constants are rider medians"
+              + (", and so are the regime powers" if P1 == "pace" else
+                 "; the ride keeps its own regime powers")
+              + " — files are suffixed, nothing canonical is written")
+        p1_setup()
     rows: list[dict] = []
     seen: dict[str, int] = {}
     for group, pts, mass in corpus_rides():
