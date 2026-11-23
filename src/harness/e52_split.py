@@ -32,7 +32,9 @@ paired sign test against F_base (`sign_win`, `sign_los`, `sign_p`) and the test
 half's own eps optimum (`eps_test_opt`). Paper 1's Table 3 prints all of them,
 so all of them live in a file rather than only in a console log.
 
-Run: python3 src/harness/e52_split.py        (E52_SMOKE=1 for the smoke cache)
+Run: python3 src/harness/e52_split.py        (E52_SMOKE=1 for the smoke cache;
+     E52_CLIMBAIR=vc|ss runs the same chain on that arm's cache — see
+     e52_build.py's docstring — and suffixes every file it reads or writes)
 """
 
 from __future__ import annotations
@@ -50,7 +52,8 @@ sys.path.insert(0, HERE)
 from bicycling_energy_model import is_finite
 from bicycling_energy_model.jsfmt import to_fixed
 
-from e52_build import AERO, FALLBACK, C_PUB, FORMS, GROUPS, NPAR, TAU_GRID, TAU_PUB_I, e_form
+from e52_build import (ARM_SUFFIX, CLIMBAIR, C_PUB, FORMS, GROUPS, NPAR, TAU_GRID,
+                       TAU_PUB_I, e_form)
 from perride_invert import RESULTS
 from skc_compare import boot_ci_strat, med_of, sign_p
 
@@ -82,7 +85,7 @@ def mulberry32(seed: int):
 
 
 def load() -> list[dict]:
-    path = os.path.join(RESULTS, "e52_aggregates" + ("" if AERO == "reg" else "." + AERO) + ("" if FALLBACK == "rider" else "." + FALLBACK) + (".SMOKE" if SMOKE else "") + ".csv")
+    path = os.path.join(RESULTS, "e52_aggregates" + ARM_SUFFIX + ".csv")
     rows = []
     with open(path, encoding="utf-8") as fh:
         for r in csv.DictReader(fh):
@@ -370,6 +373,9 @@ def main() -> None:
     rows = load()
     print(f"Entry 52 — the A-chain on {len(rows)} rides of D3-D6 under P_f,r"
           + ("   [SMOKE]" if SMOKE else ""))
+    if CLIMBAIR != "zero":
+        print(f"  CLIMB-AIR ARM ({CLIMBAIR}): F2/F3/F4 are the arm's forms — every "
+              f"file read or written carries the suffix {ARM_SUFFIX}")
 
     # ---- A.1 / A.2
     train, test = split(rows)
@@ -469,7 +475,7 @@ def main() -> None:
           f"{to_fixed(eps_test, 4)} at the test half's own optimum"
           + (f" (tau held at {w['tau']} m)" if w["form"] == "F3" else ""))
 
-    out = os.path.join(RESULTS, "e52_split" + ("" if AERO == "reg" else "." + AERO) + ("" if FALLBACK == "rider" else "." + FALLBACK) + (".SMOKE" if SMOKE else "") + ".csv")
+    out = os.path.join(RESULTS, "e52_split" + ARM_SUFFIX + ".csv")
     with open(out, "w", encoding="utf-8") as fh:
         fh.write("form,npar,cv,cv_se,aic,eps,c,tau,test_med_abs,test_med_signed,winner\n")
         for f in FORMS:
@@ -482,7 +488,7 @@ def main() -> None:
                      f"{1 if f == w['form'] else 0}\n")
     # summary row set: the numbers the gate battery re-derives and the article
     # cites. Written here so a published claim traces to a file, not a console log.
-    summ = os.path.join(RESULTS, "e52_summary" + ("" if AERO == "reg" else "." + AERO) + ("" if FALLBACK == "rider" else "." + FALLBACK) + (".SMOKE" if SMOKE else "") + ".csv")
+    summ = os.path.join(RESULTS, "e52_summary" + ARM_SUFFIX + ".csv")
     with open(summ, "w", encoding="utf-8") as fh:
         fh.write("key,value\n")
         fh.write(f"f3_test_med_abs,{to_fixed(res[w['form']]['med_abs'], 4)}\n")

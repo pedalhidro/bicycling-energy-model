@@ -60,7 +60,13 @@ home of the *derivation* and the side-by-side comparison.
   once and caches per-form energy components at every τ on a grid, so all
   downstream fitting is exact arithmetic — `E52_AERO=seg|reg`,
   `E52_FALLBACK=prior|rider`, defaults `reg`/`rider`; ~12 min, the only expensive
-  step) → `e52_split.py` (A.1–A.8: random 15% hold-out, repeated stratified
+  step. `E52_CLIMBAIR=vc|ss` is the registered **climb-air arm**: F2/F3/F4 charge
+  the air on climbs at the engine's `vc` ceiling or at the exact steady climb
+  speed (`ss`, solved in this file, not in the engine), every file of the chain
+  takes the arm's suffix through the shared `ARM_SUFFIX`, the build gates
+  air(zero) ≤ air(ss) ≤ air(vc) ≤ air(off) per ride, and **only `e52_build.py`
+  and `e52_split.py` accept the flag** — every other harness refuses to import
+  under it, because it would write the arm's numbers under a canonical name) → `e52_split.py` (A.1–A.8: random 15% hold-out, repeated stratified
   k-fold with **every** parameter refitted in-fold, CV binding with AIC reported,
   one test scoring; `e52_summary.csv` is what the gates read — the held-out
   medians and their stratified CIs (every cell of paper 1's Table 3, F_base's
@@ -86,6 +92,11 @@ home of the *derivation* and the side-by-side comparison.
   v_b grid in `e63_tolls.csv`, downstream refits arithmetic; internal gate
   F5(v_b=0) ≡ F3(τ_n) at 0 kJ. `E63_SMOKE=1`, `E63_TAUN=2.0` — env-suffixed
   sensitivity arm, `E63_DECOMP=1` pinned-τ control only, `E63_REBUILD=1`.
+  `E63_CREDIT=full` is the registered **credit arm**: the toll comes off the
+  climb charge only (β per metre, the reading `research/proofs`' `valley_toll`
+  supports) instead of off both totals ((1 − ε)·β); fitted outputs take the
+  flag's suffix, the toll table is shared, and the flag is refused when any
+  other harness imports the module.
   Verdict: F5(τ_n=2) enters F3's 1-SE band; both arms rail v_b at ∞ — the cap
   doesn't bind at these corpora's grades. Entry 64 (same file): **F5f** (v_b
   frozen at never-brake, 1 parameter) WINS the A.5 selection under the 1-SE

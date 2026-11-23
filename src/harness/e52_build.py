@@ -25,6 +25,42 @@ D1/D2 are absent on purpose: matching on measured kJ puts 87% of D2 and 43%
 of D1 inside D5, so they are re-processings of the same rider's rides, not
 independent corpora (Entry 52's registration).
 
+THE CLIMB-AIR ARM — registered 2026-11-23, before any run; it takes its entry
+number when it lands in the journal. F2 charges nothing for the air on a
+climb, and F3 and F4 are built on F2. research/proofs shows what that drops:
+the work against the air on the climbs is a fourth term of the law, and on a
+steady climb ridden no faster than v_f it lies between zero and what the
+engine's `vc` mode charges (`law_bracket`, `steady_climb_air_le`). The arm asks
+whether charging that term buys anything once eps is refitted.
+
+  E52_CLIMBAIR=vc   climbs pay air at v_c = keff*P_c/(Crr*mg*cos + mg*sin),
+                    capped at v_f: the engine's own mode, and the ceiling.
+  E52_CLIMBAIR=ss   climbs pay air at the exact steady speed, the root of
+                    keff*P_c/v = Crr*mg*cos + mg*sin + (rho/2)*CdA*v^2, capped
+                    at v_f. Computed in this file, not in the engine: an arm
+                    that loses should not cost the applet a mode.
+  unset (`zero`)    the published chain, byte for byte.
+
+Under the arm the cache's f2 and f3 columns ARE the arm's forms (f1 already
+pays air at v_f everywhere and is untouched), every file is suffixed with the
+arm, and e52_split.py runs the A-chain on it unchanged. Only e52_build.py and
+e52_split.py accept the flag: every other harness that reads this cache writes
+its own canonical CSV and would publish the arm under the canonical name.
+
+  GATE         per ride, air(zero) <= air(ss) <= air(vc) <= air(off): the
+               bracket research/proofs proves, checked against fresh engine
+               calls. The build refuses to ship a cache that breaks it.
+  CHECK        F2's fitted eps rises under ss, and rises more under vc.
+               Today eps is lowered to make up for the missing term; if it
+               does not rise, something other than the arm changed. (F2, not
+               F3: F3's eps also moves with its refitted tau.)
+  DECISION     ss becomes a candidate form only if F3's fold CV falls by more
+               than one fold SE against the published chain. Inside one SE,
+               or worse, eps absorbs the term, F2's assumption costs nothing
+               that can be measured, and the published form stays.
+  EXPECTATION  for the record: the check holds, and the CV difference is
+               small enough that it may sit inside one SE.
+
 Output: data/results/e52_aggregates.csv
 Run:    python3 src/harness/e52_build.py            (E52_SMOKE=1 for a subset)
 """
@@ -32,6 +68,7 @@ Run:    python3 src/harness/e52_build.py            (E52_SMOKE=1 for a subset)
 from __future__ import annotations
 
 import csv
+import math
 import os
 import sys
 
@@ -81,9 +118,28 @@ def _rider_fallbacks() -> dict:
     return out
 
 
+# The climb-air arm (docstring): what F2/F3/F4 charge for the air on climbs.
+CLIMBAIR = os.environ.get("E52_CLIMBAIR", "zero")
+if CLIMBAIR not in ("zero", "vc", "ss"):
+    raise SystemExit(f"E52_CLIMBAIR={CLIMBAIR!r}: expected zero, vc or ss")
+if CLIMBAIR != "zero":
+    _main = os.path.basename(getattr(sys.modules.get("__main__"), "__file__", "") or "")
+    if _main not in ("e52_build.py", "e52_split.py"):
+        raise SystemExit("E52_CLIMBAIR is an arm of e52_build.py and e52_split.py "
+                         f"alone — unset it before running {_main or 'this harness'}")
+# One suffix for every file of the chain, so the builder and the splitter
+# cannot disagree about which arm a file belongs to. Empty for the published
+# chain.
+ARM_SUFFIX = (("" if AERO == "reg" else "." + AERO)
+              + ("" if FALLBACK == "rider" else "." + FALLBACK)
+              + ("" if CLIMBAIR == "zero" else "." + CLIMBAIR)
+              + (".SMOKE" if SMOKE else ""))
+
 RIDER_FB = _rider_fallbacks()
 CDA_RANGE = (0.10, 1.00)
 CHECK: list[float] = []   # build-time cache-vs-engine deviations
+BRACKET: list[float] = []  # ss arm: worst violation of zero <= ss <= vc <= off
+SS_RESID = [0.0]           # ss arm: worst relative force-balance residual
 CANON_FAIL: list[str] = []   # F_base failures, counted rather than swallowed
 C_PUB = 3.0                      # F4's published climb-fraction constant
 # tau grid for F3's deadband. Entry 52's findings showed tau was frozen at the
@@ -107,6 +163,70 @@ COLS = (["group", "ride", "date", "emp",
         + [f"f3t{i}_{k}" for i in range(len(TAU_GRID))
            for k in ("roll", "aero", "climb", "recov1")]
         + ["x_m", "hplus", "hminus", "vf_kmh", "canon_kj"])
+
+
+def steady_climb_speed(slope: float, p: dict, vf: float, p_climb: float) -> float:
+    """Speed held up a grade at pedal power `p_climb`, capped at v_f: the root
+    of keff*P/v = Crr*mg*cos + mg*sin + (rho/2)*CdA*(v+w)|v+w|. The engine's
+    `vc` drops the air from this balance and so reads faster; with P <= 0 it
+    reads zero, and so does this."""
+    if not p_climb > 0:
+        return 0.0
+    mg = p["m"] * G
+    sec = math.sqrt(1 + slope * slope)
+    c = (p["Crr"] * mg + mg * slope) / sec     # rolling + gravity along the road
+    a = 0.5 * p["rho"] * p["CdA"]
+    w = p["wind"]
+    kp = p["keff"] * p_climb
+
+    def spare(v: float) -> float:              # power left over at speed v
+        return kp - v * (c + a * (v + w) * abs(v + w))
+
+    if spare(vf) >= 0:
+        return vf                              # would outrun v_f: capped, as vc is
+    if w == 0 and c > 0:
+        # a*v^3 + c*v - kp is convex and increasing for v > 0, and min(kp/c,
+        # vf) is at or above its root, so Newton descends onto it monotonically
+        v = min(kp / c, vf)
+        for _ in range(60):
+            step = (a * v * v * v + c * v - kp) / (3 * a * v * v + c)
+            v -= step
+            if abs(step) <= 1e-14 * v:
+                break
+    else:
+        lo, hi = 0.0, vf                       # spare(0) = kp > 0 > spare(vf)
+        for _ in range(200):
+            v = 0.5 * (lo + hi)
+            if spare(v) > 0:
+                lo = v
+            else:
+                hi = v
+        v = 0.5 * (lo + hi)
+    SS_RESID[0] = max(SS_RESID[0], abs(spare(v)) / kp)
+    return v
+
+
+def climb_air_ss(prof: dict, p: dict, vf: float, p_climb: float,
+                 memo: dict) -> float:
+    """Work against the air on the climb segments, J at the pedals, charged at
+    the steady climb speed. Same segments, same gate and same per-metre
+    convention as approximate()'s `vc` branch, so the two differ in the speed
+    alone. `memo` maps a slope to its speed within ONE ride (the constants are
+    fixed there); pass a fresh dict per ride."""
+    a = 0.5 * p["rho"] * p["CdA"] / p["keff"]
+    w = p["wind"]
+    xs, hs = prof["x"], prof["h"]
+    tot = 0.0
+    for i in range(1, len(xs)):
+        dx = xs[i] - xs[i - 1]
+        slope = (hs[i] - hs[i - 1]) / dx
+        if slope < CLIMB_THR:
+            continue
+        v = memo.get(slope)
+        if v is None:
+            v = memo[slope] = steady_climb_speed(slope, p, vf, p_climb)
+        tot += a * (v + w) * abs(v + w) * dx
+    return tot
 
 
 def one_ride(pts, label, group, m_logged) -> dict | None:
@@ -186,15 +306,25 @@ def one_ride(pts, label, group, m_logged) -> dict | None:
     for i, tau in enumerate(TAU_GRID):
         forms.append((f"f3t{i}",
                       {"x": prof["x"], "h": deadband(prof["h"], tau)}, "zero"))
+    # The climb-air arm acts on every form built on F2's gate (mode "zero"):
+    # `vc` swaps the engine mode, `ss` adds the steady-speed air to the zero-
+    # mode components. F1 (mode "off") is the same under every arm.
+    arm_mode = lambda mode: "vc" if (CLIMBAIR == "vc" and mode == "zero") else mode
+    ss_air = lambda pr, mode, memo: (climb_air_ss(pr, p, vf, p_climb, memo)
+                                     if (CLIMBAIR == "ss" and mode == "zero") else None)
+    memo: dict = {}
     for tag, pr, mode in forms:
-        a0 = approximate(pr, p, vf, 0.0, opt(mode))
-        a1 = approximate(pr, p, vf, 1.0, opt(mode))
+        a0 = approximate(pr, p, vf, 0.0, opt(arm_mode(mode)))
+        a1 = approximate(pr, p, vf, 1.0, opt(arm_mode(mode)))
         # Components, not just the E0/E1 pair: the decomposition invariant
         # roll + aero + climb + recov == E makes these exactly equivalent, and
         # storing them is what lets A.7 perturb a term for EVERY form. Caching
         # only E0/E1 silently gave F1-F3 a zero elasticity, since the
         # perturbation had nothing to act on.
         row[f"{tag}_roll"], row[f"{tag}_aero"] = a0["roll"], a0["aero"]
+        air = ss_air(pr, mode, memo)
+        if air is not None:
+            row[f"{tag}_aero"] += air
         row[f"{tag}_climb"] = a0["climb"]
         row[f"{tag}_recov1"] = a1["recov"]      # recov at eps = 1
         if tag == "f2":
@@ -208,21 +338,33 @@ def one_ride(pts, label, group, m_logged) -> dict | None:
     if len(CHECK) < 300:
         worst = 0.0
         for tag, pr, mode in forms:
+            air = ss_air(pr, mode, {})         # recomputed, no shared memo
             for eps in (0.2, 0.37, 0.85):
-                want = approximate(pr, p, vf, eps, opt(mode))["E"]
+                want = approximate(pr, p, vf, eps, opt(arm_mode(mode)))["E"]
+                if air is not None:
+                    want += air
                 got = (row[tag + "_roll"] + row[tag + "_aero"]
                        + row[tag + "_climb"] + eps * row[tag + "_recov1"])
                 if want:
                     worst = max(worst, abs(got - want) / abs(want))
+        air = ss_air(prof, "zero", {})
         for eps in (0.2, 0.37):
-            a2 = approximate(prof, p, vf, eps, opt("zero"))
+            a2 = approximate(prof, p, vf, eps, opt(arm_mode("zero")))
             km = (max(0, 1 - C_PUB * (prof["x"][-1] / 1000) / a2["hplus"])
                   if a2["hplus"] > 0 else 1)
             want = a2["roll"] + a2["aero"] + km * (a2["climb"] + a2["recov"])
+            if air is not None:
+                want += air
             got = e_form(row, "F4", eps) * 1000
             if want:
                 worst = max(worst, abs(got - want) / abs(want))
         CHECK.append(worst)
+        if CLIMBAIR == "ss":
+            # the bracket of research/proofs, against the engine's own modes
+            lo_, hi_, top = (approximate(prof, p, vf, 0.0, opt(m))["aero"]
+                             for m in ("zero", "vc", "off"))
+            mid = row["f2_aero"]
+            BRACKET.append(max(lo_ - mid, mid - hi_, hi_ - top) / max(top, 1.0))
 
     # F_base, the comparator. A bare `except` here silently produced nan on all
     # 2,039 rides and left P3 unanswerable, so the failure is counted and
@@ -271,11 +413,24 @@ def verify() -> bool:
           f"(two-point interpolation + F4 algebra vs fresh engine calls)")
     print(f"    worst relative deviation: {worst:.3e}   "
           f"{'GATE-OK' if ok else 'GATE-FAIL'}")
+    if CLIMBAIR == "ss":
+        b = max(0.0, max(BRACKET)) if BRACKET else float("inf")
+        b_ok = b <= 1e-9
+        r_ok = SS_RESID[0] <= 1e-9
+        print(f"  climb-air arm (ss) on {len(BRACKET)} rides: "
+              f"air(zero) <= air(ss) <= air(vc) <= air(off), worst violation "
+              f"{b:.3e}   {'GATE-OK' if b_ok else 'GATE-FAIL'}")
+        print(f"    worst force-balance residual of the steady speed: "
+              f"{SS_RESID[0]:.3e}   {'GATE-OK' if r_ok else 'GATE-FAIL'}")
+        ok = ok and b_ok and r_ok
     return ok
 
 
 def main() -> None:
     print("Entry 52 stage 1 — building the aggregate cache for D3-D6")
+    if CLIMBAIR != "zero":
+        print(f"  CLIMB-AIR ARM: F2/F3/F4 charge climb air ({CLIMBAIR}) — files "
+              f"are suffixed, nothing canonical is written")
     rows: list[dict] = []
     seen: dict[str, int] = {}
     for group, pts, mass in corpus_rides():
@@ -303,7 +458,7 @@ def main() -> None:
         for msg, n in Counter(CANON_FAIL).most_common(3):
             print(f"    {n:>5}x  {msg[:96]}")
 
-    out = os.path.join(RESULTS, "e52_aggregates" + ("" if AERO == "reg" else "." + AERO) + ("" if FALLBACK == "rider" else "." + FALLBACK) + (".SMOKE" if SMOKE else "") + ".csv")
+    out = os.path.join(RESULTS, "e52_aggregates" + ARM_SUFFIX + ".csv")
     with open(out, "w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=COLS, extrasaction="ignore")
         w.writeheader()
