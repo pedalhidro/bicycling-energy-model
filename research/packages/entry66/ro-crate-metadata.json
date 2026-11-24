@@ -129,9 +129,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e66_driftprobe.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/434ec220487e7ec5f04f479413f26ea84a0fceca/src/harness/e66_driftprobe.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b88623df6c0ba35409f64f354126c4f3855ca6ac/src/harness/e66_driftprobe.py",
       "sha256": "e79cd08abcebb4efd0a144f24278e8384405b817bebbe10681a2babe0ec365b5",
-      "version": "434ec220487e7ec5f04f479413f26ea84a0fceca",
+      "version": "b88623df6c0ba35409f64f354126c4f3855ca6ac",
       "programmingLanguage": "Python"
     },
     {

@@ -129,9 +129,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e50_sensitivity.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/434ec220487e7ec5f04f479413f26ea84a0fceca/src/harness/e50_sensitivity.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b88623df6c0ba35409f64f354126c4f3855ca6ac/src/harness/e50_sensitivity.py",
       "sha256": "382342c730e0544024367c244744b1526911cb8b6a19a0ae80f51ce35e158753",
-      "version": "434ec220487e7ec5f04f479413f26ea84a0fceca",
+      "version": "b88623df6c0ba35409f64f354126c4f3855ca6ac",
       "programmingLanguage": "Python"
     },
     {

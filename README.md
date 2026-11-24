@@ -7,7 +7,7 @@ mechanical energy (and time) of pedalling a route:
   asymmetric uphill/downhill cycling-energy law used across the Pedal
   Hidrográfico tools (Simujaules / quilojaules);
 - a **canonical** forward-dynamics simulation — a per-step force balance
-  `m·dv/ds = k_eff·P/v − C_rr·mg·cosθ − ½ρ·CdA·(v+wind)² − mg·sinθ` with a
+  `m·v·dv/ds = k_eff·P/v − C_rr·mg·cosθ − ½ρ·CdA·(v+wind)² − mg·sinθ` with a
   safe-speed brake cap on descents (semi-implicit, so it stays exact even on
   near-stall climbs).
 

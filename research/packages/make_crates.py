@@ -136,6 +136,20 @@ PRODUCER = {
     "e72_edgegrain.csv": "python3 src/harness/e72_edgegrain.py",
     "e73_gridpath.csv": "/Users/danlessa/conda/bin/python src/harness/e73_gridpath.py",
     "e75_prominence.csv": "/Users/danlessa/conda/bin/python src/harness/e75_prominence.py",
+    "e52_aggregates.p1const.csv": "E52_P1=const python3 src/harness/e52_build.py",
+    "e52_split.p1const.csv": "E52_P1=const python3 src/harness/e52_split.py",
+    "e52_summary.p1const.csv": "E52_P1=const python3 src/harness/e52_split.py",
+    "e52_aggregates.p1pace.csv": "E52_P1=pace python3 src/harness/e52_build.py",
+    "e52_split.p1pace.csv": "E52_P1=pace python3 src/harness/e52_split.py",
+    "e52_summary.p1pace.csv": "E52_P1=pace python3 src/harness/e52_split.py",
+    "e52_aggregates.ss.csv": "E52_CLIMBAIR=ss python3 src/harness/e52_build.py",
+    "e52_split.ss.csv": "E52_CLIMBAIR=ss python3 src/harness/e52_split.py",
+    "e52_summary.ss.csv": "E52_CLIMBAIR=ss python3 src/harness/e52_split.py",
+    "e52_aggregates.vc.csv": "E52_CLIMBAIR=vc python3 src/harness/e52_build.py",
+    "e52_split.vc.csv": "E52_CLIMBAIR=vc python3 src/harness/e52_split.py",
+    "e52_summary.vc.csv": "E52_CLIMBAIR=vc python3 src/harness/e52_split.py",
+    "e63_split.E63_TAUN2p0_E63_CREDITfull.csv": "E63_TAUN=2.0 E63_CREDIT=full python3 src/harness/e63_f5_kebuffer.py",
+    "e63_loro.E63_TAUN2p0_E63_CREDITfull.csv": "E63_TAUN=2.0 E63_CREDIT=full E63_LORO=1 python3 src/harness/e63_f5_kebuffer.py",
 }
 
 # entry → (instrument harness scripts, result CSVs, uses private tracks,
@@ -263,6 +277,15 @@ ENTRIES = {
           "research/notes/discrete-model.md"]),
     75: (["src/harness/e75_prominence.py"], ["e75_prominence.csv"], True,
          ["research/notes/discrete-model.md"]),
+    76: (["src/harness/e52_build.py", "src/harness/e52_split.py",
+          "src/harness/e63_f5_kebuffer.py"],
+         ["e52_aggregates.p1const.csv", "e52_split.p1const.csv",
+          "e52_summary.p1const.csv", "e52_aggregates.p1pace.csv",
+          "e52_split.p1pace.csv", "e52_summary.p1pace.csv",
+          "e52_aggregates.ss.csv", "e52_split.ss.csv", "e52_summary.ss.csv",
+          "e52_aggregates.vc.csv", "e52_split.vc.csv", "e52_summary.vc.csv",
+          "e63_split.E63_TAUN2p0_E63_CREDITfull.csv",
+          "e63_loro.E63_TAUN2p0_E63_CREDITfull.csv"], True, []),
 }
 
 # entry 22 reads the per-ride CSVs the other harnesses wrote

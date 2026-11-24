@@ -40,7 +40,7 @@ Um coletivo de ciclismo auto-organizado em São Paulo planeja pedaladas *seguind
 Há duas maneiras de colocar um número em kJ sobre uma rota. A maneira **canônica** é uma simulação de dinâmica direta: integrar o balanço de forças longitudinal [Martin et al. 1998],
 
 ```
-m·dv/ds = k_eff·P/v − C_rr·m·g·cosθ − ½·ρ·C_dA·(v + wind)² − m·g·sinθ,
+m·v·dv/ds = k_eff·P/v − C_rr·m·g·cosθ − ½·ρ·C_dA·(v + wind)² − m·g·sinθ,
 ```
 
 regime por regime, com um limite de freio/velocidade segura nas descidas. É precisa (aqui, 5.2% de erro absoluto mediano contra o `∫P·dt` medido sobre 44 pedaladas) mas rígida, opaca, e precisa de um solucionador de velocidade por segmento — pouco adequada ao planejamento interativo sobre muitas rotas candidatas ou ao cálculo de campo por aresta sobre um MDE. A maneira **aproximada** é uma integral de energia em velocidade constante em forma fechada,

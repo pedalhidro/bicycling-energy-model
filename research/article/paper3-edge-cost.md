@@ -76,7 +76,7 @@ $$\varepsilon(s) \;=\; \mathrm{clamp}_{01}\!\Big(\min\big(1,\ \tfrac{\alpha/\bet
 
 paper 1's coasting ceiling (its eq. 6) less the frozen coasting deficit $\varepsilon_0 = 0.13$, floored at 0, with $\alpha = \alpha_r + \alpha_a$ evaluated at the flat reference speed. The deployed router additionally scales the two gravity arms by a per-map scalar $k_s$ — its edge-local stand-in for the deadband's noise removal, F4's $c$ in multiplier form; the runs in this paper take each profile as given, and it is exactly this stand-in that [§3.1](#3.1)'s valley patch replaces. E2's floor is deliberate model content at this grain: paper 1 publishes its *ride-level* estimator unclamped because ride-mean grades never reach the floor grade $s_*/\varepsilon_0$, but single 30 m edges beyond it (≈ 11–15%, depending on the flat reference speed) are common even where ride means are not (paper 1 Appendix A.6). E1's own $\max(0,\cdot)$, by contrast, is dead code at the deployed constants — [§3.4](#3.4).
 
-For the search to be exact the cost must be additive, non-negative ($\varepsilon \leq 1$ guarantees it), and local; direction-asymmetry is fine for Dijkstra but rules out bidirectional search and A* without an admissible heuristic. *Planned:* derive the trivial lower-bound heuristic $\alpha_r \cdot d$ and check admissibility (Appendix B).
+For the search to be exact the cost must be additive, non-negative ($\varepsilon \leq 1$ guarantees it), and local; direction-asymmetry is fine for Dijkstra but rules out bidirectional search and A* without an admissible heuristic. The obvious candidate, the rolling bill $\alpha_r \cdot d$ over the straight-line distance $d$ to the goal, is **not** admissible on E1: a descent at exactly the grade $s_* = \alpha/\beta$ costs $\varepsilon_0\,\alpha$ per metre, which is below $\alpha_r$ whenever $\varepsilon_0 < \alpha_r/\alpha$ (1.4 against 6.0 J/m for a 75 kg rider at 50 W and the shared constants). Two lower bounds do hold on every path: $\min(\varepsilon_0\,\alpha,\ \alpha_r)\cdot d$, and $\alpha_r \cdot d + k_s\,\beta\,(h_{\mathrm{goal}} - h)$ with $h$ the elevation of the current node. The larger of the two is an admissible heuristic (Appendix B; machine-checked in `research/proofs/`, step 16 of its README).
 
 <a id="1.4"></a>
 
@@ -291,6 +291,6 @@ The analysis harnesses, the lab journal's bookkeeping, and drafts of this text w
 
 ## Appendix (planned)
 
-- **A. Derivation:** from paper 1's integral formalism to the edge sum; the exact discretization error terms — what vanishes as $\Delta x \to 0$ and what does not (the deadband term does not); the $mgh/k_{\mathrm{eff}}$ potential.
-- **B. Admissible heuristic for A\***, if [§1.3](#1.3)'s lower bound pans out.
+- **A. Derivation:** from paper 1's integral formalism to the edge sum; the exact discretization error terms — what vanishes as $\Delta x \to 0$ and what does not (the deadband term does not); the $mgh/k_{\mathrm{eff}}$ potential. The derivation is machine-checked in `research/proofs/` (steps 10–16 of its README); the appendix text is still to be written from it.
+- **B. Admissible heuristic for A\*:** $\alpha_r \cdot d$ fails ([§1.3](#1.3)); the appendix states the two bounds that hold, $\min(\varepsilon_0\,\alpha,\ \alpha_r)\cdot d$ and $\alpha_r \cdot d + k_s\,\beta\,(h_{\mathrm{goal}} - h)$, and that each is consistent because it holds edge by edge. Checked as `v2_path_ge_rate`, `v2_path_ge` and `rolling_bound_fails` in `research/proofs/RouteEnergy.lean`.
 - **C. Bit-parity protocol** between the JS and Rust engines.

@@ -32,7 +32,20 @@ paired sign test against F_base (`sign_win`, `sign_los`, `sign_p`) and the test
 half's own eps optimum (`eps_test_opt`). Paper 1's Table 3 prints all of them,
 so all of them live in a file rather than only in a console log.
 
-Run: python3 src/harness/e52_split.py        (E52_SMOKE=1 for the smoke cache)
+Run: python3 src/harness/e52_split.py        (E52_SMOKE=1 for the smoke cache;
+     E52_CLIMBAIR=vc|ss runs the same chain on that arm's cache — see
+     e52_build.py's docstring — and suffixes every file it reads or writes)
+
+THE PLANNING ROW (E52_P1=const|pace, registered in e52_build.py's docstring).
+Under the planning arm the chain above still runs on the arm's cache, which
+says what a refit could reach. The row a reader needs is a different one: the
+PUBLISHED form at its PUBLISHED constants, read from the published
+e52_split.csv, scored on the same held-out rides with the planner's inputs.
+`planning_row` prints it beside P0 on those rides, the paired per-ride
+difference (stratified CI, seed 56) and the same two figures on the held-out
+rides that have no near-twin in training. The arm refuses to run if its rides
+are not exactly the published chain's: the comparison is paired or it is
+nothing.
 """
 
 from __future__ import annotations
@@ -50,12 +63,14 @@ sys.path.insert(0, HERE)
 from bicycling_energy_model import is_finite
 from bicycling_energy_model.jsfmt import to_fixed
 
-from e52_build import AERO, FALLBACK, C_PUB, FORMS, GROUPS, NPAR, TAU_GRID, TAU_PUB_I, e_form
+from e52_build import (ARM_SUFFIX, CANON_SUFFIX, CLIMBAIR, C_PUB, FORMS, GROUPS, NPAR,
+                       P1, TAU_GRID, TAU_PUB_I, e_form)
 from perride_invert import RESULTS
 from skc_compare import boot_ci_strat, med_of, sign_p
 
 SMOKE = bool(os.environ.get("E52_SMOKE"))
 SEED = 48                     # 42/43 published, 44 TOST, 45 E49, 46 E50, 47 E51
+SEED_P1 = 56                  # the planning row's paired CI (49..55 are taken)
 TEST_FRAC = 0.15
 K_FOLDS = 5
 N_REPEATS = 4
@@ -81,8 +96,11 @@ def mulberry32(seed: int):
     return rnd
 
 
-def load() -> list[dict]:
-    path = os.path.join(RESULTS, "e52_aggregates" + ("" if AERO == "reg" else "." + AERO) + ("" if FALLBACK == "rider" else "." + FALLBACK) + (".SMOKE" if SMOKE else "") + ".csv")
+def load(suffix: str | None = None) -> list[dict]:
+    """The cache of the active arm; `suffix` names another chain's (the
+    planning arm reads the published one beside its own)."""
+    path = os.path.join(RESULTS, "e52_aggregates"
+                        + (ARM_SUFFIX if suffix is None else suffix) + ".csv")
     rows = []
     with open(path, encoding="utf-8") as fh:
         for r in csv.DictReader(fh):
@@ -227,18 +245,18 @@ def twin_exposure(train, test, dtol=0.05, htol=0.10) -> tuple[int, int]:
     """The disclosure the registration promised: how many test rides have a
     near-twin in train, by (distance, ascent) within tolerance, same rider.
     A random split cannot rule this out, so it is measured instead."""
-    hit = 0
-    for t in test:
-        for r in train:
-            if r["group"] != t["group"]:
-                continue
-            if t["x_m"] <= 0 or t["hplus"] <= 0:
-                continue
-            if (abs(r["x_m"] - t["x_m"]) / t["x_m"] < dtol
-                    and abs(r["hplus"] - t["hplus"]) / t["hplus"] < htol):
-                hit += 1
-                break
-    return hit, len(test)
+    return sum(1 for t in test if has_twin(t, train, dtol, htol)), len(test)
+
+
+def has_twin(t, train, dtol=0.05, htol=0.10) -> bool:
+    """Does this held-out ride have a near-twin in train — same rider, distance
+    and ascent within tolerance?"""
+    if t["x_m"] <= 0 or t["hplus"] <= 0:
+        return False
+    return any(r["group"] == t["group"]
+               and abs(r["x_m"] - t["x_m"]) / t["x_m"] < dtol
+               and abs(r["hplus"] - t["hplus"]) / t["hplus"] < htol
+               for r in train)
 
 
 # ------------------------------------------------------------------ A.4/A.5
@@ -366,10 +384,74 @@ def base_pct(rows) -> list[float]:
     return [100.0 * (r["canon_kj"] - r["emp"]) / r["emp"] for r in rows]
 
 
+def published(suffix: str) -> dict:
+    """The published chain's selected form and its constants, read from that
+    chain's own CSV — the constants a reader of the paper would use."""
+    path = os.path.join(RESULTS, "e52_split" + suffix + ".csv")
+    with open(path, encoding="utf-8") as fh:
+        for r in csv.DictReader(fh):
+            if r["winner"] == "1":
+                return {"form": r["form"], "eps": float(r["eps"]),
+                        "c": float(r["c"]) if r["c"] else C_PUB,
+                        "ti": TAU_GRID.index(float(r["tau"])) if r["tau"] else TAU_PUB_I,
+                        "p0": float(r["test_med_abs"])}
+    raise SystemExit(f"{os.path.basename(path)} names no winner")
+
+
+def planning_row(train, test) -> dict:
+    """The planning arm's reading (docstring): the published form at its
+    published constants on the planner's inputs, paired with P0 on the same
+    held-out rides."""
+    ctrain, ctest = split(load(CANON_SUFFIX))
+    if ([r["ride"] for r in ctest] != [r["ride"] for r in test]
+            or [r["ride"] for r in ctrain] != [r["ride"] for r in train]):
+        raise SystemExit("the arm's rides are not the published chain's rides — "
+                         "the planning row would not be paired; rebuild both")
+    pub = published(CANON_SUFFIX)
+    f, e, c, ti = pub["form"], pub["eps"], pub["c"], pub["ti"]
+    err = lambda rows: pct(rows, f, e, c, ti)
+    print(f"\n  PLANNING ROW — published {f} (eps {to_fixed(e, 4)}"
+          + (f", tau {TAU_GRID[ti]} m" if f == "F3" else f", c {to_fixed(c, 2)}" if f == "F4" else "")
+          + f") on the SAME {len(test)} held-out rides")
+    print(f"    {'inputs':<26} {'med|D%|':>6} {'[95% CI]':<19}  {'signed':>6} [95% CI]")
+    p0 = _scored(ctest, "P0: read from the ride", err)
+    p1 = _scored(test, f"P1 {P1}: rider medians", err)
+    if abs(p0["med_abs"] - pub["p0"]) > 0.05:
+        print(f"    NOTE: P0 here is {to_fixed(p0['med_abs'], 2)} against the published "
+              f"{to_fixed(pub['p0'], 2)} — the published cache has moved since its "
+              f"e52_split.csv was written; re-run the published chain first")
+    a0, a1 = [abs(v) for v in err(ctest)], [abs(v) for v in err(test)]
+    diff = [b - a for a, b in zip(a0, a1)]
+    by_g = [[d for d, r in zip(diff, test) if r["group"] == g] for g in GROUPS]
+    ci = boot_ci_strat([x for x in by_g if x], SEED_P1)
+    worse = sum(1 for d in diff if d > 0)
+    better = sum(1 for d in diff if d < 0)
+    print(f"    per ride, P1 minus P0 in |D%|: median {to_fixed(med_of(diff), 2)} pp "
+          f"[{to_fixed(ci[0], 2)}, {to_fixed(ci[1], 2)}]; P1 is further from the "
+          f"meter on {worse} of {worse + better} (sign p = {to_fixed(sign_p(worse, better), 4)})")
+    solo = [i for i, t in enumerate(test) if not has_twin(t, train)]
+    out = {"form": f, "eps": e, "tau": TAU_GRID[ti], "c": c, "p0": p0, "p1": p1,
+           "diff_med": med_of(diff), "diff_ci": ci, "worse": worse, "better": better,
+           "n_solo": len(solo)}
+    if solo:
+        out["p0_solo"] = med_of([a0[i] for i in solo])
+        out["p1_solo"] = med_of([a1[i] for i in solo])
+        print(f"    on the {len(solo)} held-out rides with no near-twin in training: "
+              f"P0 {to_fixed(out['p0_solo'], 2)}, P1 {to_fixed(out['p1_solo'], 2)}")
+    return out
+
+
 def main() -> None:
     rows = load()
     print(f"Entry 52 — the A-chain on {len(rows)} rides of D3-D6 under P_f,r"
           + ("   [SMOKE]" if SMOKE else ""))
+    if CLIMBAIR != "zero":
+        print(f"  CLIMB-AIR ARM ({CLIMBAIR}): F2/F3/F4 are the arm's forms — every "
+              f"file read or written carries the suffix {ARM_SUFFIX}")
+    if P1:
+        print(f"  PLANNING ARM ({P1}): this cache was built on rider medians — every "
+              f"file written carries the suffix {ARM_SUFFIX}; the planning row is "
+              f"printed after A.8")
 
     # ---- A.1 / A.2
     train, test = split(rows)
@@ -469,7 +551,9 @@ def main() -> None:
           f"{to_fixed(eps_test, 4)} at the test half's own optimum"
           + (f" (tau held at {w['tau']} m)" if w["form"] == "F3" else ""))
 
-    out = os.path.join(RESULTS, "e52_split" + ("" if AERO == "reg" else "." + AERO) + ("" if FALLBACK == "rider" else "." + FALLBACK) + (".SMOKE" if SMOKE else "") + ".csv")
+    plan = planning_row(train, test) if P1 else None
+
+    out = os.path.join(RESULTS, "e52_split" + ARM_SUFFIX + ".csv")
     with open(out, "w", encoding="utf-8") as fh:
         fh.write("form,npar,cv,cv_se,aic,eps,c,tau,test_med_abs,test_med_signed,winner\n")
         for f in FORMS:
@@ -482,7 +566,7 @@ def main() -> None:
                      f"{1 if f == w['form'] else 0}\n")
     # summary row set: the numbers the gate battery re-derives and the article
     # cites. Written here so a published claim traces to a file, not a console log.
-    summ = os.path.join(RESULTS, "e52_summary" + ("" if AERO == "reg" else "." + AERO) + ("" if FALLBACK == "rider" else "." + FALLBACK) + (".SMOKE" if SMOKE else "") + ".csv")
+    summ = os.path.join(RESULTS, "e52_summary" + ARM_SUFFIX + ".csv")
     with open(summ, "w", encoding="utf-8") as fh:
         fh.write("key,value\n")
         fh.write(f"f3_test_med_abs,{to_fixed(res[w['form']]['med_abs'], 4)}\n")
@@ -519,6 +603,28 @@ def main() -> None:
             fh.write(f"sign_los,{base['los']}\n")
             fh.write(f"sign_p,{to_fixed(base['p'], 4)}\n")
         fh.write(f"eps_test_opt,{to_fixed(eps_test, 4)}\n")
+        if plan:
+            # the planning row: the arm's summary only, never the published one
+            fh.write(f"p1_form,{plan['form']}\n")
+            fh.write(f"p1_eps,{to_fixed(plan['eps'], 4)}\n")
+            if plan["form"] == "F3":
+                fh.write(f"p1_tau,{plan['tau']}\n")
+            if plan["form"] == "F4":
+                fh.write(f"p1_c,{to_fixed(plan['c'], 4)}\n")
+            for tag in ("p0", "p1"):
+                for stat, ci_k in (("med_abs", "ci_abs"), ("med_signed", "ci_signed")):
+                    fh.write(f"{tag}_same_rides_{stat},{to_fixed(plan[tag][stat], 4)}\n")
+                    fh.write(f"{tag}_same_rides_{stat}_lo,{to_fixed(plan[tag][ci_k][0], 4)}\n")
+                    fh.write(f"{tag}_same_rides_{stat}_hi,{to_fixed(plan[tag][ci_k][1], 4)}\n")
+            fh.write(f"p1_minus_p0_med,{to_fixed(plan['diff_med'], 4)}\n")
+            fh.write(f"p1_minus_p0_lo,{to_fixed(plan['diff_ci'][0], 4)}\n")
+            fh.write(f"p1_minus_p0_hi,{to_fixed(plan['diff_ci'][1], 4)}\n")
+            fh.write(f"p1_worse,{plan['worse']}\n")
+            fh.write(f"p1_better,{plan['better']}\n")
+            fh.write(f"notwin_n,{plan['n_solo']}\n")
+            if plan["n_solo"]:
+                fh.write(f"p0_notwin_med_abs,{to_fixed(plan['p0_solo'], 4)}\n")
+                fh.write(f"p1_notwin_med_abs,{to_fixed(plan['p1_solo'], 4)}\n")
     print(f"\nwrote {os.path.basename(out)} and {os.path.basename(summ)}")
 
 

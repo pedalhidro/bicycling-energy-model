@@ -215,6 +215,7 @@ counted from its CSV rather than asserted, is [`research/data-graph.ttl`](../dat
 
 | entry | $I = (D, P)$ | $T$ | $O$ (rows) | $S$ |
 |--:|---|---|---|---|
+| 76 | $(D_3..D_6, P_{f,r})$, and the same rides under rider-median constants, then rider-median regime powers | the A-chain on four arm caches (planning `const`/`pace`, climb air `ss`/`vc`); F5 family under two toll bookkeepings | `e52_aggregates.{p1const,p1pace,ss,vc}.csv` (2,039 each) + their `e52_split.*`/`e52_summary.*`; `e63_split`/`e63_loro.E63_TAUN2p0_E63_CREDITfull.csv` | planning row: published F3 reads 4.56 (`const`) and 7.51 [6.41, 8.69] (`pace`) on the 305 held-out rides, against 3.24 at P0 — expectation held; climb air: ε rises as registered, F3's fold CV rises 1.53 SE (`ss`), published form stays; credit: 0.13 SE, NO VERDICT |
 | 75 | 290-ride stratified subset × raster crops at the 30 m lattices | 2-D prominence-τ (capped geodesic reconstruction) vs σ30, × {v2, eF2, F3} | `e75_prominence.csv` (290) | REFUTED: prom6 7.43/22.80 vs σ30 4.23/4.96 at (v2, n=16) — DEM noise is connected 2-D micro-structure; σ30 keeps the crown |
 | 74 | Entry 73's cached paths, five ε policies | the eF2 skeleton × {ε₂, ε_SP, ε_geo, ε_GI, ε_VD, 0} | contest columns in `e73_gridpath.csv` (same 1,901) | ε_geo wins every treated cell (3.31 default); regional flat refuted; raw chains invert to flat; §3.2(d)'s default = deployed ε on σ30 at n = 16 (gate 3l) |
 | 73 | $(D_3..D_6, P_{f,r})$ + GPS lines + (IGC wide, FABDEM, E26 spans) | the E73 quantizer × {v2, eF1/eF2/eF4, F1–F4, F5f, patch} per config | `e73_gridpath.csv` (1,901; IGC pop 1,034, FAB pop 1,844) + `fig-p3-dirs.svg`, `fig-p3-chain.svg` | the dirs ladder is chain-shaped (distance vs noise error); eF4 at measured pins best deployable 6/6 chains; deadband's unique share survives at edge grain (gate 3l) |
@@ -293,6 +294,394 @@ Entries with no $O$ are reviews, registrations, imported notes or refactors — 
 what the other rows *mean* without producing a per-ride table of their own.
 
 ---
+
+---
+
+## 2026-11-23 — Entry 76: three registered arms — the planning row, climb air in the A-chain, and the toll's credit
+
+**Lineage** — $I$: $(D_3..D_6, P_{f,r})$, the Entry-52 population (2,039 rides,
+seed-48 split 1,734 / 305), plus two re-walks under rider-median inputs and two
+under a climb-air charge · $T$: the A-chain of Entry 52, unchanged, on each arm's
+cache; F5/F5f/F5m of Entries 63–64 under two bookkeepings of the toll · $O$:
+`e52_aggregates.{p1const,p1pace,ss,vc}.csv` (2,039 each),
+`e52_split.*` / `e52_summary.*` for the same four suffixes,
+`e63_split.E63_TAUN2p0_E63_CREDITfull.csv`, `e63_loro.E63_TAUN2p0_E63_CREDITfull.csv`
+(and the published `e63_split.E63_TAUN2p0.csv` / `e63_loro.E63_TAUN2p0.csv`,
+re-run and byte-identical) · $S$: the planning row; the three-way climb-air
+table; the two-way credit table.
+
+Three arms were written in a session that had no ride data, and registered in
+their harness docstrings before any run: the climb-air arm and the credit arm in
+commit `ef4546e`, the planning arm in commit `8efaff2` (both 2026-11-23, and both
+commits are the registrations' timestamps). This entry is the run, on the machine
+that holds the data, with the registered rules applied as written. One arm has a
+measurement and no rule, one has a rule that goes against it, and one has no
+verdict.
+
+### 0. What was run, and the checks that it is the same chain
+
+The published chain was re-run first (`e52_split.py`): `e52_split.csv` came back
+byte-identical and `e52_summary.csv` gained only its new rows (every Table 3
+interval, the sign test, the test half's own ε optimum). `bootstrap_ci.py`: all
+gates pass. `check_paper_stats.py`: 54 claims across 4 papers, 6 planned, 0
+failing. No paper, sidecar or gate literal changed.
+
+For every arm cache the per-group "kept" counts equal the published cache's
+(441 / 219 / 636 / 193 / 346 / 190 / 14, 2,039 of 2,041 seen), in the same ride
+order. For the two climb-air caches every column the arm must not touch (the
+inverted constants and their sources, `emp`, `x_m`, `hplus`, `hminus`, `vf_kmh`,
+`canon_kj`, all of F1, and F2's roll / climb / recov1) is string-identical to the
+published cache on all 2,039 rides, and the F1 row and the $F_\mathrm{base}$ row
+of each arm's split reproduce the published ones to the digit. After every arm
+the published files (`e52_aggregates.csv`, `e52_split.csv`, `e52_summary.csv`,
+`e52_rider_fallback.csv`, `e63_split.E63_TAUN2p0.csv`) were checked by hash and
+had not been rewritten.
+
+### 1. The planning arm (`E52_P1`) — a measurement, with no decision rule
+
+The registration, verbatim from `e52_build.py` at `8efaff2`:
+
+```
+THE PLANNING ARM — registered 2026-11-23, before any run; it takes its entry
+number when it lands in the journal. Everything above scores a ride with
+constants inverted from that ride's own power record (protocol P0 of the
+working paper). The error it reports is the account closing once the ride is
+known; it is not a forecast. The arm takes the scored ride's telemetry away in
+two steps.
+
+  E52_P1=const   mass, Crr and CdA are the RIDER's medians over the training
+                 half's genuinely inverted values (e52_rider_fallback.csv,
+                 Entry 57). The ride still supplies its own regime powers.
+                 Measures what not knowing the day's constants costs.
+  E52_P1=pace    as `const`, and the regime powers are the rider's medians
+                 over the training half too. The model then reads nothing of
+                 the scored ride but its geometry: what a planner holds for a
+                 rider with a history.
+
+The simulation is rebuilt on the same inputs under both, so its row stays a
+like-for-like comparator. e52_split.py runs the chain on the arm's cache and
+adds the PLANNING ROW: the published form at its published constants (read
+from the published e52_split.csv, never a literal), scored on the same
+held-out rides, paired per ride with P0, and repeated on the held-out rides
+that have no near-twin in training.
+
+  HEADLINE     F3 at the published eps and tau, held-out half, under `pace`.
+               It is printed whatever it turns out to be: this arm is a
+               measurement, not a contest, and has no decision rule.
+  EXPECTATION  for the record: 7 to 9% median error under `pace` (from the 15%
+               within-rider spread of the flat resistance in paper 1's error
+               budget), with `const` between that and P0's 3.2%.
+  NOT COVERED  a rider with no history (the frozen-priors protocol), the wind
+               and air density of the day, and a split by route. The split is
+               the published one so that every figure is paired with P0 on the
+               same rides; the no-twin subset is the check on route leakage.
+```
+
+**What the planner holds.** Every rider reads `[rider/rider/rider]`: no prior
+stands in anywhere.
+
+| rider | m (kg) | $C_{rr}$ | $C_dA$ | training rides behind the pace medians |
+|---|--:|--:|--:|--:|
+| D3 | 75.2 | 0.0082 | 0.308 | 375 |
+| D4 | 98.7 | 0.0096 | 0.450 | 186 |
+| D5 | 73.7 | 0.0086 | 0.412 | 541 |
+| D6-user_1 | 98.1 | 0.0091 | 0.394 | 164 |
+| D6-user_2 | 76.5 | 0.0076 | 0.383 | 294 |
+| D6-user_3 | 69.7 | 0.0081 | 0.351 | 162 |
+| D6-user_5 | 80.7 | 0.0065 | 0.413 | 12 |
+
+Under `pace` the planner also holds each rider's median flat, climb and descent
+power over those training rides. The build prints them; they are not restated
+here, because a rider's absolute power figures have not been published in this
+journal before and six of the seven riders are other people.
+
+**The planning row** — the published F3 at its published constants (ε = 0.2939,
+τ = 6.0 m, read from the published `e52_split.csv`) on the same 305 held-out
+rides. Median with stratified 95% interval, as the harness prints it:
+
+| inputs | med \|Δ%\| | median Δ% | per ride, P1 − P0 in \|Δ%\| | P1 further from the meter | no near-twin (n = 56): P0 → P1 |
+|---|--:|--:|--:|--:|--:|
+| P0: read from the ride | 3.24 [2.75, 3.51] | 0.07 [−0.31, 0.70] | — | — | 3.22 |
+| P1 `const`: rider-median m, $C_{rr}$, $C_dA$ | 4.56 [4.04, 5.43] | 1.15 [0.21, 1.74] | 0.81 pp [0.46, 1.36] | 189 of 300, sign p = 0.0000 | 3.22 → 7.06 |
+| **P1 `pace`: and rider-median regime powers** | **7.51 [6.41, 8.69]** | 1.13 [−1.06, 2.34] | 4.06 pp [2.84, 4.73] | 226 of 305, sign p = 0.0000 | 3.22 → 8.54 |
+
+**The headline, by registration:** F3 at the published ε and τ on the held-out
+half under `pace` reads **7.51% [6.41, 8.69]**, bias +1.13% [−1.06, 2.34].
+
+**The expectation on record held.** It was 7 to 9% median error under `pace`,
+with `const` between that and P0's 3.2%: `pace` is 7.51 and `const` is 4.56.
+
+**The arm's own refitted chain** (what a refit on the planner's inputs could
+reach), and the simulation rebuilt on the same inputs:
+
+| arm | form | fold CV ± SE | ε | τ (m) | c (m/km) | held-out med \|Δ%\| | median Δ% |
+|---|---|--:|--:|--:|--:|--:|--:|
+| `const` | F1 | 0.09098 ± 0.00186 | 0.6753 | — | — | 6.17 [5.30, 7.13] | 2.04 [1.17, 3.03] |
+| | F2 | 0.08238 ± 0.00187 | 0.4502 | — | — | 4.97 [4.28, 5.69] | 0.92 [0.07, 2.52] |
+| | **F3 (selected)** | 0.07681 ± 0.00178 | 0.3281 | 4.0 | — | 4.43 [3.93, 5.37] | 1.29 [0.32, 1.80] |
+| | F4 | 0.08003 ± 0.00202 | 0.3604 | — | 1.89 | 4.56 [3.73, 5.13] | −0.10 [−0.60, 0.97] |
+| | $F_\mathrm{base}$ | — | — | — | — | 4.04 [3.71, 4.84] | 0.31 [−0.22, 1.16] |
+| `pace` | F1 | 0.11547 ± 0.00220 | 0.6693 | — | — | 9.01 [7.32, 10.37] | 1.42 [−0.05, 4.02] |
+| | F2 | 0.11115 ± 0.00220 | 0.4472 | — | — | 7.84 [6.84, 8.89] | 1.42 [−0.98, 2.55] |
+| | **F3 (selected)** | 0.10439 ± 0.00210 | 0.2828 | 8.0 | — | 7.39 [6.73, 8.77] | 0.32 [−1.38, 1.89] |
+| | F4 | 0.11226 ± 0.00232 | 0.4455 | — | 0.06 | 7.90 [6.80, 8.86] | 1.39 [−1.07, 2.52] |
+| | $F_\mathrm{base}$ | — | — | — | — | 7.72 [6.64, 8.73] | 0.06 [−1.88, 1.52] |
+
+The refit buys little: 4.43 against the published constants' 4.56 under `const`,
+7.39 against 7.51 under `pace`. F3 is selected under both, CV and AIC agreeing.
+The refitted winner against the simulation on the same inputs, paired per ride:
+closer on 129 of 305 under `const` (sign p = 0.0083, so the simulation is the
+closer one there) and on 142 of 305 under `pace` (p = 0.2521).
+
+Three things the table says, read off it and nothing more. (i) Taking away the
+day's constants costs about 1.3 points of median error; taking away the day's
+pace costs about 3 more. The effort the rider chose that day is the larger
+unknown. (ii) The simulation loses the same amount (3.19 → 4.04 → 7.72), so the
+cost belongs to the inputs, not to the closed form. (iii) Under P0 the rides with
+no near-twin in training read the same as the whole held-out half (3.22 against
+3.24); under P1 they read worse than it (7.06 and 8.54 against 4.56 and 7.51). The
+published split's 82% twin exposure does not flatter P0, and does flatter P1.
+
+**What this arm does not cover**, as registered: a rider with no history (the
+frozen-priors protocol); the wind and the air density of the day (wind is zero
+for every ride, by the iterator); and a split by route — the split is the
+published random one, so that every figure is paired with P0, and the no-twin
+subset (56 rides) is the only check on route leakage it offers.
+
+Two footnotes on the P0 line. It reads 3.2358 [2.7502, 3.5051] where the
+published chain reads 3.2365 [2.7499, 3.5046]: the planning row takes ε from the
+CSV at its four printed decimals, the published chain scores at full precision.
+The harness's own tolerance for this is 0.05 and no NOTE was printed. And the
+`const` pairing counts 300 rides, not 305: five rides have identical |Δ%| under
+both inputs and are ties.
+
+### 2. The climb-air arm (`E52_CLIMBAIR`) — the check holds, the decision goes against the arm
+
+The registration, verbatim from `e52_build.py` at `ef4546e`:
+
+```
+THE CLIMB-AIR ARM — registered 2026-11-23, before any run; it takes its entry
+number when it lands in the journal. F2 charges nothing for the air on a
+climb, and F3 and F4 are built on F2. research/proofs shows what that drops:
+the work against the air on the climbs is a fourth term of the law, and on a
+steady climb ridden no faster than v_f it lies between zero and what the
+engine's `vc` mode charges (`law_bracket`, `steady_climb_air_le`). The arm asks
+whether charging that term buys anything once eps is refitted.
+
+  E52_CLIMBAIR=vc   climbs pay air at v_c = keff*P_c/(Crr*mg*cos + mg*sin),
+                    capped at v_f: the engine's own mode, and the ceiling.
+  E52_CLIMBAIR=ss   climbs pay air at the exact steady speed, the root of
+                    keff*P_c/v = Crr*mg*cos + mg*sin + (rho/2)*CdA*v^2, capped
+                    at v_f. Computed in this file, not in the engine: an arm
+                    that loses should not cost the applet a mode.
+  unset (`zero`)    the published chain, byte for byte.
+
+Under the arm the cache's f2 and f3 columns ARE the arm's forms (f1 already
+pays air at v_f everywhere and is untouched), every file is suffixed with the
+arm, and e52_split.py runs the A-chain on it unchanged. Only e52_build.py and
+e52_split.py accept the flag: every other harness that reads this cache writes
+its own canonical CSV and would publish the arm under the canonical name.
+
+  GATE         per ride, air(zero) <= air(ss) <= air(vc) <= air(off): the
+               bracket research/proofs proves, checked against fresh engine
+               calls. The build refuses to ship a cache that breaks it.
+  CHECK        F2's fitted eps rises under ss, and rises more under vc.
+               Today eps is lowered to make up for the missing term; if it
+               does not rise, something other than the arm changed. (F2, not
+               F3: F3's eps also moves with its refitted tau.)
+  DECISION     ss becomes a candidate form only if F3's fold CV falls by more
+               than one fold SE against the published chain. Inside one SE,
+               or worse, eps absorbs the term, F2's assumption costs nothing
+               that can be measured, and the published form stays.
+  EXPECTATION  for the record: the check holds, and the CV difference is
+               small enough that it may sit inside one SE.
+```
+
+The `ss` build printed GATE-OK three times: cache against engine (worst relative
+deviation 5.7e-16 on 300 rides), the bracket air(zero) ≤ air(ss) ≤ air(vc) ≤
+air(off) (worst violation 0), and the steady speed's force-balance residual
+(4.9e-16). The `vc` build's one gate passed (2.4e-16).
+
+**How much air the arm adds.** Per ride, `f2_aero` in the arm's cache minus the
+published one, as a share of that ride's published F2 energy at F2's published
+ε (0.4621, read from `e52_split.csv`); percentiles by linear interpolation:
+
+| arm | median | 95th percentile | maximum |
+|---|--:|--:|--:|
+| `ss` | 3.04% | 7.30% | 14.64% |
+| `vc` | 3.91% | 9.44% | 21.43% |
+
+(13 rides add exactly zero under both arms.)
+
+**The three-way table.** Fold CV is the mean of 20 fold scores; held-out columns
+are med |Δ%| · median Δ% on the 305 test rides. F1 is untouched by the arm.
+
+| arm | form | fold CV ± SE | ε | τ (m) | c (m/km) | held-out | winner |
+|---|---|--:|--:|--:|--:|--:|:--:|
+| zero (published) | F1 | 0.07113 ± 0.00187 | 0.6830 | — | — | 4.03 · +1.46 | |
+| | F2 | 0.06306 ± 0.00186 | 0.4621 | — | — | 3.21 · +0.14 | |
+| | **F3** | **0.05406 ± 0.00180** | 0.2939 | 6.0 | — | 3.24 · +0.07 | ✓ |
+| | F4 | 0.06286 ± 0.00199 | 0.4094 | — | 1.10 | 2.86 · −0.40 | |
+| `ss` | F1 | 0.07113 ± 0.00187 | 0.6830 | — | — | 4.03 · +1.46 | |
+| | F2 | 0.06419 ± 0.00185 | 0.5451 | — | — | 2.92 · +0.30 | |
+| | **F3** | **0.05682 ± 0.00180** | 0.3543 | 6.0 | — | 3.50 · +0.19 | ✓ |
+| | F4 | 0.06160 ± 0.00194 | 0.4668 | — | 1.73 | 2.71 · −0.22 | |
+| `vc` | F1 | 0.07113 ± 0.00187 | 0.6830 | — | — | 4.03 · +1.46 | |
+| | F2 | 0.06596 ± 0.00186 | 0.5700 | — | — | 3.24 · +0.54 | |
+| | **F3** | **0.05799 ± 0.00180** | 0.3666 | 6.0 | — | 3.69 · +0.27 | ✓ |
+| | F4 | 0.06210 ± 0.00194 | 0.4647 | — | 2.28 | 2.85 · −0.38 | |
+
+F3 is selected under every arm (CV best, alone inside one SE, AIC agreeing), and
+τ refits to 6 m under every arm.
+
+**CHECK — holds.** F2's fitted ε is 0.4621 as published, 0.5451 under `ss` and
+0.5700 under `vc`: it rises, and rises more under `vc`. ε was being lowered to
+make up for the missing term, as the registration said.
+
+**DECISION — `ss` does not become a candidate; the published form stays.** The
+rule asks for F3's fold CV under `ss` to fall by more than one fold SE against
+the published chain (0.05406, SE 0.00180, both read from `e52_split.csv`). It
+did not fall. It rose, by 0.00276, which is 1.53 of that SE; under `vc` it rose
+by 0.00393, 2.18 SE. Charging the climb air makes the selected form fit worse.
+
+**The expectation on record held in half.** The check held. The CV difference
+was expected to be small enough that it might sit inside one SE; it sits outside
+one SE, on the wrong side.
+
+Recorded beside the verdict, without a rule of its own: F2's fold CV also rises
+(by 0.61 and 1.56 of its own SE), while F4's falls slightly under both (by 0.63
+and 0.38 of its own SE, so inside one SE), and on the held-out half F2 and F4
+read a little better under `ss` (2.92 and 2.71 against 3.21 and 2.86) while F3
+reads worse (3.50 against 3.24). None of that was registered as a criterion and
+none of it changes the decision. What can be said is that ε absorbs the mean of
+the dropped term, and that on the deadbanded profile the term's ride-to-ride
+variation adds error instead of removing it. F2's assumption of free air on
+climbs costs nothing that this chain can measure.
+
+### 3. The credit arm (`E63_CREDIT`) — no verdict
+
+The registration, verbatim from `e63_f5_kebuffer.py` at `ef4546e`:
+
+```
+THE CREDIT ARM — registered 2026-11-23, before any run; it takes its entry
+number when it lands in the journal. F5 moves the toll off BOTH elevation
+totals, so a metre of toll saves (1 - eps)*beta: the valley is filled, and the
+filled part of the descent stops earning its refund. research/proofs proves a
+different statement (`valley_toll`): on the climb the legs pay for the rise
+less the kinetic head spent on it, beta per metre, and says nothing about the
+descent. The two agree only if the head carried into the climb is drawn from
+the refunded share of the descent. If it is drawn from the share the descent
+would have wasted anyway (air above the reference bill, the brakes), the
+refund is untouched and a metre of toll saves the full beta.
+
+  E63_CREDIT=full   the toll comes off the climb charge only:
+                    climb -= beta*T, recov1 unchanged.
+                    Unset (or `fill`) is F5 as published.
+
+Arithmetic on the same cache, the same toll table and the same split, so the
+two bookkeepings differ in one term, eps*beta*T per ride. Run it at the
+published floor (E63_TAUN=2.0); read F5f, the one-parameter member.
+
+  PREDICTION   full credit lowers F5f's fold CV by more than one fold SE.
+  FALSIFIED    if fill is lower by more than one SE: the carried head is
+               drawn from the refunded share, as on a descent gentler than
+               s* = alpha/beta, and F5's bookkeeping stands on evidence.
+  NO VERDICT   inside one SE either way. F5 stays as published, and the
+               entry says the corpora cannot tell the two apart.
+
+Neither bookkeeping is the whole truth and the entry should say so: the exact
+weight is one minus the descent's own marginal refund, which runs from 0 on a
+steep descent to 1 on a gentle one. This arm tests the two ends.
+```
+
+Both bookkeepings were run on the same cache, the same toll table
+(`e63_tolls.E63_TAUN2p0.csv`, reused, not rebuilt) and the same split, at the
+published floor τ_n = 2 m. The published arm's F3 and F4 rows reproduce
+`e52_split.csv` to the digit, and its two output files came back byte-identical
+to the August ones. The internal gate F5(v_b = 0) ≡ F3(τ = 2) passed at 0 kJ
+under both.
+
+| bookkeeping | form | fold CV ± SE | ε | $v_b$ | held-out med \|Δ%\| | median Δ% | selected |
+|---|---|--:|--:|--:|--:|--:|:--:|
+| `fill` (published): (1 − ε)·β per metre | F5 | 0.05576 ± 0.00185 | 0.3632 | ∞ (rail) | 3.05 [2.55, 3.52] | 0.41 [−0.09, 0.86] | |
+| | **F5f** | **0.05567 ± 0.00183** | 0.3632 | ∞ (frozen) | 3.05 [2.55, 3.52] | 0.41 [−0.09, 0.86] | ✓ |
+| | F5m | 0.05662 ± 0.00187 | 0.3695 | measured | 2.93 [2.55, 3.36] | 0.52 [−0.16, 0.82] | |
+| `full`: β per metre, climb only | F5 | 0.05557 ± 0.00184 | 0.3607 | 65 km/h | 3.09 [2.56, 3.58] | 0.38 [−0.18, 0.90] | |
+| | **F5f** | **0.05544 ± 0.00181** | 0.3584 | ∞ (frozen) | 3.10 [2.63, 3.64] | 0.39 [−0.10, 0.94] | ✓ |
+| | F5m | 0.05687 ± 0.00187 | 0.3648 | measured | 2.91 [2.51, 3.45] | 0.50 [−0.11, 0.88] | |
+
+(F3 0.05406 ± 0.00180 and F4 0.06286 ± 0.00199 are the same rows under both.
+Under both, CV-best is F3, F3 / F5 / F5f sit inside one SE, AIC prefers F3, and
+the 1-SE rule toward fewer parameters selects F5f.)
+
+Leave-one-rider-out against F3 (Entry 64's protocol: fit on six riders' training
+halves, score the seventh's held-out half; per-ride difference in |Δ%|, median
+with stratified interval, as the harness prints them):
+
+| bookkeeping | F5f − F3 | F5f closer | F5m − F3 | F5m closer |
+|---|--:|--:|--:|--:|
+| `fill` (published) | −0.06 pp [−0.19, +0.01] | 161 of 302, sign p = 0.2742 | −0.11 pp [−0.24, −0.00] | 169 of 302, p = 0.0438 |
+| `full` | −0.02 pp [−0.14, +0.10] | 154 of 302, sign p = 0.7736 | −0.08 pp [−0.21, +0.01] | 162 of 302, p = 0.2268 |
+
+**The rule, on F5f's fold CV: NO VERDICT.** Full credit lowers it by 0.00023
+(0.055669 → 0.055439), which is 0.13 of a fold SE whichever arm's SE is used
+(0.001835 or 0.001814). The prediction asked for more than one SE; the falsifier
+asked for more than one SE the other way. Neither happened. F5 stays as
+published, and these corpora cannot tell the two bookkeepings apart.
+
+Recorded beside the null: the rider-transfer contest leans, weakly, the other
+way from the fold CV. Under `full` both transfer margins shrink toward zero and
+F5m's sign test against F3 (p = 0.044 as published, Entry 64) is no longer below
+0.05 (p = 0.23). And under `full` the two-parameter F5 moves its fitted $v_b$ off
+the never-brake rail, to 65 km/h, for the first time at this floor. Neither was
+registered as a criterion.
+
+**Neither bookkeeping of the toll is exact.** `fill` takes the toll off both
+elevation totals, as if every metre of head carried into the climb came from the
+refunded share of the descent. `full` takes it off the climb only, as if every
+metre came from the share the descent would have wasted anyway. The true weight
+on a metre of toll is one minus the descent's own marginal refund, which runs
+from 0 on a steep descent to 1 on a gentle one. This arm tested the two ends,
+and the data sit between them without preferring either.
+
+### Caveats and conduct
+
+- The branch was fast-forwarded from `ef4546e` to `8efaff2` partway through. On
+  `ef4546e`: the re-run of the published chain, the gate battery, both climb-air
+  builds, the `vc` split and the published (`fill`) F5 run. On `8efaff2`: the
+  `ss` split, the `full` F5 run, both leave-one-rider-out runs and the whole
+  planning arm. The later commit touches `e52_build.py` and `e52_split.py` only
+  by adding the planning arm and refactoring two helpers (`_regime_powers`,
+  `has_twin`). The evidence that nothing else moved: the F1 and
+  $F_\mathrm{base}$ rows are identical between the `vc` split (older code) and
+  the `ss` split (newer), the F3 and F4 rows are identical between the `fill`
+  run (older) and the `full` run (newer), and the arm caches are string-identical
+  to the published cache on every untouched column.
+- The arms were run as separate processes, several at a time, each with a single
+  arm flag and each writing only its own suffixed files. The published files'
+  hashes were checked after each arm finished and never moved.
+- The first `ss` build was started beside the `vc` build and was killed: the
+  repository's path had changed since the parse cache was written, both builds
+  were re-parsing and writing cache entries, and `load_pts` does not write
+  atomically, so one build read a half-written entry and dropped a corpus. The
+  cache was then verified entry by entry and `ss` rebuilt alone. The numbers
+  above are from the clean builds.
+- The leave-one-rider-out medians and intervals are quoted as
+  `e63_f5_kebuffer.py` prints them, which is through Python's `format`, not
+  `jsfmt.to_fixed`. They are diagnostics, not gated numbers.
+- No A.8 scoring beyond what each registered chain does once. The held-out half
+  has now been scored under the published chain, four arm caches and two toll
+  bookkeepings; every one of those was registered before its run, and none fed a
+  selection.
+- No gate was added and no paper was changed for these arms. The planning row is
+  the number the working paper's Table 6 lists as owed item 2; it is handed to
+  the maintainer here, not written into a paper.
+
+Instruments: [`e52_build.py`](../../src/harness/e52_build.py) and
+[`e52_split.py`](../../src/harness/e52_split.py) (`E52_P1=const|pace`,
+`E52_CLIMBAIR=ss|vc`; one arm at a time, and no other harness accepts either
+flag), [`e63_f5_kebuffer.py`](../../src/harness/e63_f5_kebuffer.py)
+(`E63_TAUN=2.0 E63_CREDIT=full`, with `E63_LORO=1` for the transfer contest).
 
 ---
 

@@ -112,8 +112,8 @@
       "@type": "File",
       "name": "data/results/e52_summary.csv",
       "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `python3 src/harness/e52_split.py`.",
-      "sha256": "30f4fc869a44343804ea1359f1ac3088086d534da6ef5c24f6be3da8be379bb0",
-      "contentSize": "382",
+      "sha256": "4ee719fe4fb76e79291c3719f18c298aae55f7df8db1b03e2b0625cf336f35ac",
+      "contentSize": "1008",
       "encodingFormat": "text/csv"
     },
     {
@@ -161,9 +161,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e52_build.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/434ec220487e7ec5f04f479413f26ea84a0fceca/src/harness/e52_build.py",
-      "sha256": "5eb1437a41701b414f53381fa80cc81b04deb19c45e23d361ed758c938ac42e5",
-      "version": "434ec220487e7ec5f04f479413f26ea84a0fceca",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b88623df6c0ba35409f64f354126c4f3855ca6ac/src/harness/e52_build.py",
+      "sha256": "9c081a0af495824bebeb2821678c2e64f4357c594a74279b670c95ca124a0da8",
+      "version": "b88623df6c0ba35409f64f354126c4f3855ca6ac",
       "programmingLanguage": "Python"
     },
     {
@@ -174,9 +174,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e52_split.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/434ec220487e7ec5f04f479413f26ea84a0fceca/src/harness/e52_split.py",
-      "sha256": "d79f566ffb9f5e4ea897dabd6fa680810eb7d84051a229a029f01123a1e0c677",
-      "version": "434ec220487e7ec5f04f479413f26ea84a0fceca",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b88623df6c0ba35409f64f354126c4f3855ca6ac/src/harness/e52_split.py",
+      "sha256": "ddcd309f64a06fd82740e45c959280dfa117c8c27f893a565c2a00ae3e94ca3b",
+      "version": "b88623df6c0ba35409f64f354126c4f3855ca6ac",
       "programmingLanguage": "Python"
     },
     {

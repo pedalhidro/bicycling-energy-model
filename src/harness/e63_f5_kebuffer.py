@@ -75,6 +75,41 @@ Two diagnostic modes (both read the toll CSV, fit nothing on the test half):
                  tau* (on that group's train-half alone) against
                  tau_noise + h_KE/(2(1-eps)) with h_KE from the group's
                  MEASURED v_b and v_f. Diagnostic table, no gate.
+
+THE CREDIT ARM — registered 2026-11-23, before any run; it landed as
+Entry 76 of the journal, where the result is. F5 moves the toll off BOTH elevation
+totals, so a metre of toll saves (1 - eps)*beta: the valley is filled, and the
+filled part of the descent stops earning its refund. research/proofs proves a
+different statement (`valley_toll`): on the climb the legs pay for the rise
+less the kinetic head spent on it, beta per metre, and says nothing about the
+descent. The two agree only if the head carried into the climb is drawn from
+the refunded share of the descent. If it is drawn from the share the descent
+would have wasted anyway (air above the reference bill, the brakes), the
+refund is untouched and a metre of toll saves the full beta.
+
+  E63_CREDIT=full   the toll comes off the climb charge only:
+                    climb -= beta*T, recov1 unchanged.
+                    Unset (or `fill`) is F5 as published.
+
+Arithmetic on the same cache, the same toll table and the same split, so the
+two bookkeepings differ in one term, eps*beta*T per ride. Run it at the
+published floor (E63_TAUN=2.0); read F5f, the one-parameter member.
+
+  PREDICTION   full credit lowers F5f's fold CV by more than one fold SE.
+  FALSIFIED    if fill is lower by more than one SE: the carried head is
+               drawn from the refunded share, as on a descent gentler than
+               s* = alpha/beta, and F5's bookkeeping stands on evidence.
+  NO VERDICT   inside one SE either way. F5 stays as published, and the
+               entry says the corpora cannot tell the two apart.
+
+Neither bookkeeping is the whole truth and the entry should say so: the exact
+weight is one minus the descent's own marginal refund, which runs from 0 on a
+steep descent to 1 on a gentle one. This arm tests the two ends.
+
+Outputs under the arm carry `E63_CREDIT` in their suffix; the toll table does
+not, because the tolls do not depend on how they are spent. The flag is
+refused when another harness imports this module, and in the modes that never
+read the toll (E63_TAUPRED, E63_DECOMP).
 """
 
 from __future__ import annotations
@@ -147,7 +182,27 @@ SMOOTH = float(os.environ.get("E63_SMOOTH") or 0)   # Gaussian sigma, metres
 # the buffer caps at max(0, h_KE - 12) ~ 0, so F5f degenerates to F3(tau = 6,
 # eps-only) — the curve's far anchor.
 F5FCV = bool(os.environ.get("E63_F5FCV"))
+# The credit arm (docstring): how a metre of toll is spent. "fill" takes it off
+# both elevation totals, F5 as published; "full" takes it off the climb only.
+CREDIT = (os.environ.get("E63_CREDIT") or "fill").lower()
+if CREDIT not in ("fill", "full"):
+    raise SystemExit(f"E63_CREDIT={CREDIT!r}: expected fill or full")
+if CREDIT != "fill":
+    # e67/e69/e71/e72/e73 import this module and write their own canonical
+    # CSVs with no knowledge of the flag: under it they would publish the arm's
+    # numbers under the canonical name. Refuse rather than rely on care.
+    _main = os.path.basename(getattr(sys.modules.get("__main__"), "__file__", "") or "")
+    if _main != "e63_f5_kebuffer.py":
+        raise SystemExit("E63_CREDIT is an arm of e63_f5_kebuffer.py alone — "
+                         f"unset it before running {_main or 'this harness'}")
+    if DECOMP or TAUPRED:
+        raise SystemExit("E63_CREDIT changes nothing in E63_DECOMP or "
+                         "E63_TAUPRED (neither reads the toll) — unset it")
 SUFF = env_suffix("E63_TAUN", "E63_RAINFLOW", "E63_SMOOTH") + (".SMOKE" if SMOKE else "")
+# The toll table is shared by both credit arms (the tolls do not depend on how
+# they are spent); everything fitted or scored is suffixed with the arm.
+OUT_SUFF = (env_suffix("E63_TAUN", "E63_RAINFLOW", "E63_SMOOTH", "E63_CREDIT")
+            + (".SMOKE" if SMOKE else ""))
 TOLLS_CSV = os.path.join(RESULTS, "e63_tolls" + SUFF + ".csv")
 SM_CHECK: list[float] = []        # build-time sm-component vs engine deviations
 
@@ -433,11 +488,13 @@ def e_form5k(r: dict, eps: float, key: str) -> float:
     """F5-family energy in kJ: the base components (F3(tau_n)'s from the e52
     cache, or the smoothed-profile ones under E63_SMOOTH) with the valley toll
     (column `key`: bt<i> for a grid arm, btm for the measured cap) moved off
-    both the climb charge and the descent credit."""
+    both the climb charge and the descent credit — or, under E63_CREDIT=full,
+    off the climb charge alone."""
     k = "sm" if SMOOTH else f"f3t{TI_N}"
     bt = r[key] * 1000.0
+    back = bt if CREDIT == "fill" else 0.0   # what also leaves the descent credit
     return (r[k + "_roll"] + r[k + "_aero"] + (r[k + "_climb"] - bt)
-            + eps * (r[k + "_recov1"] + bt)) / 1000.0
+            + eps * (r[k + "_recov1"] + back)) / 1000.0
 
 
 def e_form5(r: dict, eps: float, vbi: int) -> float:
@@ -626,7 +683,7 @@ def loro(rows) -> None:
               f"{med_of(flat):+.2f} pp [{ci[0]:+.2f}, {ci[1]:+.2f}], "
               f"{tag} closer on {win}/{win + los} "
               f"(sign p = {to_fixed(sign_p(win, los), 4)})")
-    out = os.path.join(RESULTS, "e63_loro" + SUFF + ".csv")
+    out = os.path.join(RESULTS, "e63_loro" + OUT_SUFF + ".csv")
     with open(out, "w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=list(out_rows[0].keys()))
         w.writeheader()
@@ -700,6 +757,10 @@ def main() -> None:
     rows = load()
     print(f"Entry 63 — F5 (KE-buffer valley toll) vs F3/F4 on {len(rows)} rides"
           + ("   [SMOKE]" if SMOKE else ""))
+    if CREDIT != "fill":
+        print("  CREDIT ARM: the toll comes off the climb charge only "
+              "(E63_CREDIT=full) — outputs are suffixed, nothing canonical "
+              "is written")
     if os.path.exists(TOLLS_CSV) and not os.environ.get("E63_REBUILD"):
         print(f"  reusing {os.path.basename(TOLLS_CSV)} (E63_REBUILD=1 to rewalk)")
     else:
@@ -847,7 +908,7 @@ def main() -> None:
         print(f"    winner vs F_base: closer on {win}/{win + los}, "
               f"sign p = {to_fixed(sign_p(win, los), 4)}")
 
-    out = os.path.join(RESULTS, "e63_split" + SUFF + ".csv")
+    out = os.path.join(RESULTS, "e63_split" + OUT_SUFF + ".csv")
     with open(out, "w", encoding="utf-8") as fh:
         fh.write("form,npar,cv,cv_se,aic,eps,c,tau,vb_kmh,"
                  "test_med_abs,test_med_signed,winner\n")
