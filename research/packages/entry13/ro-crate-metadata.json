@@ -129,9 +129,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/time_compare.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/8efaff2aa0b09ebf4b509436ca28f0dfb9eec939/src/harness/time_compare.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b88623df6c0ba35409f64f354126c4f3855ca6ac/src/harness/time_compare.py",
       "sha256": "18b0557a1f253596aa79f2da43df95ff99dac5e3fcee6de5208745a345454cbe",
-      "version": "8efaff2aa0b09ebf4b509436ca28f0dfb9eec939",
+      "version": "b88623df6c0ba35409f64f354126c4f3855ca6ac",
       "programmingLanguage": "Python"
     },
     {

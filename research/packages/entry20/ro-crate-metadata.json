@@ -129,9 +129,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/goal_calibration.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/8efaff2aa0b09ebf4b509436ca28f0dfb9eec939/src/harness/goal_calibration.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b88623df6c0ba35409f64f354126c4f3855ca6ac/src/harness/goal_calibration.py",
       "sha256": "a878a13a4c86f277dc20463d69575475922f0a5aee39cb4964fbc0ac9fd8e351",
-      "version": "8efaff2aa0b09ebf4b509436ca28f0dfb9eec939",
+      "version": "b88623df6c0ba35409f64f354126c4f3855ca6ac",
       "programmingLanguage": "Python"
     },
     {

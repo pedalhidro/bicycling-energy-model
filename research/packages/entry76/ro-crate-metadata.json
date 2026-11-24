@@ -1,0 +1,344 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    {
+      "sha256": "https://w3id.org/ro/terms/workflow-run#sha256"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      },
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Entry 76 evidence package — three registered arms — the planning row, climb air in the A-chain, and the toll's credit",
+      "description": "Evidence package for journal Entry 76 (2026-11-23): aggregates, hashes and provenance only — the prose remains authoritative in the journal. Regenerate all packages: `python3 research/packages/make_crates.py`.",
+      "author": {
+        "@id": "#danilo"
+      },
+      "dateCreated": "2026-11-23",
+      "isPartOf": {
+        "@id": "https://doi.org/10.5281/zenodo.21282165"
+      },
+      "url": "https://github.com/danlessa/bicycling-energy-model/tree/main/research/packages/entry76",
+      "hasPart": [],
+      "mentions": [
+        {
+          "@id": "#claim"
+        },
+        {
+          "@id": "#run"
+        }
+      ],
+      "subjectOf": {
+        "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/wfrun/process/0.5"
+      }
+    },
+    {
+      "@id": "#danilo",
+      "@type": "Person",
+      "name": "Danilo Lessa Bernardineli",
+      "email": "danilo.lessa@gmail.com"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md",
+      "@type": "CreativeWork",
+      "name": "Model comparison journal",
+      "encodingFormat": "text/markdown"
+    },
+    {
+      "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl",
+      "@type": "Dataset",
+      "name": "Claims–questions–evidence graph (Entries 1–24)",
+      "encodingFormat": "text/turtle"
+    },
+    {
+      "@id": "#claim",
+      "@type": "Claim",
+      "name": "Entry 76: three registered arms — the planning row, climb air in the A-chain, and the toll's credit",
+      "text": "three registered arms — the planning row, climb air in the A-chain, and the toll's credit",
+      "appearance": [
+        {
+          "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/journal/MODEL_COMPARISON_JOURNAL.md"
+        }
+      ],
+      "subjectOf": {
+        "@id": "https://github.com/danlessa/bicycling-energy-model/blob/main/research/notes/claims.ttl"
+      }
+    },
+    {
+      "@id": "#ride-recordings",
+      "@type": "Dataset",
+      "name": "Raw ride recordings (NOT distributed)",
+      "description": "FIT tracks (GPS + power) and source spreadsheets — excluded from version control and from this crate: location and private-activity data. Coordinate-stripped aggregates available on request.",
+      "conditionsOfAccess": "Available on request from the author, coordinates stripped."
+    },
+    {
+      "@id": "#data/results/e52_aggregates.p1const.csv",
+      "@type": "File",
+      "name": "data/results/e52_aggregates.p1const.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E52_P1=const python3 src/harness/e52_build.py`.",
+      "sha256": "48be83c1c5e623b392654258f95b131ed9f02ca2beeb0a64ca7a2cb19fd0c5f1",
+      "contentSize": "3166361",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e52_split.p1const.csv",
+      "@type": "File",
+      "name": "data/results/e52_split.p1const.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E52_P1=const python3 src/harness/e52_split.py`.",
+      "sha256": "d6895498b745c7a5797e5696a5fc99597ac43e96721bb9e81aa475b170333c8f",
+      "contentSize": "311",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e52_summary.p1const.csv",
+      "@type": "File",
+      "name": "data/results/e52_summary.p1const.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E52_P1=const python3 src/harness/e52_split.py`.",
+      "sha256": "170b8d9d543f4dba269f1ad9a5725d9885b187f0d38edcda830a3f074bb277b0",
+      "contentSize": "1588",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e52_aggregates.p1pace.csv",
+      "@type": "File",
+      "name": "data/results/e52_aggregates.p1pace.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E52_P1=pace python3 src/harness/e52_build.py`.",
+      "sha256": "f4af66c9c5d4179839be30f19cfd2cc5474e2a1671a83a612acc385f0bacf95f",
+      "contentSize": "3166250",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e52_split.p1pace.csv",
+      "@type": "File",
+      "name": "data/results/e52_split.p1pace.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E52_P1=pace python3 src/harness/e52_split.py`.",
+      "sha256": "fc343d22ceefead63d7eb019d0f4640e5681e80929bc6e604c8b27543599663d",
+      "contentSize": "310",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e52_summary.p1pace.csv",
+      "@type": "File",
+      "name": "data/results/e52_summary.p1pace.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E52_P1=pace python3 src/harness/e52_split.py`.",
+      "sha256": "4f850d0c1a3bc093e4c9a29873c419950c4bf8a07a6accc10d40b24bfd13df60",
+      "contentSize": "1591",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e52_aggregates.ss.csv",
+      "@type": "File",
+      "name": "data/results/e52_aggregates.ss.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E52_CLIMBAIR=ss python3 src/harness/e52_build.py`.",
+      "sha256": "d9dc04db87ea9949904da410f3fdf88a72ef64ca09e534f8e63813c953d15f72",
+      "contentSize": "3224428",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e52_split.ss.csv",
+      "@type": "File",
+      "name": "data/results/e52_split.ss.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E52_CLIMBAIR=ss python3 src/harness/e52_split.py`.",
+      "sha256": "307871f7ba15864ae9dffc24464518354cad9083f2fb9f17ebbb72275cd44569",
+      "contentSize": "311",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e52_summary.ss.csv",
+      "@type": "File",
+      "name": "data/results/e52_summary.ss.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E52_CLIMBAIR=ss python3 src/harness/e52_split.py`.",
+      "sha256": "22470785de257005f4a50c845115a1503dfa50ad74e2233c62d891f2f450e757",
+      "contentSize": "1008",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e52_aggregates.vc.csv",
+      "@type": "File",
+      "name": "data/results/e52_aggregates.vc.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E52_CLIMBAIR=vc python3 src/harness/e52_build.py`.",
+      "sha256": "c40e10db2ae07017b6432664c7fed9fc9d59686f89fdc2efb23cebaca9bc9c34",
+      "contentSize": "3224546",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e52_split.vc.csv",
+      "@type": "File",
+      "name": "data/results/e52_split.vc.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E52_CLIMBAIR=vc python3 src/harness/e52_split.py`.",
+      "sha256": "49494e1a0e1fed4dcaa79c45d6dd282af1216f09ade604184f58810e4f8b7625",
+      "contentSize": "311",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e52_summary.vc.csv",
+      "@type": "File",
+      "name": "data/results/e52_summary.vc.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E52_CLIMBAIR=vc python3 src/harness/e52_split.py`.",
+      "sha256": "2a92dec69ee0b9c4b5d3bd4a0e5e6cb3f76d125c220a6e92110d7a43583fe136",
+      "contentSize": "1007",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e63_split.E63_TAUN2p0_E63_CREDITfull.csv",
+      "@type": "File",
+      "name": "data/results/e63_split.E63_TAUN2p0_E63_CREDITfull.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E63_TAUN=2.0 E63_CREDIT=full python3 src/harness/e63_f5_kebuffer.py`.",
+      "sha256": "3cc2269e3d4feab8a20815126980d5b859d0749ba567ae952f6ea35174413342",
+      "contentSize": "435",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#data/results/e63_loro.E63_TAUN2p0_E63_CREDITfull.csv",
+      "@type": "File",
+      "name": "data/results/e63_loro.E63_TAUN2p0_E63_CREDITfull.csv",
+      "description": "Per-ride CSV — gitignored (rows carry ride names/dates tied to private activities); described hash-only, never distributed. Regenerates via `E63_TAUN=2.0 E63_CREDIT=full E63_LORO=1 python3 src/harness/e63_f5_kebuffer.py`.",
+      "sha256": "3b70a11ac33271ecc3c8af6ce36e8a9680efe34ffc0d262e4cf32ba9dff5ae54",
+      "contentSize": "1389",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "#run",
+      "@type": "CreateAction",
+      "name": "Entry 76 harness run",
+      "description": "Re-executable from the repository and the private inputs; see the journal entry for protocol, endpoints and verdicts.",
+      "endTime": "2026-11-23",
+      "actionStatus": {
+        "@id": "http://schema.org/CompletedActionStatus"
+      },
+      "agent": {
+        "@id": "#danilo"
+      },
+      "instrument": [
+        {
+          "@id": "#src/harness/e52_build.py"
+        },
+        {
+          "@id": "#src/harness/e52_split.py"
+        },
+        {
+          "@id": "#src/harness/e63_f5_kebuffer.py"
+        }
+      ],
+      "object": [
+        {
+          "@id": "#ride-recordings"
+        }
+      ],
+      "result": [
+        {
+          "@id": "#data/results/e52_aggregates.p1const.csv"
+        },
+        {
+          "@id": "#data/results/e52_split.p1const.csv"
+        },
+        {
+          "@id": "#data/results/e52_summary.p1const.csv"
+        },
+        {
+          "@id": "#data/results/e52_aggregates.p1pace.csv"
+        },
+        {
+          "@id": "#data/results/e52_split.p1pace.csv"
+        },
+        {
+          "@id": "#data/results/e52_summary.p1pace.csv"
+        },
+        {
+          "@id": "#data/results/e52_aggregates.ss.csv"
+        },
+        {
+          "@id": "#data/results/e52_split.ss.csv"
+        },
+        {
+          "@id": "#data/results/e52_summary.ss.csv"
+        },
+        {
+          "@id": "#data/results/e52_aggregates.vc.csv"
+        },
+        {
+          "@id": "#data/results/e52_split.vc.csv"
+        },
+        {
+          "@id": "#data/results/e52_summary.vc.csv"
+        },
+        {
+          "@id": "#data/results/e63_split.E63_TAUN2p0_E63_CREDITfull.csv"
+        },
+        {
+          "@id": "#data/results/e63_loro.E63_TAUN2p0_E63_CREDITfull.csv"
+        }
+      ]
+    },
+    {
+      "@id": "#src/harness/e52_build.py",
+      "@type": [
+        "File",
+        "SoftwareApplication",
+        "SoftwareSourceCode"
+      ],
+      "name": "src/harness/e52_build.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b88623df6c0ba35409f64f354126c4f3855ca6ac/src/harness/e52_build.py",
+      "sha256": "9c081a0af495824bebeb2821678c2e64f4357c594a74279b670c95ca124a0da8",
+      "version": "b88623df6c0ba35409f64f354126c4f3855ca6ac",
+      "programmingLanguage": "Python"
+    },
+    {
+      "@id": "#src/harness/e52_split.py",
+      "@type": [
+        "File",
+        "SoftwareApplication",
+        "SoftwareSourceCode"
+      ],
+      "name": "src/harness/e52_split.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b88623df6c0ba35409f64f354126c4f3855ca6ac/src/harness/e52_split.py",
+      "sha256": "ddcd309f64a06fd82740e45c959280dfa117c8c27f893a565c2a00ae3e94ca3b",
+      "version": "b88623df6c0ba35409f64f354126c4f3855ca6ac",
+      "programmingLanguage": "Python"
+    },
+    {
+      "@id": "#src/harness/e63_f5_kebuffer.py",
+      "@type": [
+        "File",
+        "SoftwareApplication",
+        "SoftwareSourceCode"
+      ],
+      "name": "src/harness/e63_f5_kebuffer.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b88623df6c0ba35409f64f354126c4f3855ca6ac/src/harness/e63_f5_kebuffer.py",
+      "sha256": "ac7e921ddaae69a0a764fb1f2088b85b3299f661b7fe78083123656bdfbbbf01",
+      "version": "b88623df6c0ba35409f64f354126c4f3855ca6ac",
+      "programmingLanguage": "Python"
+    },
+    {
+      "@id": "ro-crate-preview.html",
+      "@type": [
+        "File",
+        "CreativeWork"
+      ],
+      "name": "Pré-visualização humana do pacote (convenção RO-Crate)",
+      "encodingFormat": "text/html",
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "https://doi.org/10.5281/zenodo.21282165",
+      "@type": "Dataset",
+      "name": "bicycling-energy-model — research package",
+      "url": "https://github.com/danlessa/bicycling-energy-model"
+    }
+  ]
+}

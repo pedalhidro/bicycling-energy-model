@@ -170,9 +170,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e69_frontier.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/8efaff2aa0b09ebf4b509436ca28f0dfb9eec939/src/harness/e69_frontier.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b88623df6c0ba35409f64f354126c4f3855ca6ac/src/harness/e69_frontier.py",
       "sha256": "e3d1e480ed685733ac8d1674b303a4f9e3d252ff769a14efc20ce74472f2a59d",
-      "version": "8efaff2aa0b09ebf4b509436ca28f0dfb9eec939",
+      "version": "b88623df6c0ba35409f64f354126c4f3855ca6ac",
       "programmingLanguage": "Python"
     },
     {
