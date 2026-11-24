@@ -236,7 +236,12 @@ home of the *derivation* and the side-by-side comparison.
   (path, size, mtime, a schema version) — repeat runs and sensitivity sweeps
   skip the parse entirely; delete the directory to force a re-parse, and bump
   `ride.py`'s `_CACHE_SCHEMA` if a point's fields ever change (a stale cache
-  entry is a silent correctness bug, not a crash). `goal_calibration.py` and
+  entry is a silent correctness bug, not a crash). Entries are written to a
+  temporary file and renamed into place, and an entry that cannot be read is
+  re-parsed, so builds may run side by side on a cold cache: before Entry 76
+  they could read each other's half-written entries and, because the
+  harnesses skip a ride that raises, drop rides without saying so. **The
+  per-group "kept" counts are the check that a population is whole.** `goal_calibration.py` and
   `scale_trio.py` each re-run their whole analysis twice to prove determinism
   (Entries 20–21's gates); `FAST=1` skips that second run and the cache-subset
   rebuild during iteration — same result, just without the ×2 proof, so don't

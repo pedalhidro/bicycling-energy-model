@@ -57,7 +57,15 @@ def load_pts(path: str | os.PathLike, meta: dict | None = None) -> Points:
     to force a full re-parse (its contents are our own pickled output, never
     untrusted input, so unpickling them back is safe). `meta` is filled
     exactly as `parse_fit` would (manufacturer, sport) for a FIT track;
-    always left untouched for GPX, which carries neither."""
+    always left untouched for GPX, which carries neither.
+
+    Safe to call from several processes at once. An entry is written to a
+    temporary file and renamed into place, so a reader sees a whole entry or
+    none; and an entry that cannot be read (left by a writer that was killed)
+    is a miss, not an error: the track is parsed again and the entry rewritten.
+    Before this, two builds started side by side on a cold cache could read
+    each other's half-written entries, and the harnesses, which skip a ride
+    that raises, dropped rides without saying so (Entry 76)."""
     path = str(path)
     st = os.stat(path)
     digest = hashlib.sha1(os.path.abspath(path).encode()).hexdigest()[:16]
@@ -65,11 +73,15 @@ def load_pts(path: str | os.PathLike, meta: dict | None = None) -> Points:
            f".{st.st_size}.{int(st.st_mtime)}.pkl")
     cache_path = os.path.join(_cache_dir(), key)
     if os.path.exists(cache_path):
-        with open(cache_path, "rb") as f:
-            pts, cached_meta = pickle.load(f)
-        if meta is not None:
-            meta.update(cached_meta)
-        return pts
+        try:
+            with open(cache_path, "rb") as f:
+                pts, cached_meta = pickle.load(f)
+        except Exception:
+            pass                # unreadable entry: fall through and re-parse
+        else:
+            if meta is not None:
+                meta.update(cached_meta)
+            return pts
 
     is_gz = path.lower().endswith(".gz")
     raw_ext = path[:-3] if is_gz else path
@@ -82,8 +94,10 @@ def load_pts(path: str | os.PathLike, meta: dict | None = None) -> Points:
         pts = pts_from_gpx(buf.decode("utf-8", errors="replace"))
     else:
         pts = pts_from_fit(buf, m)
-    with open(cache_path, "wb") as f:
+    tmp_path = f"{cache_path}.{os.getpid()}.tmp"
+    with open(tmp_path, "wb") as f:
         pickle.dump((pts, m), f, protocol=pickle.HIGHEST_PROTOCOL)
+    os.replace(tmp_path, cache_path)        # atomic: never a partial entry
     if meta is not None:
         meta.update(m)
     return pts
