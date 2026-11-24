@@ -196,6 +196,18 @@ home of the *derivation* and the side-by-side comparison.
   −3.8 — the bundle rule extends to (ε, c). Emits `fig-p3-scale.svg`
   hand-drawn; gate section 3k; `a3.divergence` stays honestly planned
   (needs real network routing). `E72_SMOKE=1`),
+  `e77_stops.py` (Entry 77, **registered before any run**: does a stop term
+  earn a place in the edge cost? One walk counts each ride's stops from its
+  speed record — on flat ground, above 4 m/s then below 2 m/s or a pause over
+  10 s — into `e77_stops.csv`; the rest is arithmetic on the published cache
+  and Entry 76's `pace` cache, read by suffix, so **it runs with no arm flag
+  set**. The term is `κ·(N − n̄·x)·½mv_f²/k_eff`, the ride's stops in excess of
+  the rider's training-median density, because under the planning arm the
+  rider-median constants already carry the rider's usual stops (Entry 35:
+  stop-go lands in the flat rate). Rule: EARNED only if it lowers F3's fold CV
+  over all rides on `pace` by more than one fold SE; control: the absolute
+  count buys nothing at P0. F3's fold CV must reproduce each cache's
+  `e52_split` to six decimals — the drift check. `E77_SMOKE=1`, `E77_REBUILD=1`),
   `bootstrap_ci.py` (**the gate script**; exits non-zero on failure). **Narrowed
   2026-07-31 to only what the papers still claim** — 22 sections became 7, and a
   full run is 4.5 min instead of 15. Surviving sections are keyed to
