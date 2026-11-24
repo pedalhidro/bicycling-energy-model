@@ -39,7 +39,7 @@ Working titles (the first is already yours, from part 1):
 | 3 | **Surpresa 1: a descida devolve pouco** | First thing to repeat. | The refund is about 29% of what the same height cost to climb. Why so little: steep descents offer more than can be used (air, brakes), and people keep pedalling. It changes with the landscape, 0.24 in São Paulo against 0.37 in the European rides. | part 2 "O reembolso", "Depende de onde se pedala" | 200 |
 | 4 | **Surpresa 2: a subida que o mapa inventa** | Second thing to repeat. | Contornar Anhangabaú: the barometer logged 440 m, the 5 m map says 602 m for the same streets. The estimate goes from −1.6% to +8.7%, and smoothing the profile brings it to 0.0%. The general fact behind it: the finer you measure, the more climbing you find (92 / 77 / 56 km for the same 44 rides). | part 3 "Quanto sobe uma subida?"; paper 2 §4 | 250 |
 | 5 | **O teste** | Earn the trust, briefly. | 2,039 rides, seven people, power meters. The sealed envelope: 305 rides kept out. Median error 3.2%. A full physics simulation ties: closer on 152 rides, the formula on 153. | part 1 "O envelope lacrado", "O resultado", "Empate com a simulação" | 200 |
-| 6 | **O que isso garante, e o que não** | The honest sentence, early enough to be read. | The 3.2% is the account closing when we already know how the person rode. With typical constants instead of each rider's own, the one test so far reads about 8%, on 44 long rides. The proper before-the-ride test is not done yet. Road bikes, rides of 20 km or more, no wind. | part 1 "O que o teste não mostra" | 150 |
+| 6 | **O que isso garante, e o que não** | The honest sentence, early enough to be read. | The 3.2% is the account closing when we already know how the person rode. Before the ride, for someone with a history of rides, the same formula reads 7.5%: about a point of that is not knowing the day's bike and tyres, the rest is not knowing how hard they will push. On a route they have never ridden it is nearer 8.5%. For someone with no history at all there is no clean test yet. Road bikes, rides of 20 km or more, no wind. | part 1 "O que o teste não mostra"; lab journal Entry 76 | 150 |
 | 7 | **Até onde 400 kJ levam** | The picture that travels. | The reach map from Simujaules, from a starting point everyone knows. One caption, one sentence on reading it. | NEW, see Pictures | 100 |
 | 8 | **Faça a sua conta** | Something to do tonight. | The Calculadora de Quilojaules and the applet. The happy coincidence: one kJ at the pedals costs the body about one kcal, so 320 kJ is roughly *um pão com manteiga e uma banana*. A closing question, for example: which label was your last ride? | part 2 "Um exemplo" (last paragraph), "Para usar" | 150 |
 | — | Créditos | Thanks, authorship, AI declaration, links to the four parts for depth. | | part 1 footer | — |
@@ -67,7 +67,7 @@ One number per idea. If a second number is needed to explain the first, the idea
 ## Decisions that are yours
 
 1. **Which refund to print.** 0.29 is the pooled value; São Paulo's own is 0.24. Printing "between a quarter and a third" and naming 0.29 once would cover both.
-2. **Publish before or after the planner test.** Beat 6 has a slot for the number a reader actually wants: the error when the estimate is made before the ride from a rider's typical constants. If that run is a day's work, do it first. If not, publish with the sentence as written; it is true today.
+2. **The planner test is done** (lab journal Entry 76, 2026-11-23), so beat 6 can print it: 7.5% before the ride for a rider with a history. Which figure to lead with is yours: 7.5% on all 305 sealed rides, or 8.5% on the 56 of them that are not repeats of a route in the rider's history. The second is closer to what "planning a new ride" means, but it rests on 56 rides and has no interval yet.
 3. **Anhangabaú is an illustration, not a test.** It is one of your own rides and sits inside the population the constants were fitted on. The piece should say so in half a sentence, as part 3's draft already does.
 4. **The kJ ≈ kcal line** rests on a 24% muscle efficiency. It needs a source before it is printed.
 
@@ -90,18 +90,21 @@ Status key: **gated** = asserted by `bootstrap_ci.py` (section in brackets) · *
 | 92 / 77 / 56 km of climb, same 44 rides, by filter width | 4 | `make_figures.py` fig3; part 3 caption | journal: the 44 long rides of the early entries |
 | 2,039 rides, seven people | 5 | paper 1 Table 1 | gated [1] |
 | 305 held out, 1,734 used | 5 | `e52_summary.csv` | gated [3q] |
-| median error 3.2% (3.24 [2.75, 3.50]), bias +0.07% | 5 | `e52_summary.csv` | gated [3q]; brackets re-run |
+| median error 3.2% (3.24 [2.75, 3.50]), bias +0.07% | 5 | `e52_summary.csv` | gated [3q], confirmed by the 2026-11-23 run |
 | simulation 3.2% (3.19) | 5 | `e52_summary.csv` | gated [3q] |
-| 153 rides to 152 | 5 | `e52_split.py` console, 2026-09-25 | re-run: the gate now asserts 153 of 305 |
+| 153 rides to 152 | 5 | `e52_summary.csv` | gated [3q], confirmed by the 2026-11-23 run |
 | about 8% with typical constants, 44 rides | 6 | lab journal Entry 31: 8.2 [4.5, 10.8], simulation 8.4 [5.1, 10.9] | journal: it still reads each ride's power, and it used the grade-dependent refund, not 0.29 |
-| planner test (before the ride) | 6 | not run | **to produce** |
+| before the ride, rider with a history: 7.5% (7.51 [6.41, 8.69]), bias +1.1% | 6 | lab journal Entry 76; `e52_summary.p1pace.csv` | journal: registered before the run, not gated, not yet in a paper |
+| of which constants alone: 3.2% → 4.6% (4.56 [4.04, 5.43]) | 6 | lab journal Entry 76; `e52_summary.p1const.csv` | journal |
+| on rides that repeat no route in the rider's history: 8.5% (56 rides) | 6 | lab journal Entry 76 | journal: no interval computed |
+| the simulation before the ride: 7.7% | 6, if used | lab journal Entry 76 | journal |
 | 82% of held-out rides have a near-twin | 6, if used | `e52_summary.csv` | gated [3q] |
 | 1 kJ at the pedals ≈ 1 kcal | 8 | part 2 draft | external: 0.996 at 24% efficiency, 1.20–0.96 across 20–25%; needs a citation |
 | reach map at 400 kJ | 7 | Simujaules | **to produce** |
 
 ## Before it goes out
 
-- [ ] Re-run `e52_split.py` and the gate battery, so the envelope numbers above are confirmed by a run rather than by a commit message.
+- [x] Re-run `e52_split.py` and the gate battery, so the envelope numbers above are confirmed by a run rather than by a commit message. Done 2026-11-23: every gate passes, no literal changed.
 - [ ] Confirm the 400 kJ rule and the scale against the published post.
 - [ ] Render the reach map; redraw the two figures in Portuguese.
 - [ ] Find a source for the efficiency figure, or drop the kcal line.
