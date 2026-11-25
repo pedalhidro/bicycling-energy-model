@@ -687,6 +687,10 @@ power over those training rides. The build prints them; they are not restated
 here, because a rider's absolute power figures have not been published in this
 journal before and six of the seven riders are other people.
 
+*Correction (2026-11-25):* the reason given above is wrong. Entry 62 already
+publishes each rider's median moving power. The medians are still left out of
+this entry; restating them is the maintainer's call.
+
 **The planning row** — the published F3 at its published constants (ε = 0.2939,
 τ = 6.0 m, read from the published `e52_split.csv`) on the same 305 held-out
 rides. Median with stratified 95% interval, as the harness prints it:
