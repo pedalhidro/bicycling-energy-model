@@ -117,9 +117,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e46_switch.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b88623df6c0ba35409f64f354126c4f3855ca6ac/src/harness/e46_switch.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b2284127e865f2f8269b37cd4a18d6e3af39198d/src/harness/e46_switch.py",
       "sha256": "2d70842fb654289cc33cf4927cd00ef0d0f4b121f518166919554a4ff670bb59",
-      "version": "b88623df6c0ba35409f64f354126c4f3855ca6ac",
+      "version": "b2284127e865f2f8269b37cd4a18d6e3af39198d",
       "programmingLanguage": "Python"
     },
     {

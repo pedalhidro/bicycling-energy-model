@@ -201,9 +201,9 @@
         "SoftwareSourceCode"
       ],
       "name": "src/harness/e63_f5_kebuffer.py",
-      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b88623df6c0ba35409f64f354126c4f3855ca6ac/src/harness/e63_f5_kebuffer.py",
+      "url": "https://github.com/danlessa/bicycling-energy-model/blob/b2284127e865f2f8269b37cd4a18d6e3af39198d/src/harness/e63_f5_kebuffer.py",
       "sha256": "ac7e921ddaae69a0a764fb1f2088b85b3299f661b7fe78083123656bdfbbbf01",
-      "version": "b88623df6c0ba35409f64f354126c4f3855ca6ac",
+      "version": "b2284127e865f2f8269b37cd4a18d6e3af39198d",
       "programmingLanguage": "Python"
     },
     {
