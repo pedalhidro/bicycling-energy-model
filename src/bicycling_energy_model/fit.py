@@ -62,7 +62,7 @@ def parse_fit(buf: bytes, meta: dict | None = None) -> list[dict]:
     fields and FIT invalid-value markers. `record` is global message 20; every
     message's field 253 advances the running clock.
 
-    Each record may carry: lat, lon, alt, dist, speed, power, cad, time.
+    Each record may carry: lat, lon, alt, dist, speed, power, cad, hr, time.
 
     Pass a dict as `meta` to also collect the file-level fields some harnesses
     need — it is filled with:
@@ -149,6 +149,8 @@ def parse_fit(buf: bytes, meta: dict | None = None) -> list[dict]:
                             rec["power"] = v
                         elif num == 4:
                             rec["cad"] = v  # cadence (rpm) — 0 ⇒ not pedalling
+                        elif num == 3:
+                            rec["hr"] = v   # heart rate (bpm) — diagnostic only
                         elif num == 253:
                             rec["time"] = v
                 elif meta is not None and gmn == 0 and num == 1:
@@ -194,7 +196,7 @@ def finish_pts(pts: Points) -> None:
 
 
 def pts_from_fit(buf: bytes, meta: dict | None = None) -> Points:
-    """FIT buffer -> point list {x, alt, power, cad, t, v, dt}.
+    """FIT buffer -> point list {x, alt, power, cad, hr, t, v, dt}.
 
     Distance is interpolated by record index between dist anchors so devices
     that log distance and altitude in separate records keep every altitude
@@ -228,21 +230,21 @@ def pts_from_fit(buf: bytes, meta: dict | None = None) -> Points:
                 f = (i - di[k]) / (di[k + 1] - di[k])
                 x = dv[k] + (dv[k + 1] - dv[k]) * f
             pts.append({"x": x, "alt": last_alt, "power": r.get("power"),
-                        "cad": r.get("cad"), "t": r.get("time"),
-                        "v": r.get("speed")})
+                        "cad": r.get("cad"), "hr": r.get("hr"),
+                        "t": r.get("time"), "v": r.get("speed")})
     else:
         geo = [r for r in recs if "lat" in r and "lon" in r and "alt" in r]
         if len(geo) < 2:
             raise ValueError("FIT sem distância nem GPS")
         cum = 0.0
         pts.append({"x": 0.0, "alt": geo[0]["alt"], "power": geo[0].get("power"),
-                    "cad": geo[0].get("cad"), "t": geo[0].get("time"),
-                    "v": geo[0].get("speed")})
+                    "cad": geo[0].get("cad"), "hr": geo[0].get("hr"),
+                    "t": geo[0].get("time"), "v": geo[0].get("speed")})
         for i in range(1, len(geo)):
             cum += haversine(geo[i - 1], geo[i])
             pts.append({"x": cum, "alt": geo[i]["alt"], "power": geo[i].get("power"),
-                        "cad": geo[i].get("cad"), "t": geo[i].get("time"),
-                        "v": geo[i].get("speed")})
+                        "cad": geo[i].get("cad"), "hr": geo[i].get("hr"),
+                        "t": geo[i].get("time"), "v": geo[i].get("speed")})
     finish_pts(pts)
     return pts
 

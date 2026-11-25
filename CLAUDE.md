@@ -104,6 +104,12 @@ home of the *derivation* and the side-by-side comparison.
   likelihood, on D1∪D2 under two parameter arms, plus the labelled in-sample
   D3–D6 arm; `E47_SMOKE=1`. Hosts `invert_physics`, extracted from
   `perride_invert.run_ride` so the per-ride inversion has exactly one copy),
+  `e62_corpus_profile.py` (Entry 62 — the **descriptive** profile of D3–D6 over
+  paper 1's own population: nine per-ride aggregates, percentiles per rider with
+  D6 split into D6a–D6d, and a hand-emitted SVG pairplot under
+  `research/journal/figs/`. `E62_PLOT_ONLY=1` re-renders the figure from the CSV
+  without re-parsing tracks; `E62_HUE=corpus` pools D6 back; `E62_SMOKE=1`. Fits
+  nothing and gates nothing),
   `e63_f5_kebuffer.py` (Entry 63 — **F5**, the KE-buffer valley toll replacing
   the deadband's fitted τ with a per-valley physics-computed cap
   `min(D, H, h_KE − 2τ_n)`; runs Entry 52's A-chain verbatim on the E52 cache +
@@ -463,7 +469,12 @@ mass-bug lesson; the implied masses in `regime_compare.py`'s `PHYS` and
   FIT invalid markers; `record` is global message 20; near-duplicate points
   (`Δdist < 0.5 m`) are dropped. Optional `meta` dict collects file-level
   manufacturer (260 = Zwift ⇒ virtual) and sport. Regime power is speed-gated
-  (`< 0.5 km/h`) and time-weighted.
+  (`< 0.5 km/h`) and time-weighted. Points carry `hr` (record field 3, Entry 62)
+  and `cad` (field 4); **neither is mirrored in the applet**, which is the only
+  intentional gap in the two-copies rule — the applet has no use for either, and
+  the drift is recorded here rather than left to be rediscovered. Adding a point
+  field means bumping `ride.py`'s `_CACHE_SCHEMA` (now **2**) or every harness
+  silently reads pre-change cache entries.
 - **Units.** Internals SI (N, J, m/s); display converts (kJ, km/h). `ε` and the
   grade thresholds are entered as **percent** and divided by 100.
 

@@ -33,7 +33,7 @@ VMAX, VSTART = 38 / 3.6, 15 / 3.6
 # Bump on any change to pts_from_fit/pts_from_gpx's output shape (new/renamed
 # point field, changed units, ...) — a stale cache entry is a silent
 # correctness bug, not a crash, so the schema is part of the cache key.
-_CACHE_SCHEMA = 1
+_CACHE_SCHEMA = 2   # 2: points carry `hr` (FIT record field 3) — Entry 62
 _CACHE_DIR = None
 
 
