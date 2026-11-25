@@ -150,6 +150,8 @@ PRODUCER = {
     "e52_summary.vc.csv": "E52_CLIMBAIR=vc python3 src/harness/e52_split.py",
     "e63_split.E63_TAUN2p0_E63_CREDITfull.csv": "E63_TAUN=2.0 E63_CREDIT=full python3 src/harness/e63_f5_kebuffer.py",
     "e63_loro.E63_TAUN2p0_E63_CREDITfull.csv": "E63_TAUN=2.0 E63_CREDIT=full E63_LORO=1 python3 src/harness/e63_f5_kebuffer.py",
+    "e77_stops.csv": "python3 src/harness/e77_stops.py",
+    "e77_split.csv": "python3 src/harness/e77_stops.py",
 }
 
 # entry → (instrument harness scripts, result CSVs, uses private tracks,
@@ -286,6 +288,8 @@ ENTRIES = {
           "e52_aggregates.vc.csv", "e52_split.vc.csv", "e52_summary.vc.csv",
           "e63_split.E63_TAUN2p0_E63_CREDITfull.csv",
           "e63_loro.E63_TAUN2p0_E63_CREDITfull.csv"], True, []),
+    77: (["src/harness/e77_stops.py"], ["e77_stops.csv", "e77_split.csv"],
+         True, []),
 }
 
 # entry 22 reads the per-ride CSVs the other harnesses wrote

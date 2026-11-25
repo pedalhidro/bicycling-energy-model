@@ -207,7 +207,15 @@ home of the *derivation* and the side-by-side comparison.
   stop-go lands in the flat rate). Rule: EARNED only if it lowers F3's fold CV
   over all rides on `pace` by more than one fold SE; control: the absolute
   count buys nothing at P0. F3's fold CV must reproduce each cache's
-  `e52_split` to six decimals — the drift check. `E77_SMOKE=1`, `E77_REBUILD=1`),
+  `e52_split` to six decimals — the drift check. `E77_SMOKE=1`, `E77_REBUILD=1`.
+  Result: **NOT EARNED** — −0.69 SE on `pace`, and κ = −1.515, outside
+  [0.5, 2] and NEGATIVE: a ride with more stops than the rider's usual takes
+  less energy than predicted, so the count is not acting as a kinetic cost.
+  The paired fold difference is real (−0.00146 ± 0.00031) and too small to
+  earn a parameter; the excess kinetic head does nothing (+0.02 SE) and the
+  signal vanishes at P0. The control HOLDS (−0.11 SE). Not covered: whether a
+  graph can predict the count, stops on climbs and descents, routes other than
+  the riders' own. Paper 3's H6 stays open and was not edited),
   `bootstrap_ci.py` (**the gate script**; exits non-zero on failure). **Narrowed
   2026-07-31 to only what the papers still claim** — 22 sections became 7, and a
   full run is 4.5 min instead of 15. Surviving sections are keyed to

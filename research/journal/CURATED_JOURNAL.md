@@ -1347,6 +1347,56 @@ with no published number moved.
 
 ---
 
+## Act XIX — The reviewer's stop (Entry 77)
+
+*One day (2026-11-24). A criticism from outside, turned into a test with a
+rule before any ride was read.*
+
+### Entry 77 — Does a stop term earn a place in the edge cost?
+**Data:** the Entry-52 population twice over — as published, and under
+Entry 76's planning inputs — plus one walk of the tracks that counts each
+ride's stops on flat ground from its own speed record.
+
+A reviewer pointed out that a per-edge routing cost has no memory, so it
+cannot carry the kinetic energy a rider throws away at every stop and then
+rebuilds from the legs. One full stop costs about as much as 74 m of flat
+road. The law has no such term. Should it?
+
+The test gave the term its best chance. The count was an oracle — the
+ride's true stops, not a guess from junctions — and it was priced as the
+ride's stops *in excess of what that rider usually meets*, because a
+planner who holds the rider's typical constants already holds their
+typical stops. A typical ride has 8 stops; a rider's usual density runs
+from 0.07 to 0.34 per km. The rule, written beforehand, was the chain's
+own: one more parameter must beat the simpler form by more than one
+standard error.
+
+**It did not: 0.69 of a standard error. Not earned.** And the fitted price
+came out *negative*, about minus one and a half stops' worth per excess
+stop — more stops than usual goes with less energy than predicted, and
+fewer stops than usual with more. Two things make that less strange than it
+sounds. On average across the folds the term helps a little, so the signal
+looks real; it is simply too small to pay for a parameter, and the journal
+does not round it up. And the
+direct physical measure — the kinetic energy each stop actually destroyed —
+explains nothing at all, while the whole effect vanishes once the ride's
+own telemetry is read. The likeliest reading, which this entry does not
+test, is that a stop-heavy day is also an easier day, and the count is
+standing in for effort rather than for kinetic loss.
+
+The control held: with the constants read off the ride itself, counting
+stops buys a tenth of a standard error. The stops are already inside the
+flat rate, where Entry 35 found them.
+
+So the mechanism the criticism names is real physics, but on these riders'
+own routes a count of stops has not shown that it belongs in the router.
+What the entry leaves open is stated plainly:
+whether a map could predict the count, stops on climbs and descents, and
+routes the riders did not choose.
+[[package]](../packages/entry77/ro-crate-preview.html)
+
+---
+
 ## Recurring terms, once
 
 - **The champion / F3** — the corrected closed form (the paper's F1–F4

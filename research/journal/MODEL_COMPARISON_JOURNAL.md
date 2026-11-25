@@ -215,6 +215,7 @@ counted from its CSV rather than asserted, is [`research/data-graph.ttl`](../dat
 
 | entry | $I = (D, P)$ | $T$ | $O$ (rows) | $S$ |
 |--:|---|---|---|---|
+| 77 | $(D_3..D_6, P_{f,r})$ and Entry 76's `pace` inputs, plus per-ride stop counts from the speed record | F3 + κ·R, four stop regressors, fitted in-fold after the chain's F3 | `e77_stops.csv` (2,039), `e77_split.csv` (8) | stop term NOT EARNED on the planning cache (−0.69 SE; κ = −1.515, outside [0.5, 2] and negative); control holds at P0 (−0.11 SE); the paired fold difference is real (−0.00146 ± 0.00031) and too small to earn a parameter |
 | 76 | $(D_3..D_6, P_{f,r})$, and the same rides under rider-median constants, then rider-median regime powers | the A-chain on four arm caches (planning `const`/`pace`, climb air `ss`/`vc`); F5 family under two toll bookkeepings | `e52_aggregates.{p1const,p1pace,ss,vc}.csv` (2,039 each) + their `e52_split.*`/`e52_summary.*`; `e63_split`/`e63_loro.E63_TAUN2p0_E63_CREDITfull.csv` | planning row: published F3 reads 4.56 (`const`) and 7.51 [6.41, 8.69] (`pace`) on the 305 held-out rides, against 3.24 at P0 — expectation held; climb air: ε rises as registered, F3's fold CV rises 1.53 SE (`ss`), published form stays; credit: 0.13 SE, NO VERDICT |
 | 75 | 290-ride stratified subset × raster crops at the 30 m lattices | 2-D prominence-τ (capped geodesic reconstruction) vs σ30, × {v2, eF2, F3} | `e75_prominence.csv` (290) | REFUTED: prom6 7.43/22.80 vs σ30 4.23/4.96 at (v2, n=16) — DEM noise is connected 2-D micro-structure; σ30 keeps the crown |
 | 74 | Entry 73's cached paths, five ε policies | the eF2 skeleton × {ε₂, ε_SP, ε_geo, ε_GI, ε_VD, 0} | contest columns in `e73_gridpath.csv` (same 1,901) | ε_geo wins every treated cell (3.31 default); regional flat refuted; raw chains invert to flat; §3.2(d)'s default = deployed ε on σ30 at n = 16 (gate 3l) |
@@ -294,6 +295,297 @@ Entries with no $O$ are reviews, registrations, imported notes or refactors — 
 what the other rows *mean* without producing a per-ride table of their own.
 
 ---
+
+---
+
+## 2026-11-24 — Entry 77: a stop term on the edge cost — not earned, and the count that does carry signal has the wrong sign
+
+**Lineage** — $I$: $(D_3..D_6, P_{f,r})$ and the same rides under Entry 76's
+`pace` inputs (2,039 rides each, the seed-48 split 1,734 / 305), plus one walk of
+the tracks for the stop counts · $T$: F3 with an added stop term
+$\kappa\,R$, four regressors $R$ (excess count, absolute count, excess kinetic
+head, excess strict count), fitted in-fold after the chain's own F3 fit · $O$:
+`e77_stops.csv` (2,039 rides, all of the cache), `e77_split.csv` (8 rows: 2
+caches × 4 terms) · $S$: the registered rule on the planning cache, the control
+on the published cache.
+
+A reviewer's criticism: a per-edge routing cost is additive and stateless, so it
+has no term for the kinetic energy a rider throws away at every stop. This entry
+tests whether such a term earns a place. The test, its rule and its controls on
+simulated riders were registered in the harness docstring in commit `ce1e0c4`
+(2026-11-24), written in a session with no ride data; that commit is the
+registration's timestamp. This is the run.
+
+### The registration, verbatim from `e77_stops.py` at `ce1e0c4`
+
+```
+REGISTERED 2026-11-24, before any run on ride data. 77 is the next free entry
+number as this is written; the entry fixes it when it lands.
+
+THE CRITICISM. A per-edge cost is additive and stateless, so it cannot carry
+the kinetic energy a rider throws away at every stop and rebuilds from the
+legs. The law has no such term. One full stop from the flat reference speed
+costs (1/2) m v_f^2 / k_eff: 0.8 kJ for 75 kg at 17 km/h, the price of 74 m of
+flat road.
+
+WHERE THE STOPS GO TODAY. Entry 35 found them inside the flat rate: with the
+drag area inverted at the ride's own measured flat speed, a stop-go ride
+returns a "total-loss coefficient", not an aerodynamic one (D2's reads 0.62).
+So under P0, where the constants are read off the scored ride, the ride's stops
+are already paid for. Under the planning arm (Entry 76) the constants are the
+RIDER's medians, which carry the rider's TYPICAL stop density. What a planner
+then misses is the stops a route has in excess of what that rider usually
+meets.
+
+THE TERM. Count each ride's stops from its own speed record (below), and add
+
+    E_stop = kappa * (N - nbar * x) * (1/2) m v_f^2 / k_eff
+
+to F3, with N the ride's stop count, x its length, nbar the rider's median
+stops per km over their TRAINING rides, m and v_f the planner's own (the arm
+cache's), and kappa one fitted number. kappa = 1 means each excess stop costs
+one full stop from v_f. The count comes from the ride, so this is an oracle for
+what a router could know from junctions: if the true count does not help, a
+count read off the graph will not either.
+
+A STOP is an event on flat ground (grade over the last 50 m inside the flat
+band the chain uses): having been above 4 m/s, the rider falls below 2 m/s, or
+the recording pauses for more than 10 s. Flat ground only, on purpose: on a
+descent gravity pays for the re-acceleration, and slowing into a climb is
+momentum carried uphill (Entry 63's toll), not a stop.
+
+THE RULES. Fold CV as in Entry 52: the same split, the same 20 folds, F3
+fitted in-fold by the chain's own fit(), then (eps, kappa) refitted in-fold at
+that fold's tau. The criterion is the chain's own parsimony rule: a form with
+one more parameter is adopted only if it beats the simpler one by more than
+one fold SE of the simpler one's CV.
+
+  EARNED       on the planning cache (`pace`), the term lowers F3's fold CV
+               over all rides by more than one fold SE.
+  NOT EARNED   otherwise. A count of stops, priced at one reference stop each,
+               has then not shown that it belongs in the router.
+  CHECK        kappa, fitted on the whole training half, lies between 0.5 and
+               2. Outside that band the count carries signal but not as one
+               reference stop each, and the entry says which way.
+  CONTROL      on the published cache (P0), the ABSOLUTE count
+               kappa * N * (1/2) m v_f^2 / k_eff buys nothing: it does not lower
+               the fold CV over all rides by more than one SE. If it does, the
+               stops are not fully inside the flat rate at P0 and Entry 35's
+               reading is incomplete.
+  EXPECTATION  for the record: the term is earned on the urban rides with
+               kappa above 1 (riders cruise faster between stops than their
+               flat average), and the control holds.
+
+The held-out half is scored ONCE for each of the two registered cells, with
+the constants fitted on the whole training half. Diagnostics are fold CV only
+and have no rule: the paired fold-by-fold difference with its own SE (more
+sensitive than the rule: a term can be real and still too small to earn a
+parameter); the same figures on the "urban" rides, the top third by stops per
+km with the cut taken on the training half; the kinetic head each stop
+actually destroyed, in excess of the rider's usual per km (an upper bound on
+what a count could do); the absolute count on the planning cache; the excess
+count on the published cache; and a stricter definition of a stop (above
+3 m/s, then below 0.5 m/s).
+
+WHY ALL RIDES AND NOT THE URBAN ONES. The term is an excess over the rider's
+own usual density, so it speaks wherever a ride differs from that rider's
+habit, in either direction: a rider of quiet roads crossing a city, or a city
+rider on an open road. The top third by absolute density is mostly the habitual
+rides of riders who always stop a lot, which is where the excess is small. A
+positive control on simulated riders showed this before any real run: with a
+stop cost planted, the term improved the fit over all rides and not on the
+"urban" third. The urban figures are reported, and carry no rule.
+
+CONTROLS, run on simulated riders before this was registered (seven riders,
+168 rides from the repo's own forward simulation, each rider with a usual stop
+density and each ride its own; the whole chain run on them, then this file):
+
+  stops planted, quiet days   the rule fires: -2.55 SE, kappa 0.60, and the P0
+                              control holds (+0.16 SE, kappa 0.00)
+  the same stops dealt to     the rule does not fire: +0.69 SE, kappa -0.18
+  the wrong rides
+  stops planted, days as      -0.57 SE on 140 training rides: real, and too
+  noisy as a real rider's     small to earn a parameter at that size
+
+Two cautions the controls taught. The absolute count on the planning cache can
+"gain" with the stops shuffled (-1.65 SE): it carries the rider's identity, so
+it is a diagnostic there and never the rule. And the simulated riders' stops
+cost more than a real rider's are likely to; the controls show the test can
+see an effect and can refuse one, not how large the real one is.
+
+NOT COVERED. Whether a graph can predict the count (junctions, signals); stops
+on climbs and descents; and the routes, which are the riders' own.
+```
+
+### What was run
+
+`python3 src/harness/e77_stops.py`, with no arm flag set. The walk counted stops
+on all 2,039 cached rides, in every rider group (441 / 219 / 636 / 193 / 346 /
+190 / 14): no ride is scored as plain F3 for want of a count. The drift check
+printed GATE-OK twice: F3's fold CV is 0.104392 on the planning cache and
+0.054059 on the published cache, each equal to its own `e52_split` figure to six
+decimals. `e52_aggregates.csv`, `e52_aggregates.p1pace.csv`, `e52_split.csv` and
+`e52_split.p1pace.csv` were hashed before and after and were not rewritten.
+
+### The stop counts
+
+| | median | 5th | 95th |
+|---|--:|--:|--:|
+| stops per ride (all 2,039) | 8 | 0 | 28 |
+| stops per km (training half, 1,734) | 0.14 | 0.00 | 0.64 |
+
+Rider medians, stops per km over training rides: D3 0.14 · D4 0.17 · D5 0.34 ·
+D6-user_1 0.07 · D6-user_2 0.09 · D6-user_3 0.07 · D6-user_5 0.10. The "urban"
+third is the rides at or above **0.22 stops per km**, the cut taken on the
+training half: 578 of 1,734 training rides and 117 of 305 held out.
+
+### The planning cache (`pace`) — the rule
+
+Fold CV, mean of 20 folds, lower is better. F3 on the whole training half:
+ε 0.2828, τ 8.0 m. As the harness prints it:
+
+| term | all rides | vs F3 (SE) | paired fold difference ± SE | urban | vs F3 (SE) | κ | ε |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| F3, no term | 0.10439 ± 0.00210 | — | — | 0.13319 ± 0.00375 | — | — | 0.2828 |
+| **excess count (registered)** | 0.10293 | **−0.69** | −0.00146 ± 0.00031 | 0.13254 | −0.17 | −1.515 | 0.2711 |
+| absolute count | 0.10450 | +0.05 | +0.00011 ± 0.00006 | 0.13344 | +0.07 | −0.056 | 0.2769 |
+| excess kinetic head | 0.10443 | +0.02 | +0.00003 ± 0.00006 | 0.13366 | +0.12 | −0.131 | 0.2781 |
+| excess, strict stops | 0.10301 | −0.66 | −0.00138 ± 0.00025 | 0.13169 | −0.40 | −1.590 | 0.2725 |
+
+In the harness's own words:
+
+> RULE (pace, excess count): fold CV over all rides moves by -0.69 SE -> NOT EARNED   (urban rides, no rule: -0.17 SE)
+>
+> CHECK: kappa = -1.515 is OUTSIDE [0.5, 2.0]
+
+**RULE: NOT EARNED.** The term lowers F3's fold CV over all rides by 0.69 of a
+fold SE; the rule asks for more than one. A count of stops, priced at one
+reference stop each, has not shown that it belongs in the router.
+
+**CHECK: κ is outside the band, on the low side, and it is negative.** The
+fitted κ is −1.515 (the search runs from −2 to 6, so it is not on a bound). The
+count carries signal, but not as one reference stop each, and not as a cost at
+all. On the planner's inputs, more stops than the rider usually meets is
+associated with *less* energy than F3 predicts, and fewer stops than usual with
+more, at about one and a half reference stops per stop of excess or shortfall.
+(By the term's own formula the shortfall is largest on long rides by riders
+whose usual density is high.)
+
+Held-out half, scored once (n = 305), as printed:
+
+| estimator | med \|Δ%\| [95% CI] | median Δ% [95% CI] |
+|---|--:|--:|
+| F3, no term | 7.39 [6.73, 8.77] | 0.32 [−1.38, 1.89] |
+| F3 + excess count | 7.47 [6.54, 8.15] | 0.02 [−1.77, 1.10] |
+
+Per ride, with the term minus without, in |Δ%|: median −0.18 pp [−0.43, 0.07];
+closer with the term on 166 of 305 (sign p = 0.1364). On the 117 urban held-out
+rides: 9.23 without the term, 8.72 with it.
+
+### The published cache (P0) — the control
+
+F3 on the whole training half: ε 0.2939, τ 6.0 m.
+
+| term | all rides | vs F3 (SE) | paired fold difference ± SE | urban | vs F3 (SE) | κ | ε |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| F3, no term | 0.05406 ± 0.00180 | — | — | 0.07667 ± 0.00313 | — | — | 0.2939 |
+| excess count | 0.05403 | −0.01 | −0.00003 ± 0.00002 | 0.07693 | +0.08 | −0.102 | 0.2952 |
+| **absolute count (registered)** | 0.05387 | **−0.11** | −0.00019 ± 0.00005 | 0.07584 | −0.26 | 0.260 | 0.3061 |
+| excess kinetic head | 0.05411 | +0.03 | +0.00005 ± 0.00001 | 0.07667 | +0.00 | 0.034 | 0.2943 |
+| excess, strict stops | 0.05406 | +0.00 | +0.00000 ± 0.00001 | 0.07676 | +0.03 | −0.056 | 0.2942 |
+
+> CONTROL (P0, absolute count): fold CV over all rides moves by -0.11 SE -> the control HOLDS
+
+**CONTROL: holds.** With the constants read off the scored ride, the absolute
+count buys 0.11 of a fold SE. The stops are inside the flat rate at P0, as
+Entry 35 read them.
+
+Held-out half, scored once (n = 305), as printed:
+
+| estimator | med \|Δ%\| [95% CI] | median Δ% [95% CI] |
+|---|--:|--:|
+| F3, no term | 3.24 [2.75, 3.50] | 0.07 [−0.31, 0.70] |
+| F3 + absolute count | 3.10 [2.81, 3.54] | 0.38 [−0.09, 0.82] |
+
+Per ride, with the term minus without, in |Δ%|: median 0.00 pp [−0.05, 0.05];
+closer with the term on 151 of 301 (sign p = 1.0000). On the 117 urban held-out
+rides: 4.32 without the term, 4.32 with it.
+
+### The expectation on record
+
+It had three parts. *The term is earned on the urban rides*: it is not earned,
+by the rule over all rides (−0.69 SE), and the urban figure, which carries no
+rule, is smaller still (−0.17 SE). *With κ above 1*: no; κ is −1.515. *The
+control holds*: yes. One part of three held.
+
+### Observed outside the rule
+
+None of what follows was registered as a criterion, and none of it changes the
+verdict.
+
+1. **The effect looks real, and is too small to earn a parameter.** The paired
+   fold difference for the excess count is −0.00146 ± 0.00031: on average
+   across the 20 folds the term helps, by about 4.6 of that difference's own
+   SEs. That is not a significance level, because the 20 fold scores share
+   training rides. It is still only 0.69 of the SE the rule is written in, and
+   the rule is the rule. This is the case the registration named in advance,
+   and it is not rounded up. The held-out half does not sharpen it: per ride
+   the difference is −0.18 pp [−0.43, 0.07] with sign p = 0.1364, and the
+   median error is slightly higher with the term (7.47 against 7.39). The
+   urban held-out figure (9.23 → 8.72) comes with no interval.
+2. **The sign is the opposite of a stop cost.** A kinetic loss would give a
+   positive κ near 1. The fit is negative, and stable: the strict definition of
+   a stop gives the same picture (−0.66 SE, κ −1.590, paired difference
+   −0.00138 ± 0.00025).
+3. **The physical measure of what the stops destroyed does nothing.** The
+   excess kinetic head, registered as the upper bound on what a count could do,
+   moves the fold CV by +0.02 SE with κ −0.131. Whatever the count is carrying,
+   it is not the kinetic energy lost at the stops.
+4. **The signal is gone when the ride's own inputs are read.** At P0 the same
+   excess count moves the fold CV by −0.01 SE (κ −0.102). It appears only under
+   the planning inputs, where the constants and the regime powers are the
+   rider's medians.
+5. **A reading, not a finding.** Points 2 to 4 fit one story: a day with more
+   stops than usual is also a day that costs less than the rider's median day
+   (lower effort is the obvious candidate), the planner, holding the medians,
+   over-predicts it, and the count is a proxy for that. Nothing here tests the
+   story. It would need the count set against the ride's own regime powers,
+   which this entry does not do.
+6. **The absolute count on the planning cache did not gain** (+0.05 SE,
+   κ −0.056). The registration warned that it could appear to, because it
+   carries the rider's identity, and that it is a diagnostic there and never
+   the rule. Here it shows nothing either way.
+7. **At P0 the absolute count has a small positive κ** (0.260; paired
+   difference −0.00019 ± 0.00005). Read at face value, about a quarter of a
+   reference stop per stop is not already in the flat rate. That is 0.11 of a
+   fold SE and the control holds; it is noted as the size of what Entry 35's
+   reading may leave out.
+
+### What this does not cover
+
+As registered: whether a graph can predict the count (junctions, signals);
+stops on climbs and descents, which were left out on purpose; and routes other
+than the riders' own. The count here is an oracle, read from the ride's own
+speed record, so the entry bounds what a count priced as kinetic loss could do
+for a router. It says nothing about how well a router could know the count, and
+nothing about a rider on a route they did not choose.
+
+### Conduct
+
+- The tables and the quoted lines are as the harness prints them, which for the fold-CV table is through Python's `format`, not
+  `jsfmt.to_fixed`; `e77_split.csv` holds the same figures through `to_fixed`
+  at six decimals, and the verdicts above were read from its `verdict` column.
+- The run executed at commit `ce1e0c4`, the registering commit, unmodified.
+- The held-out half was scored once for each of the two registered cells, as
+  registered, and for nothing else.
+- Per-ride stop counts stay in the private `e77_stops.csv`. Only rider medians
+  per km are given here.
+- No gate was added, no paper was changed and no published CSV was rewritten.
+  Paper 3 lists a neighbouring question as open hypothesis H6; what this entry
+  means for it is handed to the maintainer, not written into the paper.
+
+Instrument: [`e77_stops.py`](../../src/harness/e77_stops.py) (run with no arm
+flag set; `E77_SMOKE=1`, `E77_REBUILD=1`).
 
 ---
 
